@@ -6,6 +6,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.FishingRodItem;
@@ -37,7 +38,11 @@ public class FishingRodItemCoFH extends FishingRodItem implements ICoFHItem {
     public FishingRodItemCoFH setParams(Tier tier) {
 
         enchantability = tier.getEnchantmentValue();
-        luckModifier = tier.getLevel() / 2;
+        // Tier#getLevel() (the old numeric harvest level, roughly 0-4) was removed upstream
+        // entirely - mining tiers are tag-based now (getIncorrectBlocksForDrops()). ItemTierCoFH
+        // keeps its own getLevel() for CoFH-authored tiers; fall back to 0 (the old WOOD-tier
+        // value) for a non-CoFH Tier since there's no equivalent numeric field left on it.
+        luckModifier = (tier instanceof ItemTierCoFH cofhTier ? cofhTier.getLevel() : 0) / 2;
         speedModifier = (int) tier.getSpeed() / 3;
         return this;
     }
@@ -57,9 +62,7 @@ public class FishingRodItemCoFH extends FishingRodItem implements ICoFHItem {
         if (playerIn.fishing != null) {
             if (!worldIn.isClientSide) {
                 int i = playerIn.fishing.retrieve(stack);
-                stack.hurtAndBreak(i, playerIn, (entity) -> {
-                    entity.broadcastBreakEvent(handIn);
-                });
+                stack.hurtAndBreak(i, playerIn, LivingEntity.getSlotForHand(handIn));
             }
             playerIn.swing(handIn);
             worldIn.playSound(null, playerIn.getX(), playerIn.getY(), playerIn.getZ(), SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.NEUTRAL, 1.0F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));

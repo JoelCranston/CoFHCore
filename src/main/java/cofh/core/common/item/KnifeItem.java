@@ -3,8 +3,8 @@ package cofh.core.common.item;
 import cofh.core.common.entity.ThrownKnife;
 import cofh.lib.common.item.SwordItemCoFH;
 import cofh.lib.util.helpers.MathHelper;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
-import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -16,6 +16,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileItem;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -23,7 +24,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 
-public class KnifeItem extends SwordItemCoFH {
+public class KnifeItem extends SwordItemCoFH implements ProjectileItem {
 
     private static final int DEFAULT_ATTACK_DAMAGE = 1;
     private static final float DEFAULT_ATTACK_SPEED = -2.0F;
@@ -32,7 +33,9 @@ public class KnifeItem extends SwordItemCoFH {
 
         super(tier, attackDamageIn, attackSpeedIn, builder);
 
-        DispenserBlock.registerBehavior(this, DISPENSER_BEHAVIOR);
+        // Custom per-item dispense-behavior subclasses are gone - ProjectileItem (implemented
+        // below) plus this registration call is the modern equivalent (see ArrowItemCoFH).
+        DispenserBlock.registerProjectileBehavior(this);
     }
 
     public KnifeItem(Tier tier, Properties builder) {
@@ -107,21 +110,19 @@ public class KnifeItem extends SwordItemCoFH {
     // endregion
 
     // region DISPENSER BEHAVIOR
-    private static final AbstractProjectileDispenseBehavior DISPENSER_BEHAVIOR = new AbstractProjectileDispenseBehavior() {
+    @Override
+    public Projectile asProjectile(Level worldIn, Position position, ItemStack stackIn, Direction direction) {
 
-        @Override
-        public Projectile getProjectile(Level worldIn, Position position, ItemStack stackIn) {
+        ThrownKnife knife = new ThrownKnife(worldIn, position.x(), position.y(), position.z(), stackIn);
+        knife.pickup = AbstractArrow.Pickup.ALLOWED;
+        return knife;
+    }
 
-            ThrownKnife knife = new ThrownKnife(worldIn, position.x(), position.y(), position.z(), stackIn);
-            knife.pickup = AbstractArrow.Pickup.ALLOWED;
-            return knife;
-        }
+    @Override
+    public ProjectileItem.DispenseConfig createDispenseConfig() {
 
-        @Override
-        protected float getUncertainty() {
-
-            return 3.0F;
-        }
-    };
+        ProjectileItem.DispenseConfig defaults = ProjectileItem.super.createDispenseConfig();
+        return new ProjectileItem.DispenseConfig(defaults.positionFunction(), 3.0F, defaults.power(), defaults.overrideDispenseEvent());
+    }
     // endregion
 }

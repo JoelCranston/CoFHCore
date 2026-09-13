@@ -48,9 +48,7 @@ public class GunpowderBlock extends ColoredFallingBlock {
             worldIn.setBlock(pos, Blocks.AIR.defaultBlockState(), 11);
             if (!player.isCreative()) {
                 if (item == Items.FLINT_AND_STEEL) {
-                    stack.hurtAndBreak(1, player, (entity) -> {
-                        entity.broadcastBreakEvent(handIn);
-                    });
+                    stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(handIn));
                 } else {
                     stack.shrink(1);
                 }

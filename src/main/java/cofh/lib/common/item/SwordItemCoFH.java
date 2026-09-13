@@ -9,7 +9,7 @@ public class SwordItemCoFH extends SwordItem implements ICoFHItem {
 
     public SwordItemCoFH(Tier tier, int attackDamageIn, float attackSpeedIn, Properties builder) {
 
-        super(tier, attackDamageIn, attackSpeedIn, builder);
+        super(tier, builder.attributes(SwordItem.createAttributes(tier, attackDamageIn, attackSpeedIn)));
     }
 
     // region DISPLAY

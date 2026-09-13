@@ -1,10 +1,9 @@
 package cofh.lib.common.item;
 
 import cofh.lib.api.item.ICoFHItem;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
-import net.minecraft.core.dispenser.ProjectileDispenseBehavior;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ArrowItem;
@@ -25,7 +24,10 @@ public class ArrowItemCoFH extends ArrowItem implements ICoFHItem {
         super(builder);
         this.factory = factory;
 
-        DispenserBlock.registerBehavior(this, DISPENSER_BEHAVIOR);
+        // The custom per-item ProjectileDispenseBehavior subclass pattern is gone - dispensing is
+        // now driven by the ProjectileItem interface (which ArrowItem already implements) via
+        // asProjectile(...) below; registerProjectileBehavior wires that up for this item.
+        DispenserBlock.registerProjectileBehavior(this);
     }
 
     public ArrowItemCoFH setInfinitySupport(boolean infinitySupport) {
@@ -40,10 +42,20 @@ public class ArrowItemCoFH extends ArrowItem implements ICoFHItem {
         return factory.createArrow(worldIn, shooter);
     }
 
+    // Position-based spawn for dispensers (no shooter entity) - replaces the old dispenser
+    // behavior's getProjectile(Level, Position, ItemStack) override.
     @Override
-    public boolean isInfinite(ItemStack stack, ItemStack bow, Player player) {
+    public Projectile asProjectile(Level level, Position position, ItemStack stack, Direction direction) {
 
-        return infinitySupport && getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, bow) > 0 || super.isInfinite(stack, bow, player);
+        AbstractArrow arrow = factory.createArrow(level, position.x(), position.y(), position.z());
+        arrow.pickup = AbstractArrow.Pickup.ALLOWED;
+        return arrow;
+    }
+
+    @Override
+    public boolean isInfinite(ItemStack stack, ItemStack bow, LivingEntity shooter) {
+
+        return infinitySupport && getItemEnchantmentLevel(Enchantments.INFINITY, bow) > 0 || super.isInfinite(stack, bow, shooter);
     }
 
     // region DISPLAY
@@ -71,19 +83,5 @@ public class ArrowItemCoFH extends ArrowItem implements ICoFHItem {
         T createArrow(Level world, double posX, double posY, double posZ);
 
     }
-    // endregion
-
-    // region DISPENSER BEHAVIOR
-    private static final ProjectileDispenseBehavior DISPENSER_BEHAVIOR = new ProjectileDispenseBehavior() {
-
-        @Override
-        public Projectile getProjectile(Level worldIn, Position position, ItemStack stackIn) {
-
-            ArrowItemCoFH arrowItem = ((ArrowItemCoFH) stackIn.getItem());
-            AbstractArrow arrow = arrowItem.factory.createArrow(worldIn, position.x(), position.y(), position.z());
-            arrow.pickup = AbstractArrow.Pickup.ALLOWED;
-            return arrow;
-        }
-    };
     // endregion
 }
