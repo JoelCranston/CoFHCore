@@ -185,7 +185,7 @@ public class FluidStorageCoFH implements IFluidHandler, IFluidStackHolder, IReso
             return Math.min(capacity - fluid.getAmount(), resource.getAmount());
         }
         if (fluid.isEmpty()) {
-            setFluidStack(new FluidStack(resource, Math.min(capacity, resource.getAmount())));
+            setFluidStack(resource.copyWithAmount(Math.min(capacity, resource.getAmount())));
             return fluid.getAmount();
         }
         if (!fluid.isFluidEqual(resource)) {
@@ -223,7 +223,7 @@ public class FluidStorageCoFH implements IFluidHandler, IFluidStackHolder, IReso
         if (fluid.getAmount() < drained) {
             drained = fluid.getAmount();
         }
-        FluidStack stack = new FluidStack(fluid, drained);
+        FluidStack stack = fluid.copyWithAmount(drained);
         if (action.execute() && !isCreative()) {
             fluid.shrink(drained);
             if (fluid.isEmpty()) {

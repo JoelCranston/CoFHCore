@@ -40,7 +40,7 @@ public class FluidStorageRestrictable extends FluidStorageCoFH {
     public int fill(FluidStack resource, FluidAction action) {
 
         if (resource.getAmount() > this.maxFill.getAsInt()) {
-            return super.fill(new FluidStack(resource, this.maxFill.getAsInt()), action);
+            return super.fill(resource.copyWithAmount(this.maxFill.getAsInt()), action);
         }
         return super.fill(resource, action);
     }

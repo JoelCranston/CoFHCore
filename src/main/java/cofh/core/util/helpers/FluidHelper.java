@@ -109,7 +109,7 @@ public final class FluidHelper {
 
         amount = Math.min(amount, tank.getSpace());
         if (!tank.getFluidStack().isEmpty()) {
-            return extractFromAdjacent(tile, tank, new FluidStack(tank.getFluidStack(), amount), side);
+            return extractFromAdjacent(tile, tank, tank.getFluidStack().copyWithAmount(amount), side);
         }
         BlockEntity adjTile = BlockHelper.getAdjacentTileEntity(tile, side);
         Direction opposite = side.getOpposite();
@@ -139,7 +139,7 @@ public final class FluidHelper {
         FluidStack drainStack = handler.drain(resource, SIMULATE);
         int drainAmount = tank.fill(drainStack, EXECUTE);
         if (drainAmount > 0) {
-            handler.drain(new FluidStack(resource, drainAmount), EXECUTE);
+            handler.drain(resource.copyWithAmount(drainAmount), EXECUTE);
             return true;
         }
         return false;
@@ -159,7 +159,7 @@ public final class FluidHelper {
         if (handler == null) {
             return false;
         }
-        int fillAmount = handler.fill(new FluidStack(tank.getFluidStack(), amount), EXECUTE);
+        int fillAmount = handler.fill(tank.getFluidStack().copyWithAmount(amount), EXECUTE);
         if (fillAmount > 0) {
             tank.drain(fillAmount, EXECUTE);
             return true;
@@ -380,9 +380,9 @@ public final class FluidHelper {
                 var stackCap = stack.getCapability(Capabilities.FluidHandler.ITEM);
                 if (stackCap != null) {
                     if (player.getAbilities().instabuild) {
-                        handler.drain(new FluidStack(containedFluid, tankSpace), EXECUTE);
+                        handler.drain(containedFluid.copyWithAmount(tankSpace), EXECUTE);
                     } else {
-                        FluidUtil.tryFluidTransfer(stackCap, handler, new FluidStack(containedFluid, tankSpace), true);
+                        FluidUtil.tryFluidTransfer(stackCap, handler, containedFluid.copyWithAmount(tankSpace), true);
                     }
                 }
                 return true;

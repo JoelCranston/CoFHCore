@@ -110,7 +110,7 @@ public class ModelUtils {
         public FluidCacheWrapper(BlockState state, FluidStack stack) {
 
             this.state = state;
-            this.stack = new FluidStack(stack, BUCKET_VOLUME);
+            this.stack = stack.copyWithAmount(BUCKET_VOLUME);
         }
 
         @Override
