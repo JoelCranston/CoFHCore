@@ -12,7 +12,7 @@ import net.minecraft.world.level.lighting.BlockLightEngine;
 import net.minecraft.world.level.lighting.LightEngine;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.event.TickEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 /**
  * Class that allows for the placement of temporary light sources.
@@ -45,9 +45,9 @@ public class TransientLightManager {
     }
 
     @SubscribeEvent
-    protected static void tick(TickEvent.ClientTickEvent event) {
+    protected static void tick(ClientTickEvent.Post event) {
 
-        if (event.phase != TickEvent.Phase.END || CURRENT.isEmpty() && PREVIOUS.isEmpty()) {
+        if (CURRENT.isEmpty() && PREVIOUS.isEmpty()) {
             return;
         }
         Level level = ProxyUtils.getClientWorld();

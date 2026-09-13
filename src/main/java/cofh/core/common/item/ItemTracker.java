@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.event.TickEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 
 import java.util.Map;
@@ -76,12 +76,9 @@ public class ItemTracker {
     //}
 
     @SubscribeEvent (priority = EventPriority.LOWEST)
-    public static void playerTick(TickEvent.PlayerTickEvent event) {
+    public static void playerTick(PlayerTickEvent.Pre event) {
 
-        Player player = event.player;
-        if (event.phase != TickEvent.Phase.START) {
-            return;
-        }
+        Player player = event.getEntity();
         updateData(player, MAIN_HAND);
         updateData(player, OFF_HAND);
     }

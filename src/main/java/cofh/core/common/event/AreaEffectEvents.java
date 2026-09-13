@@ -19,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.event.TickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 
@@ -104,11 +104,9 @@ public class AreaEffectEvents {
     }
 
     @SubscribeEvent (priority = EventPriority.LOWEST)
-    public static void handleTickEndEvent(TickEvent.ServerTickEvent event) {
+    public static void handleTickEndEvent(ServerTickEvent.Post event) {
 
-        if (event.phase == TickEvent.Phase.END) {
-            HARVESTED_BLOCKS.clear();
-        }
+        HARVESTED_BLOCKS.clear();
     }
 
     //@SubscribeEvent (priority = EventPriority.LOW)

@@ -46,7 +46,6 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.*;
-import net.neoforged.neoforge.event.TickEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import org.joml.Matrix4f;
 
@@ -168,19 +167,15 @@ public class CoreClientEvents {
     }
 
     @SubscribeEvent
-    public static void clientTick(TickEvent.ClientTickEvent event) {
+    public static void clientTick(ClientTickEvent.Post event) {
 
-        if (event.phase == TickEvent.Phase.END) {
-            renderTime++;
-        }
+        renderTime++;
     }
 
     @SubscribeEvent
-    public static void renderTick(TickEvent.RenderTickEvent event) {
+    public static void renderTick(RenderFrameEvent.Pre event) {
 
-        if (event.phase == TickEvent.Phase.START) {
-            renderFrame = event.renderTickTime;
-        }
+        renderFrame = event.getPartialTick();
     }
 
     @SubscribeEvent //(priority = EventPriority.LOWEST)

@@ -16,7 +16,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.event.TickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.ItemFishedEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerXpEvent;
@@ -136,11 +136,9 @@ public class CoreCommonEvents {
     }
 
     @SubscribeEvent
-    public static void serverTick(TickEvent.ServerTickEvent event) {
+    public static void serverTick(ServerTickEvent.Pre event) {
 
-        if (event.phase == TickEvent.Phase.START) {
-            Utils.tickTimeConstants();
-        }
+        Utils.tickTimeConstants();
     }
 
     // region HELPERS
