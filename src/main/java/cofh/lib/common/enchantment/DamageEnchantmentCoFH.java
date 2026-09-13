@@ -1,27 +1,30 @@
 package cofh.lib.common.enchantment;
 
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.enchantment.DamageEnchantment;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentCategory;
 
 public abstract class DamageEnchantmentCoFH extends EnchantmentCoFH {
 
-    protected DamageEnchantmentCoFH(Rarity rarityIn, EnchantmentCategory typeIn, EquipmentSlot[] slots) {
+    protected DamageEnchantmentCoFH(EnchantmentDefinition definition) {
 
-        super(rarityIn, typeIn, slots);
+        super(definition);
     }
 
-    @Override
-    public int getMinCost(int level) {
+    /**
+     * Matches the old getMinCost(level) = 10 + (level - 1) * 8 formula, for subclasses building
+     * their own {@link EnchantmentDefinition} at construction time.
+     */
+    protected static Enchantment.Cost minCost() {
 
-        return 10 + (level - 1) * 8;
+        return Enchantment.Cost.dynamicCost(10, 8);
     }
 
-    @Override
-    protected int maxDelegate(int level) {
+    /**
+     * Matches the old maxDelegate(level) = getMinCost(level) + 20 formula.
+     */
+    protected static Enchantment.Cost maxCost() {
 
-        return getMinCost(level) + 20;
+        return Enchantment.Cost.dynamicCost(30, 8);
     }
 
     @Override

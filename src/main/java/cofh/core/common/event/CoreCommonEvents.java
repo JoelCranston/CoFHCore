@@ -21,7 +21,7 @@ import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.ItemFishedEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerXpEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
-import net.neoforged.neoforge.event.level.SaplingGrowTreeEvent;
+import net.neoforged.neoforge.event.level.BlockGrowFeatureEvent;
 
 import java.util.Map;
 
@@ -29,7 +29,7 @@ import static cofh.core.init.CoreMobEffects.SLIMED;
 import static cofh.lib.util.Utils.getItemEnchantmentLevel;
 import static cofh.lib.util.Utils.getMaxEquippedEnchantmentLevel;
 import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
-import static net.minecraft.world.item.enchantment.Enchantments.FALL_PROTECTION;
+import static net.minecraft.world.item.enchantment.Enchantments.FEATHER_FALLING;
 import static net.minecraft.world.item.enchantment.Enchantments.MENDING;
 
 @Mod.EventBusSubscriber (modid = ID_COFH_CORE)
@@ -50,7 +50,7 @@ public class CoreCommonEvents {
         }
         Entity entity = event.getEntity();
         if (entity instanceof LivingEntity) {
-            int encFeatherFalling = getMaxEquippedEnchantmentLevel((LivingEntity) entity, FALL_PROTECTION);
+            int encFeatherFalling = getMaxEquippedEnchantmentLevel((LivingEntity) entity, FEATHER_FALLING);
             if (encFeatherFalling > 0) {
                 event.setCanceled(true);
             }
@@ -125,13 +125,13 @@ public class CoreCommonEvents {
     }
 
     @SubscribeEvent (priority = EventPriority.LOWEST)
-    public static void handleSaplingGrowTreeEvent(SaplingGrowTreeEvent event) {
+    public static void handleSaplingGrowTreeEvent(BlockGrowFeatureEvent event) {
 
         if (!CoreCommonConfig.enableSaplingGrowthMod()) {
             return;
         }
-        if (event.getRandomSource().nextInt(CoreCommonConfig.amountSaplingGrowthMod()) != 0) {
-            event.setResult(Event.Result.DENY);
+        if (event.getRandom().nextInt(CoreCommonConfig.amountSaplingGrowthMod()) != 0) {
+            event.setCanceled(true);
         }
     }
 

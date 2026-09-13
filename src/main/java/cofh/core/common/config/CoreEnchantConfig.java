@@ -7,7 +7,6 @@ import java.util.function.Supplier;
 
 import static cofh.core.CoFHCore.ENCHANTMENTS;
 import static cofh.core.util.references.CoreIDs.ID_HOLDING;
-import static cofh.lib.util.Constants.MAX_ENCHANT_LEVEL;
 import static cofh.lib.util.Constants.TRUE;
 
 public class CoreEnchantConfig implements IBaseConfig {
@@ -16,7 +15,6 @@ public class CoreEnchantConfig implements IBaseConfig {
     public void apply(ModConfigSpec.Builder builder) {
 
         String treasure = "This sets whether or not the Enchantment is considered a 'treasure' enchantment.";
-        String level = "This option adjusts the maximum allowable level for the Enchantment.";
 
         builder.push("Enchantments");
 
@@ -35,9 +33,6 @@ public class CoreEnchantConfig implements IBaseConfig {
         treasureHolding = builder
                 .comment(treasure)
                 .define("Treasure", false);
-        levelHolding = builder
-                .comment(level)
-                .defineInRange("Max Level", 4, 1, MAX_ENCHANT_LEVEL);
         builder.pop();
 
         builder.pop();
@@ -49,7 +44,8 @@ public class CoreEnchantConfig implements IBaseConfig {
         if (ENCHANTMENTS.get(ID_HOLDING) instanceof EnchantmentCoFH enc) {
             enc.setEnable(enableHolding.get());
             enc.setTreasureEnchantment(treasureHolding.get());
-            enc.setMaxLevel(levelHolding.get());
+            // Max level is now baked into the Enchantment's definition at construction and can no
+            // longer be changed at runtime (Enchantment#getMaxLevel() is final as of 1.20.5).
         }
     }
 
@@ -68,6 +64,5 @@ public class CoreEnchantConfig implements IBaseConfig {
 
     private Supplier<Boolean> enableHolding;
     private Supplier<Boolean> treasureHolding;
-    private Supplier<Integer> levelHolding;
 
 }

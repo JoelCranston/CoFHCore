@@ -11,8 +11,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -22,6 +24,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
@@ -40,6 +43,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -360,8 +364,8 @@ public class Utils {
 
     public static boolean isPotionApplicableNoEvent(LivingEntity entity, MobEffectInstance potioneffectIn) {
 
-        if (entity.getMobType() == MobType.UNDEAD) {
-            MobEffect effect = potioneffectIn.getEffect();
+        if (entity.getType().is(EntityTypeTags.UNDEAD)) {
+            Holder<MobEffect> effect = potioneffectIn.getEffect();
             return effect != MobEffects.REGENERATION && effect != MobEffects.POISON;
         }
         return true;
@@ -508,23 +512,13 @@ public class Utils {
 
     public static void removeEnchantment(ItemStack stack, Enchantment ench) {
 
-        if (stack.getTag() == null || !stack.getTag().contains(TAG_ENCHANTMENTS, TAG_LIST)) {
+        ItemEnchantments enchantments = stack.get(DataComponents.ENCHANTMENTS);
+        if (enchantments == null || enchantments.getLevel(ench) <= 0) {
             return;
         }
-        ListTag list = stack.getTag().getList(TAG_ENCHANTMENTS, TAG_COMPOUND);
-        String encId = String.valueOf(BuiltInRegistries.ENCHANTMENT.getKey(ench));
-
-        for (int i = 0; i < list.size(); ++i) {
-            CompoundTag tag = list.getCompound(i);
-            String id = tag.getString("id");
-            if (encId.equals(id)) {
-                list.remove(i);
-                break;
-            }
-        }
-        if (list.isEmpty()) {
-            stack.removeTagKey(TAG_ENCHANTMENTS);
-        }
+        ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(enchantments);
+        mutable.removeIf(holder -> holder.value() == ench);
+        stack.set(DataComponents.ENCHANTMENTS, mutable.toImmutable());
     }
     // endregion
 
