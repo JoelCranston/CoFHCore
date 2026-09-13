@@ -1,84 +1,36 @@
 package cofh.lib.common.item;
 
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.crafting.Ingredient;
 
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
-public class ArmorMaterialCoFH implements ArmorMaterial {
+/**
+ * ArmorMaterial became a final record upstream (no longer an interface CoFH can implement), and
+ * durability moved from the material onto the item's own DataComponents.MAX_DAMAGE. This is now a
+ * factory for the record instead of a base class to extend.
+ */
+public class ArmorMaterialCoFH {
 
-    protected static final int[] MAX_DAMAGE_ARRAY = new int[]{13, 15, 16, 11};
-    protected final String name;
-    protected final int maxDamageFactor;
-    protected final int[] damageReductionAmountArray;
-    protected final int enchantability;
-    protected final SoundEvent soundEvent;
-    protected final float toughness;
-    protected final float knockbackResistance;
-    protected final LazyLoadedValue<Ingredient> repairMaterial;
+    private ArmorMaterialCoFH() {
 
-    public ArmorMaterialCoFH(String nameIn, int maxDamageFactorIn, int[] damageReductionAmountsIn, int enchantabilityIn, SoundEvent equipSoundIn, float toughnessIn, float knockbackResistanceIn, Supplier<Ingredient> repairMaterialSupplier) {
-
-        this.name = nameIn;
-        this.maxDamageFactor = maxDamageFactorIn;
-        this.damageReductionAmountArray = damageReductionAmountsIn;
-        this.enchantability = enchantabilityIn;
-        this.soundEvent = equipSoundIn;
-        this.toughness = toughnessIn;
-        this.knockbackResistance = knockbackResistanceIn;
-        this.repairMaterial = new LazyLoadedValue<>(repairMaterialSupplier);
     }
 
-    // region ArmorMaterial
-    @Override
-    public int getDurabilityForType(ArmorItem.Type pType) {
+    public static ArmorMaterial create(int[] damageReductionAmountsIn, int enchantabilityIn, Holder<SoundEvent> equipSoundIn,
+                                        float toughnessIn, float knockbackResistanceIn, Supplier<Ingredient> repairMaterialSupplier) {
 
-        return MAX_DAMAGE_ARRAY[pType.ordinal()] * this.maxDamageFactor;
+        Map<ArmorItem.Type, Integer> defense = new EnumMap<>(ArmorItem.Type.class);
+        ArmorItem.Type[] types = ArmorItem.Type.values();
+        for (int i = 0; i < types.length && i < damageReductionAmountsIn.length; ++i) {
+            defense.put(types[i], damageReductionAmountsIn[i]);
+        }
+        return new ArmorMaterial(defense, enchantabilityIn, equipSoundIn, repairMaterialSupplier, List.of(), toughnessIn, knockbackResistanceIn);
     }
 
-    @Override
-    public int getDefenseForType(ArmorItem.Type pType) {
-
-        return this.damageReductionAmountArray[pType.ordinal()];
-    }
-
-    @Override
-    public int getEnchantmentValue() {
-
-        return this.enchantability;
-    }
-
-    @Override
-    public SoundEvent getEquipSound() {
-
-        return this.soundEvent;
-    }
-
-    @Override
-    public Ingredient getRepairIngredient() {
-
-        return this.repairMaterial.get();
-    }
-
-    @Override
-    public String getName() {
-
-        return this.name;
-    }
-
-    @Override
-    public float getToughness() {
-
-        return this.toughness;
-    }
-
-    @Override
-    public float getKnockbackResistance() {
-
-        return this.knockbackResistance;
-    }
-    // endregion
 }

@@ -3,6 +3,7 @@ package cofh.core.common.item;
 import cofh.core.util.ProxyUtils;
 import cofh.lib.api.item.ICoFHItem;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -41,7 +42,7 @@ public class ArmorItemCoFH extends ArmorItem implements ICoFHItem {
             UUID.fromString("A8BD3E20-FA60-47AF-8A09-B1A57D26F3CC")
     };
 
-    public ArmorItemCoFH(ArmorMaterial pMaterial, ArmorItem.Type pType, Item.Properties pProperties) {
+    public ArmorItemCoFH(Holder<ArmorMaterial> pMaterial, ArmorItem.Type pType, Item.Properties pProperties) {
 
         super(pMaterial, pType, pProperties);
     }

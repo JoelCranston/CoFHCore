@@ -1,22 +1,23 @@
 package cofh.lib.common.item;
 
 import cofh.lib.api.item.ICoFHItem;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.HorseArmorItem;
+import net.minecraft.core.Holder;
+import net.minecraft.world.item.AnimalArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
 
-public class HorseArmorItemCoFH extends HorseArmorItem implements ICoFHItem {
+/**
+ * HorseArmorItem/DyeableHorseArmorItem were merged upstream into AnimalArmorItem (BodyType.CANINE
+ * added for wolf armor); dyeability is now a constructor flag rather than a separate item class,
+ * and protection/texture are both driven by the ArmorMaterial rather than passed directly.
+ */
+public class HorseArmorItemCoFH extends AnimalArmorItem implements ICoFHItem {
 
     protected int enchantability = 1;
 
-    public HorseArmorItemCoFH(int protection, String texture, Properties builder) {
+    public HorseArmorItemCoFH(Holder<ArmorMaterial> material, boolean dyeable, Properties builder) {
 
-        super(protection, texture, builder);
-    }
-
-    public HorseArmorItemCoFH(int protection, ResourceLocation texture, Properties builder) {
-
-        super(protection, texture, builder);
+        super(material, AnimalArmorItem.BodyType.EQUESTRIAN, dyeable, builder);
     }
 
     public HorseArmorItemCoFH setEnchantability(int enchantability) {

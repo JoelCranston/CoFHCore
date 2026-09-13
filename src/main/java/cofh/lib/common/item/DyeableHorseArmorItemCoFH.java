@@ -1,56 +1,18 @@
 package cofh.lib.common.item;
 
-import cofh.lib.api.item.ICoFHItem;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.DyeableHorseArmorItem;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Holder;
+import net.minecraft.world.item.ArmorMaterial;
 
-public class DyeableHorseArmorItemCoFH extends DyeableHorseArmorItem implements ICoFHItem {
+/**
+ * See HorseArmorItemCoFH - dyeability is now a constructor flag on the merged AnimalArmorItem
+ * rather than a distinct item class (DyeableLeatherItem, the old marker interface, was removed
+ * upstream entirely - dyeability is driven by the DYED_COLOR data component now).
+ */
+public class DyeableHorseArmorItemCoFH extends HorseArmorItemCoFH {
 
-    protected int enchantability = 1;
+    public DyeableHorseArmorItemCoFH(Holder<ArmorMaterial> material, Properties builder) {
 
-    public DyeableHorseArmorItemCoFH(int protection, String texture, Properties builder) {
-
-        super(protection, texture, builder);
+        super(material, true, builder);
     }
 
-    public DyeableHorseArmorItemCoFH(int protection, ResourceLocation texture, Properties builder) {
-
-        super(protection, texture, builder);
-    }
-
-    public DyeableHorseArmorItemCoFH setEnchantability(int enchantability) {
-
-        this.enchantability = enchantability;
-        return this;
-    }
-
-    @Override
-    public boolean isEnchantable(ItemStack stack) {
-
-        return enchantability > 0;
-    }
-
-    @Override
-    public int getEnchantmentValue(ItemStack stack) {
-
-        return enchantability;
-    }
-
-    // region DISPLAY
-    protected String modId = "";
-
-    @Override
-    public DyeableHorseArmorItemCoFH setModId(String modId) {
-
-        this.modId = modId;
-        return this;
-    }
-
-    @Override
-    public String getCreatorModId(ItemStack itemStack) {
-
-        return modId == null || modId.isEmpty() ? super.getCreatorModId(itemStack) : modId;
-    }
-    // endregion
 }

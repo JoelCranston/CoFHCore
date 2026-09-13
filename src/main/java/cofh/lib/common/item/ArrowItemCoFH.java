@@ -2,7 +2,7 @@ package cofh.lib.common.item;
 
 import cofh.lib.api.item.ICoFHItem;
 import net.minecraft.core.Position;
-import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior;
+import net.minecraft.core.dispenser.ProjectileDispenseBehavior;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -74,7 +74,7 @@ public class ArrowItemCoFH extends ArrowItem implements ICoFHItem {
     // endregion
 
     // region DISPENSER BEHAVIOR
-    private static final AbstractProjectileDispenseBehavior DISPENSER_BEHAVIOR = new AbstractProjectileDispenseBehavior() {
+    private static final ProjectileDispenseBehavior DISPENSER_BEHAVIOR = new ProjectileDispenseBehavior() {
 
         @Override
         public Projectile getProjectile(Level worldIn, Position position, ItemStack stackIn) {
