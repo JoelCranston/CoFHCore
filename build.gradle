@@ -71,7 +71,7 @@ processResources {
         expand 'file': ['jarVersion': mod_version],
                 'mc_version': mc_version,
                 'neo_version': neo_version,
-                'lang_version': neo_version.split('\\.')[0]
+                'lang_version': '2'
     }
 }
 
