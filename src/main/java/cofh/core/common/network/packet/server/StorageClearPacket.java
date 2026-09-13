@@ -6,7 +6,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Optional;
 
@@ -19,14 +19,10 @@ public class StorageClearPacket {
         return INSTANCE;
     }
 
-    public void handle(final StorageClearPayload payload, final PlayPayloadContext context) {
+    public void handle(final StorageClearPayload payload, final IPayloadContext context) {
 
-        context.workHandler().submitAsync(() -> {
-            Optional<Player> senderOptional = context.player();
-            if (senderOptional.isEmpty()) {
-                return;
-            }
-            Player player = senderOptional.get();
+        context.enqueueWork(() -> {
+            Player player = context.player();
 
             Level world = player.level;
             if (!world.isLoaded(payload.pos())) {
@@ -48,7 +44,7 @@ public class StorageClearPacket {
         if (tile == null) {
             return false;
         }
-        PacketDistributor.SERVER.noArg().send(new StorageClearPayload(tile.pos(), storageType.ordinal(), storageIndex));
+        PacketDistributor.sendToServer(new StorageClearPayload(tile.pos(), storageType.ordinal(), storageIndex));
         return true;
     }
 

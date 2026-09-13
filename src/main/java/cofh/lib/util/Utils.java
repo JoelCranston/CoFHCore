@@ -16,6 +16,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -618,24 +619,28 @@ public class Utils {
 
     // region PACKET UTILS
 
-    public static PacketDistributor.TargetPoint createTargetPoint(Entity entity) {
+    public static void sendNear(Entity entity, CustomPacketPayload payload) {
 
-        return createTargetPoint(entity, NETWORK_UPDATE_DISTANCE);
+        sendNear(entity, NETWORK_UPDATE_DISTANCE, payload);
     }
 
-    public static PacketDistributor.TargetPoint createTargetPoint(Entity entity, int radius) {
+    public static void sendNear(Entity entity, int radius, CustomPacketPayload payload) {
 
-        return new PacketDistributor.TargetPoint(entity.getX(), entity.getY(), entity.getZ(), radius, entity.level.dimension());
+        if (entity.level() instanceof ServerLevel serverLevel) {
+            PacketDistributor.sendToPlayersNear(serverLevel, null, entity.getX(), entity.getY(), entity.getZ(), radius, payload);
+        }
     }
 
-    public static PacketDistributor.TargetPoint createTargetPoint(Level level, BlockPos pos) {
+    public static void sendNear(Level level, BlockPos pos, CustomPacketPayload payload) {
 
-        return createTargetPoint(level, pos, NETWORK_UPDATE_DISTANCE);
+        sendNear(level, pos, NETWORK_UPDATE_DISTANCE, payload);
     }
 
-    public static PacketDistributor.TargetPoint createTargetPoint(Level level, BlockPos pos, int radius) {
+    public static void sendNear(Level level, BlockPos pos, int radius, CustomPacketPayload payload) {
 
-        return new PacketDistributor.TargetPoint(pos.getX(), pos.getY(), pos.getZ(), radius, level.dimension());
+        if (level instanceof ServerLevel serverLevel) {
+            PacketDistributor.sendToPlayersNear(serverLevel, null, pos.getX(), pos.getY(), pos.getZ(), radius, payload);
+        }
     }
     // endregion
 }

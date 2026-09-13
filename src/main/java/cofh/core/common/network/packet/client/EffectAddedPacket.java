@@ -12,7 +12,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import static cofh.lib.util.Utils.getRegistryName;
 
@@ -25,9 +25,9 @@ public class EffectAddedPacket {
         return INSTANCE;
     }
 
-    public void handle(final EffectAddedPayload payload, final PlayPayloadContext context) {
+    public void handle(final EffectAddedPayload payload, final IPayloadContext context) {
 
-        context.workHandler().submitAsync(() -> {
+        context.enqueueWork(() -> {
             int id = payload.entityId();
             MobEffect effectType = BuiltInRegistries.MOB_EFFECT.get(payload.effect());
             int effectDur = payload.duration();
@@ -53,7 +53,7 @@ public class EffectAddedPacket {
         if (entity == null || effect == null) {
             return;
         }
-        PacketDistributor.NEAR.with(Utils.createTargetPoint(entity)).send(new EffectAddedPayload(entity.getId(), getRegistryName(effect.getEffect()), effect.getDuration()));
+        Utils.sendNear(entity, new EffectAddedPayload(entity.getId(), getRegistryName(effect.getEffect()), effect.getDuration()));
 
     }
 
@@ -63,7 +63,7 @@ public class EffectAddedPacket {
             return;
         }
         if (player instanceof ServerPlayer serverPlayer) {
-            PacketDistributor.PLAYER.with(serverPlayer).send(new EffectAddedPayload(entity.getId(), getRegistryName(effect.getEffect()), effect.getDuration()));
+            PacketDistributor.sendToPlayer(serverPlayer, new EffectAddedPayload(entity.getId(), getRegistryName(effect.getEffect()), effect.getDuration()));
         }
     }
 

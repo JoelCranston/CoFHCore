@@ -8,7 +8,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class ContainerGuiPacket {
 
@@ -19,9 +19,9 @@ public class ContainerGuiPacket {
         return INSTANCE;
     }
 
-    public void handle(final ContainerGuiPayload payload, final PlayPayloadContext context) {
+    public void handle(final ContainerGuiPayload payload, final IPayloadContext context) {
 
-        context.workHandler().submitAsync(() -> {
+        context.enqueueWork(() -> {
             Player player = ProxyUtils.getClientPlayer();
             if (player.containerMenu instanceof ContainerMenuCoFH container) {
                 container.handleGuiPacket(payload.buf());
@@ -35,7 +35,7 @@ public class ContainerGuiPacket {
             return;
         }
         if (player instanceof ServerPlayer serverPlayer) {
-            PacketDistributor.PLAYER.with(serverPlayer).send(new ContainerGuiPayload(container.getGuiPacket(new FriendlyByteBuf(Unpooled.buffer()))));
+            PacketDistributor.sendToPlayer(serverPlayer, new ContainerGuiPayload(container.getGuiPacket(new FriendlyByteBuf(Unpooled.buffer()))));
         }
     }
 

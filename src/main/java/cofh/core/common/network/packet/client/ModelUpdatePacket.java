@@ -8,7 +8,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class ModelUpdatePacket {
 
@@ -19,9 +19,9 @@ public class ModelUpdatePacket {
         return INSTANCE;
     }
 
-    public void handle(final ModelUpdatePayload payload, final PlayPayloadContext context) {
+    public void handle(final ModelUpdatePayload payload, final IPayloadContext context) {
 
-        context.workHandler().submitAsync(() -> {
+        context.enqueueWork(() -> {
             Level level = ProxyUtils.getClientWorld();
             if (level == null) {
                 return;
@@ -38,7 +38,7 @@ public class ModelUpdatePacket {
 
     public static void sendToClient(Level level, BlockPos pos) {
 
-        PacketDistributor.NEAR.with(Utils.createTargetPoint(level, pos)).send(new ModelUpdatePayload(pos));
+        Utils.sendNear(level, pos, new ModelUpdatePayload(pos));
     }
 
 }

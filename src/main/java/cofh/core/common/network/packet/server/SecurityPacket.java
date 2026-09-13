@@ -5,7 +5,7 @@ import cofh.lib.api.control.ISecurable;
 import cofh.lib.api.control.ISecurable.AccessMode;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Optional;
 
@@ -18,14 +18,10 @@ public class SecurityPacket {
         return INSTANCE;
     }
 
-    public void handle(final SecurityPayload payload, final PlayPayloadContext context) {
+    public void handle(final SecurityPayload payload, final IPayloadContext context) {
 
-        context.workHandler().submitAsync(() -> {
-            Optional<Player> senderOptional = context.player();
-            if (senderOptional.isEmpty()) {
-                return;
-            }
-            Player player = senderOptional.get();
+        context.enqueueWork(() -> {
+            Player player = context.player();
 
             if (player.containerMenu instanceof ISecurable securable) {
                 securable.setAccess(AccessMode.VALUES[payload.mode()]);
@@ -35,7 +31,7 @@ public class SecurityPacket {
 
     public static void sendToServer(AccessMode accessMode) {
 
-        PacketDistributor.SERVER.noArg().send(new SecurityPayload((byte) accessMode.ordinal()));
+        PacketDistributor.sendToServer(new SecurityPayload((byte) accessMode.ordinal()));
     }
 
 }

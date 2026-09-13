@@ -7,7 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Optional;
 
@@ -22,14 +22,10 @@ public class GhostItemPacket {
         return INSTANCE;
     }
 
-    public void handle(final GhostItemPayload payload, final PlayPayloadContext context) {
+    public void handle(final GhostItemPayload payload, final IPayloadContext context) {
 
-        context.workHandler().submitAsync(() -> {
-            Optional<Player> senderOptional = context.player();
-            if (senderOptional.isEmpty()) {
-                return;
-            }
-            Player player = senderOptional.get();
+        context.enqueueWork(() -> {
+            Player player = context.player();
 
             if (player.containerMenu instanceof ContainerMenuCoFH container) {
                 Slot slot = container.getSlot(payload.slotNumber());
@@ -45,7 +41,7 @@ public class GhostItemPacket {
         if (slotNumber < 0 || stack.isEmpty() || count < 0) {
             return;
         }
-        PacketDistributor.SERVER.noArg().send(new GhostItemPayload(slotNumber, stack, count));
+        PacketDistributor.sendToServer(new GhostItemPayload(slotNumber, stack, count));
     }
 
 }

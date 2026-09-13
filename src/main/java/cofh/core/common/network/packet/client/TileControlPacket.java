@@ -11,7 +11,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class TileControlPacket {
 
@@ -22,9 +22,9 @@ public class TileControlPacket {
         return INSTANCE;
     }
 
-    public void handle(final TileControlPayload payload, final PlayPayloadContext context) {
+    public void handle(final TileControlPayload payload, final IPayloadContext context) {
 
-        context.workHandler().submitAsync(() -> {
+        context.enqueueWork(() -> {
             Level world = ProxyUtils.getClientWorld();
 
             BlockPos pos = payload.pos();
@@ -43,7 +43,7 @@ public class TileControlPacket {
         if (tile == null || tile.world() == null || tile.world().isClientSide) {
             return;
         }
-        PacketDistributor.NEAR.with(Utils.createTargetPoint(tile.world(), tile.pos())).send(new TileControlPayload(tile.pos(), tile.getControlPacket(new FriendlyByteBuf(Unpooled.buffer()))));
+        Utils.sendNear(tile.world(), tile.pos(), new TileControlPayload(tile.pos(), tile.getControlPacket(new FriendlyByteBuf(Unpooled.buffer()))));
     }
 
 }

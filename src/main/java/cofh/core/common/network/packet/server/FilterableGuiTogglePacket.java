@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Optional;
 
@@ -31,14 +31,10 @@ public class FilterableGuiTogglePacket {
     public static byte FILTER_GUI = 0;
     public static byte GUI = 1;
 
-    public void handle(final FilterableGuiTogglePayload payload, final PlayPayloadContext context) {
+    public void handle(final FilterableGuiTogglePayload payload, final IPayloadContext context) {
 
-        context.workHandler().submitAsync(() -> {
-            Optional<Player> senderOptional = context.player();
-            if (senderOptional.isEmpty()) {
-                return;
-            }
-            ServerPlayer player = (ServerPlayer) senderOptional.get();
+        context.enqueueWork(() -> {
+            ServerPlayer player = (ServerPlayer) context.player();
 
             Level world = player.level;
 
@@ -120,7 +116,7 @@ public class FilterableGuiTogglePacket {
 
     protected static void sendToServer(byte mode) {
 
-        PacketDistributor.SERVER.noArg().send(new FilterableGuiTogglePayload(ITEM.ordinal(), -1, BlockPos.ZERO, mode));
+        PacketDistributor.sendToServer(new FilterableGuiTogglePayload(ITEM.ordinal(), -1, BlockPos.ZERO, mode));
     }
     // endregion
 
@@ -137,7 +133,7 @@ public class FilterableGuiTogglePacket {
 
     protected static void sendToServer(BlockPos pos, byte mode) {
 
-        PacketDistributor.SERVER.noArg().send(new FilterableGuiTogglePayload(TILE.ordinal(), -1, pos, mode));
+        PacketDistributor.sendToServer(new FilterableGuiTogglePayload(TILE.ordinal(), -1, pos, mode));
     }
     // endregion
 
@@ -154,7 +150,7 @@ public class FilterableGuiTogglePacket {
 
     protected static void sendToServer(int entityId, byte mode) {
 
-        PacketDistributor.SERVER.noArg().send(new FilterableGuiTogglePayload(ENTITY.ordinal(), entityId, BlockPos.ZERO, mode));
+        PacketDistributor.sendToServer(new FilterableGuiTogglePayload(ENTITY.ordinal(), entityId, BlockPos.ZERO, mode));
     }
     // endregion
 }

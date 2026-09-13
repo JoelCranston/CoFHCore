@@ -7,7 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Optional;
 
@@ -20,14 +20,10 @@ public class SecurityControlPacket {
         return INSTANCE;
     }
 
-    public void handle(final SecurityControlPayload payload, final PlayPayloadContext context) {
+    public void handle(final SecurityControlPayload payload, final IPayloadContext context) {
 
-        context.workHandler().submitAsync(() -> {
-            Optional<Player> senderOptional = context.player();
-            if (senderOptional.isEmpty()) {
-                return;
-            }
-            Player player = senderOptional.get();
+        context.enqueueWork(() -> {
+            Player player = context.player();
 
             Level world = player.level;
             if (!world.isLoaded(payload.pos())) {
@@ -45,7 +41,7 @@ public class SecurityControlPacket {
         if (tile == null) {
             return;
         }
-        PacketDistributor.SERVER.noArg().send(new SecurityControlPayload(tile.pos(), (byte) tile.securityControl().getAccess().ordinal()));
+        PacketDistributor.sendToServer(new SecurityControlPayload(tile.pos(), (byte) tile.securityControl().getAccess().ordinal()));
     }
 
 }

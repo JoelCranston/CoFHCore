@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Optional;
 
@@ -23,14 +23,10 @@ public class ItemRayTraceBlockPacket {
         return INSTANCE;
     }
 
-    public void handle(final ItemRayTraceBlockPayload payload, final PlayPayloadContext context) {
+    public void handle(final ItemRayTraceBlockPayload payload, final IPayloadContext context) {
 
-        context.workHandler().submitAsync(() -> {
-            Optional<Player> senderOptional = context.player();
-            if (senderOptional.isEmpty()) {
-                return;
-            }
-            Player player = senderOptional.get();
+        context.enqueueWork(() -> {
+            Player player = context.player();
             if (player instanceof ServerPlayer serverPlayer) {
                 ItemStack stack = player.getItemInHand(payload.hand());
                 if (stack.getItem() instanceof IBlockRayTraceItem item) {
@@ -44,7 +40,7 @@ public class ItemRayTraceBlockPacket {
 
         Player client = ProxyUtils.getClientPlayer();
         if (client != null && client.equals(player)) {
-            PacketDistributor.SERVER.noArg().send(new ItemRayTraceBlockPayload(hand, origin, result));
+            PacketDistributor.sendToServer(new ItemRayTraceBlockPayload(hand, origin, result));
         }
     }
 

@@ -8,7 +8,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import static cofh.lib.util.Utils.getRegistryName;
 
@@ -21,9 +21,9 @@ public class EffectRemovedPacket {
         return INSTANCE;
     }
 
-    public void handle(final EffectRemovedPayload payload, final PlayPayloadContext context) {
+    public void handle(final EffectRemovedPayload payload, final IPayloadContext context) {
 
-        context.workHandler().submitAsync(() -> {
+        context.enqueueWork(() -> {
             int id = payload.entityId();
             MobEffect effectType = BuiltInRegistries.MOB_EFFECT.get(payload.effect());
 
@@ -41,7 +41,7 @@ public class EffectRemovedPacket {
         if (entity == null || effect == null) {
             return;
         }
-        PacketDistributor.NEAR.with(Utils.createTargetPoint(entity)).send(new EffectRemovedPayload(entity.getId(), getRegistryName(effect.getEffect())));
+        Utils.sendNear(entity, new EffectRemovedPayload(entity.getId(), getRegistryName(effect.getEffect())));
     }
 
     public static void sendToClient(LivingEntity entity, MobEffect effect) {
@@ -49,7 +49,7 @@ public class EffectRemovedPacket {
         if (entity == null || effect == null) {
             return;
         }
-        PacketDistributor.NEAR.with(Utils.createTargetPoint(entity)).send(new EffectRemovedPayload(entity.getId(), getRegistryName(effect)));
+        Utils.sendNear(entity, new EffectRemovedPayload(entity.getId(), getRegistryName(effect)));
     }
 
 }
