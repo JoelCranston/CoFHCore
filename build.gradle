@@ -18,6 +18,14 @@ java {
 
 sourceSets.main.resources.srcDirs += "src/main/generated"
 
+// javac's default -Xmaxerrs 100 was silently capping error output during this port - the count
+// was hovering around 100 across many rebuilds regardless of how much got fixed, which turned out
+// to be the cap masking a larger real total rather than genuine lack of progress. Raised so
+// `compileJava` always shows the true error count/file list.
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << "-Xmaxerrs" << "100000"
+}
+
 group = 'com.teamcofh'
 base {
     archivesName = "${mod_id}"

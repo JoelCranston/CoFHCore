@@ -3,11 +3,13 @@ package cofh.core.util.helpers;
 import cofh.core.common.item.ILeftClickHandlerItem;
 import cofh.core.common.item.IMultiModeItem;
 import com.google.common.base.Strings;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.Block;
 
 import java.util.function.Predicate;
@@ -93,10 +95,12 @@ public final class ItemHelper {
     // endregion
 
     // region NBT TAGS
+    // "Tag" here always meant the mod-attached custom NBT blob, not vanilla's structured item
+    // data - that's DataComponents.CUSTOM_DATA now (ItemStack#hasTag/getTag/setTag are gone).
     public static ItemStack copyTag(ItemStack container, ItemStack other) {
 
-        if (!other.isEmpty() && other.hasTag()) {
-            container.setTag(other.getTag().copy());
+        if (!other.isEmpty() && other.has(DataComponents.CUSTOM_DATA)) {
+            container.set(DataComponents.CUSTOM_DATA, CustomData.of(other.get(DataComponents.CUSTOM_DATA).copyTag()));
         }
         return container;
     }
@@ -120,7 +124,7 @@ public final class ItemHelper {
     // region COMPARISON
     public static boolean itemsEqualWithTags(ItemStack stackA, ItemStack stackB) {
 
-        return ItemStack.isSameItemSameTags(stackA, stackB);
+        return ItemStack.isSameItemSameComponents(stackA, stackB);
     }
 
     public static boolean itemsEqual(ItemStack stackA, ItemStack stackB) {
@@ -153,19 +157,15 @@ public final class ItemHelper {
         if (stackA.getCount() != stackB.getCount()) {
             return false;
         }
-        if (stackA.getTag() == null && stackB.getTag() == null) {
+        CompoundTag tagA = stackA.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        CompoundTag tagB = stackB.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        if (tagA.isEmpty() && tagB.isEmpty()) {
             return true;
         }
-        if (stackA.getTag() == null || stackB.getTag() == null) {
+        int numberOfKeys = tagA.getAllKeys().size();
+        if (numberOfKeys != tagB.getAllKeys().size()) {
             return false;
         }
-        int numberOfKeys = stackA.getTag().getAllKeys().size();
-        if (numberOfKeys != stackB.getTag().getAllKeys().size()) {
-            return false;
-        }
-
-        CompoundTag tagA = stackA.getTag();
-        CompoundTag tagB = stackB.getTag();
 
         String[] keys = new String[numberOfKeys];
         keys = tagA.getAllKeys().toArray(keys);

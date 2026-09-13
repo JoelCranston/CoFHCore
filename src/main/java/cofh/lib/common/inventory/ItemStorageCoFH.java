@@ -3,7 +3,9 @@ package cofh.lib.common.inventory;
 import cofh.core.util.helpers.ItemHelper;
 import cofh.lib.api.IResourceStorage;
 import cofh.lib.api.inventory.IItemStackHolder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -123,22 +125,27 @@ public class ItemStorageCoFH implements IItemHandler, IItemStackHolder, IResourc
     }
 
     // region NBT
-    public ItemStorageCoFH read(CompoundTag nbt) {
+    // ItemStack persistence needs a HolderLookup.Provider now (components can reference
+    // registries) - ItemStack.of(CompoundTag)/ItemStack#save(CompoundTag) are both gone in favor
+    // of parseOptional(Provider, CompoundTag)/save(Provider). Note: nothing calls read/write on
+    // this class currently (item-inventory persistence elsewhere in this codebase goes through a
+    // different path) - kept correct for whenever something is wired up to it.
+    public ItemStorageCoFH read(HolderLookup.Provider provider, CompoundTag nbt) {
 
-        item = loadItemStack(nbt);
+        item = loadItemStack(provider, nbt);
         return this;
     }
 
-    public CompoundTag write(CompoundTag nbt) {
+    public CompoundTag write(HolderLookup.Provider provider, CompoundTag nbt) {
 
-        saveItemStack(item, nbt);
+        saveItemStack(provider, item, nbt);
         return nbt;
     }
     // endregion
 
-    public static ItemStack loadItemStack(CompoundTag nbt) {
+    public static ItemStack loadItemStack(HolderLookup.Provider provider, CompoundTag nbt) {
 
-        ItemStack retStack = ItemStack.of(nbt);
+        ItemStack retStack = ItemStack.parseOptional(provider, nbt);
         if (nbt.contains("IntCount")) {
             int storedCount = nbt.getInt("IntCount");
             if (retStack.getCount() < storedCount) {
@@ -148,9 +155,12 @@ public class ItemStorageCoFH implements IItemHandler, IItemStackHolder, IResourc
         return retStack;
     }
 
-    protected final void saveItemStack(ItemStack stack, CompoundTag nbt) {
+    protected final void saveItemStack(HolderLookup.Provider provider, ItemStack stack, CompoundTag nbt) {
 
-        stack.save(nbt);
+        Tag saved = stack.save(provider);
+        if (saved instanceof CompoundTag savedTag) {
+            nbt.merge(savedTag);
+        }
         if (stack.getCount() > Byte.MAX_VALUE) {
             nbt.putInt("IntCount", stack.getCount());
         }
