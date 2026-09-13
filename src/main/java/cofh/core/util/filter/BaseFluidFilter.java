@@ -2,8 +2,10 @@ package cofh.core.util.filter;
 
 import cofh.core.util.helpers.FluidHelper;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 
@@ -81,7 +83,7 @@ public class BaseFluidFilter implements IFilter, IFilterOptions {
     }
 
     @Override
-    public IFilter read(CompoundTag nbt) {
+    public IFilter read(HolderLookup.Provider provider, CompoundTag nbt) {
 
         CompoundTag subTag = nbt.getCompound(TAG_FILTER);
         //        int size = subTag.getInt(TAG_TANKS);
@@ -96,7 +98,7 @@ public class BaseFluidFilter implements IFilter, IFilterOptions {
             CompoundTag tankTag = list.getCompound(i);
             int tank = tankTag.getByte(TAG_TANK);
             if (tank >= 0 && tank < fluids.size()) {
-                fluids.set(tank, FluidStack.loadFluidStackFromNBT(tankTag));
+                fluids.set(tank, FluidStack.parseOptional(provider, tankTag));
             }
         }
         allowList = subTag.getBoolean(TAG_FILTER_OPT_LIST);
@@ -105,7 +107,7 @@ public class BaseFluidFilter implements IFilter, IFilterOptions {
     }
 
     @Override
-    public CompoundTag write(CompoundTag nbt) {
+    public CompoundTag write(HolderLookup.Provider provider, CompoundTag nbt) {
 
         CompoundTag subTag = new CompoundTag();
         ListTag list = new ListTag();
@@ -113,7 +115,10 @@ public class BaseFluidFilter implements IFilter, IFilterOptions {
             if (!fluids.get(i).isEmpty()) {
                 CompoundTag tankTag = new CompoundTag();
                 tankTag.putByte(TAG_TANK, (byte) i);
-                fluids.get(i).writeToNBT(tankTag);
+                Tag saved = fluids.get(i).save(provider);
+                if (saved instanceof CompoundTag savedTag) {
+                    tankTag.merge(savedTag);
+                }
                 list.add(tankTag);
             }
         }

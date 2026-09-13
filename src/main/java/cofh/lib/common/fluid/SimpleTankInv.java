@@ -2,6 +2,7 @@ package cofh.lib.common.fluid;
 
 import cofh.lib.api.StorageGroup;
 import cofh.lib.api.block.entity.ITileCallback;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -73,7 +74,7 @@ public class SimpleTankInv extends SimpleFluidHandler {
     }
 
     // region NBT
-    public SimpleTankInv read(CompoundTag nbt) {
+    public SimpleTankInv read(HolderLookup.Provider provider, CompoundTag nbt) {
 
         for (FluidStorageCoFH tank : tanks) {
             tank.setFluidStack(FluidStack.EMPTY);
@@ -83,13 +84,13 @@ public class SimpleTankInv extends SimpleFluidHandler {
             CompoundTag tag = list.getCompound(i);
             int tank = tag.getByte(TAG_TANK);
             if (tank >= 0 && tank < tanks.size()) {
-                tanks.get(tank).read(tag);
+                tanks.get(tank).read(provider, tag);
             }
         }
         return this;
     }
 
-    public CompoundTag write(CompoundTag nbt) {
+    public CompoundTag write(HolderLookup.Provider provider, CompoundTag nbt) {
 
         if (tanks.size() <= 0) {
             return nbt;
@@ -99,7 +100,7 @@ public class SimpleTankInv extends SimpleFluidHandler {
             if (!tanks.get(i).isEmpty()) {
                 CompoundTag tag = new CompoundTag();
                 tag.putByte(TAG_TANK, (byte) i);
-                tanks.get(i).write(tag);
+                tanks.get(i).write(provider, tag);
                 list.add(tag);
             }
         }

@@ -2,8 +2,10 @@ package cofh.core.util.filter;
 
 import cofh.core.util.helpers.ItemHelper;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -81,7 +83,7 @@ public class BaseItemFilter implements IFilter, IFilterOptions {
     }
 
     @Override
-    public IFilter read(CompoundTag nbt) {
+    public IFilter read(HolderLookup.Provider provider, CompoundTag nbt) {
 
         CompoundTag subTag = nbt.getCompound(TAG_FILTER);
         //        int size = subTag.getInt(TAG_SLOTS);
@@ -96,7 +98,7 @@ public class BaseItemFilter implements IFilter, IFilterOptions {
             CompoundTag slotTag = list.getCompound(i);
             int slot = slotTag.getByte(TAG_SLOT);
             if (slot >= 0 && slot < items.size()) {
-                items.set(slot, ItemStack.of(slotTag));
+                items.set(slot, ItemStack.parseOptional(provider, slotTag));
             }
         }
         allowList = subTag.getBoolean(TAG_FILTER_OPT_LIST);
@@ -105,7 +107,7 @@ public class BaseItemFilter implements IFilter, IFilterOptions {
     }
 
     @Override
-    public CompoundTag write(CompoundTag nbt) {
+    public CompoundTag write(HolderLookup.Provider provider, CompoundTag nbt) {
 
         CompoundTag subTag = new CompoundTag();
         ListTag list = new ListTag();
@@ -116,7 +118,10 @@ public class BaseItemFilter implements IFilter, IFilterOptions {
             if (!items.get(i).isEmpty()) {
                 CompoundTag slotTag = new CompoundTag();
                 slotTag.putByte(TAG_SLOT, (byte) i);
-                items.get(i).save(slotTag);
+                Tag saved = items.get(i).save(provider);
+                if (saved instanceof CompoundTag savedTag) {
+                    slotTag.merge(savedTag);
+                }
                 list.add(slotTag);
             }
         }

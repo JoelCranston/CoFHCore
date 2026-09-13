@@ -1,5 +1,6 @@
 package cofh.lib.common.fluid;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
@@ -27,13 +28,13 @@ public class EmptyFluidStorage extends FluidStorageCoFH {
 
     // region NBT
     @Override
-    public FluidStorageCoFH read(CompoundTag nbt) {
+    public FluidStorageCoFH read(HolderLookup.Provider provider, CompoundTag nbt) {
 
         return this;
     }
 
     @Override
-    public CompoundTag write(CompoundTag nbt) {
+    public CompoundTag write(HolderLookup.Provider provider, CompoundTag nbt) {
 
         return nbt;
     }

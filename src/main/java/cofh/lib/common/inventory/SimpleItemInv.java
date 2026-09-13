@@ -2,6 +2,7 @@ package cofh.lib.common.inventory;
 
 import cofh.lib.api.IStorageCallback;
 import cofh.lib.api.StorageGroup;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
@@ -101,7 +102,10 @@ public class SimpleItemInv extends SimpleItemHandler {
     }
 
     // region NBT
-    public SimpleItemInv read(CompoundTag nbt) {
+    // ItemStorageCoFH#read/write need a HolderLookup.Provider now (ItemStack persistence does) -
+    // threaded through every method here even though most of these are currently unused, since
+    // they all bottom out in the same per-slot read/write.
+    public SimpleItemInv read(HolderLookup.Provider provider, CompoundTag nbt) {
 
         for (ItemStorageCoFH slot : slots) {
             slot.setItemStack(ItemStack.EMPTY);
@@ -111,13 +115,13 @@ public class SimpleItemInv extends SimpleItemHandler {
             CompoundTag slotTag = list.getCompound(i);
             int slot = slotTag.getByte(TAG_SLOT);
             if (slot >= 0 && slot < slots.size()) {
-                slots.get(slot).read(slotTag);
+                slots.get(slot).read(provider, slotTag);
             }
         }
         return this;
     }
 
-    public CompoundTag write(CompoundTag nbt) {
+    public CompoundTag write(HolderLookup.Provider provider, CompoundTag nbt) {
 
         if (slots.size() <= 0) {
             return nbt;
@@ -127,7 +131,7 @@ public class SimpleItemInv extends SimpleItemHandler {
             if (!slots.get(i).isEmpty()) {
                 CompoundTag slotTag = new CompoundTag();
                 slotTag.putByte(TAG_SLOT, (byte) i);
-                slots.get(i).write(slotTag);
+                slots.get(i).write(provider, slotTag);
                 list.add(slotTag);
             }
         }
@@ -141,17 +145,17 @@ public class SimpleItemInv extends SimpleItemHandler {
     // endregion
 
     // region HELPERS
-    public CompoundTag writeSlotsToNBT(CompoundTag nbt, int startIndex, int endIndex) {
+    public CompoundTag writeSlotsToNBT(HolderLookup.Provider provider, CompoundTag nbt, int startIndex, int endIndex) {
 
-        return writeSlotsToNBT(nbt, tag, startIndex, endIndex);
+        return writeSlotsToNBT(provider, nbt, tag, startIndex, endIndex);
     }
 
-    public CompoundTag writeSlotsToNBT(CompoundTag nbt, String saveTag, int startIndex) {
+    public CompoundTag writeSlotsToNBT(HolderLookup.Provider provider, CompoundTag nbt, String saveTag, int startIndex) {
 
-        return writeSlotsToNBT(nbt, saveTag, startIndex, slots.size());
+        return writeSlotsToNBT(provider, nbt, saveTag, startIndex, slots.size());
     }
 
-    public CompoundTag writeSlotsToNBT(CompoundTag nbt, String saveTag, int startIndex, int endIndex) {
+    public CompoundTag writeSlotsToNBT(HolderLookup.Provider provider, CompoundTag nbt, String saveTag, int startIndex, int endIndex) {
 
         if (startIndex < 0 || startIndex >= endIndex || startIndex >= slots.size()) {
             return nbt;
@@ -161,7 +165,7 @@ public class SimpleItemInv extends SimpleItemHandler {
             if (!slots.get(i).isEmpty()) {
                 CompoundTag slotTag = new CompoundTag();
                 slotTag.putByte(TAG_SLOT, (byte) i);
-                slots.get(i).write(slotTag);
+                slots.get(i).write(provider, slotTag);
                 list.add(slotTag);
             }
         }
@@ -175,34 +179,34 @@ public class SimpleItemInv extends SimpleItemHandler {
     // endregion
 
     // region UNORDERED METHODS
-    public SimpleItemInv readSlotsUnordered(ListTag list, int startIndex) {
+    public SimpleItemInv readSlotsUnordered(HolderLookup.Provider provider, ListTag list, int startIndex) {
 
-        return readSlotsUnordered(list, startIndex, slots.size());
+        return readSlotsUnordered(provider, list, startIndex, slots.size());
     }
 
-    public SimpleItemInv readSlotsUnordered(ListTag list, int startIndex, int endIndex) {
+    public SimpleItemInv readSlotsUnordered(HolderLookup.Provider provider, ListTag list, int startIndex, int endIndex) {
 
         if (startIndex < 0 || startIndex >= endIndex || startIndex >= slots.size()) {
             return this;
         }
         for (int i = 0; i < Math.min(Math.min(endIndex, slots.size()) - startIndex, list.size()); ++i) {
             CompoundTag slotTag = list.getCompound(i);
-            slots.get(startIndex + i).read(slotTag);
+            slots.get(startIndex + i).read(provider, slotTag);
         }
         return this;
     }
 
-    public CompoundTag writeSlotsToNBTUnordered(CompoundTag nbt, int startIndex, int endIndex) {
+    public CompoundTag writeSlotsToNBTUnordered(HolderLookup.Provider provider, CompoundTag nbt, int startIndex, int endIndex) {
 
-        return writeSlotsToNBTUnordered(nbt, tag, startIndex, endIndex);
+        return writeSlotsToNBTUnordered(provider, nbt, tag, startIndex, endIndex);
     }
 
-    public CompoundTag writeSlotsToNBTUnordered(CompoundTag nbt, String saveTag, int startIndex) {
+    public CompoundTag writeSlotsToNBTUnordered(HolderLookup.Provider provider, CompoundTag nbt, String saveTag, int startIndex) {
 
-        return writeSlotsToNBTUnordered(nbt, saveTag, startIndex, slots.size());
+        return writeSlotsToNBTUnordered(provider, nbt, saveTag, startIndex, slots.size());
     }
 
-    public CompoundTag writeSlotsToNBTUnordered(CompoundTag nbt, String saveTag, int startIndex, int endIndex) {
+    public CompoundTag writeSlotsToNBTUnordered(HolderLookup.Provider provider, CompoundTag nbt, String saveTag, int startIndex, int endIndex) {
 
         if (startIndex < 0 || startIndex >= endIndex || startIndex >= slots.size()) {
             return nbt;
@@ -211,7 +215,7 @@ public class SimpleItemInv extends SimpleItemHandler {
         for (int i = startIndex; i < Math.min(endIndex, slots.size()); ++i) {
             if (!slots.get(i).isEmpty()) {
                 CompoundTag slotTag = new CompoundTag();
-                slots.get(i).write(slotTag);
+                slots.get(i).write(provider, slotTag);
                 list.add(slotTag);
             }
         }

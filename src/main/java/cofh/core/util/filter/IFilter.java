@@ -1,5 +1,6 @@
 package cofh.core.util.filter;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.util.INBTSerializable;
@@ -32,20 +33,20 @@ public interface IFilter extends INBTSerializable<CompoundTag> {
         return getFluidRules().test(fluid);
     }
 
-    IFilter read(CompoundTag nbt);
+    IFilter read(HolderLookup.Provider provider, CompoundTag nbt);
 
-    CompoundTag write(CompoundTag nbt);
+    CompoundTag write(HolderLookup.Provider provider, CompoundTag nbt);
 
     @Override
-    default CompoundTag serializeNBT() {
+    default CompoundTag serializeNBT(HolderLookup.Provider provider) {
 
-        return write(new CompoundTag());
+        return write(provider, new CompoundTag());
     }
 
     @Override
-    default void deserializeNBT(CompoundTag nbt) {
+    default void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
 
-        read(nbt);
+        read(provider, nbt);
     }
 
 }

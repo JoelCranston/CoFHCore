@@ -3,7 +3,9 @@ package cofh.lib.common.fluid;
 import cofh.lib.api.IResourceStorage;
 import cofh.lib.api.fluid.IFluidStackHolder;
 import cofh.lib.util.helpers.MathHelper;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.IFluidTank;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -113,16 +115,21 @@ public class FluidStorageCoFH implements IFluidHandler, IFluidStackHolder, IReso
     }
 
     // region NBT
-    public FluidStorageCoFH read(CompoundTag nbt) {
+    // FluidStack persistence now mirrors ItemStack's - parseOptional(Provider, CompoundTag)/
+    // save(Provider) replace loadFluidStackFromNBT/writeToNBT.
+    public FluidStorageCoFH read(HolderLookup.Provider provider, CompoundTag nbt) {
 
-        FluidStack fluid = FluidStack.loadFluidStackFromNBT(nbt);
+        FluidStack fluid = FluidStack.parseOptional(provider, nbt);
         setFluidStack(fluid);
         return this;
     }
 
-    public CompoundTag write(CompoundTag nbt) {
+    public CompoundTag write(HolderLookup.Provider provider, CompoundTag nbt) {
 
-        fluid.writeToNBT(nbt);
+        Tag saved = fluid.save(provider);
+        if (saved instanceof CompoundTag savedTag) {
+            nbt.merge(savedTag);
+        }
         nbt.putInt(TAG_CAPACITY, baseCapacity);
         return nbt;
     }

@@ -1,5 +1,6 @@
 package cofh.lib.common.inventory;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 
@@ -24,13 +25,13 @@ public class EmptyItemStorage extends ItemStorageCoFH {
 
     // region NBT
     @Override
-    public ItemStorageCoFH read(CompoundTag nbt) {
+    public ItemStorageCoFH read(HolderLookup.Provider provider, CompoundTag nbt) {
 
         return this;
     }
 
     @Override
-    public CompoundTag write(CompoundTag nbt) {
+    public CompoundTag write(HolderLookup.Provider provider, CompoundTag nbt) {
 
         return nbt;
     }

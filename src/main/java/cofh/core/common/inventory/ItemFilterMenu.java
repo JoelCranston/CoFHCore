@@ -8,12 +8,14 @@ import cofh.lib.common.inventory.SlotLocked;
 import cofh.lib.common.inventory.wrapper.InvWrapperGeneric;
 import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -162,7 +164,10 @@ public class ItemFilterMenu extends ContainerMenuCoFH implements IFilterOptions 
         filter.setItems(filterInventory.getStacks());
 
         if (type == SELF || type == ITEM) {
-            filter.write(filterStack.getOrCreateTag());
+            // getOrCreateTag() is gone - custom item NBT is DataComponents.CUSTOM_DATA now;
+            // CustomData.update reads whatever is already there, hands it to the consumer to
+            // mutate in place, and re-sets the component with the result.
+            CustomData.update(DataComponents.CUSTOM_DATA, filterStack, tag -> filter.write(player.registryAccess(), tag));
             filterableItem.onFilterChanged(filterStack);
         } else {
             filterable.onFilterChanged();

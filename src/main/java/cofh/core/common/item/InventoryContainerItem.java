@@ -3,6 +3,7 @@ package cofh.core.common.item;
 import cofh.lib.api.item.IInventoryContainerItem;
 import cofh.lib.common.inventory.ItemStorageCoFH;
 import cofh.lib.common.inventory.SimpleItemInv;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 
@@ -34,7 +35,9 @@ public class InventoryContainerItem extends ItemCoFH implements IInventoryContai
             invSlots.add(new ItemStorageCoFH());
         }
         SimpleItemInv inventory = new SimpleItemInv(invSlots);
-        inventory.read(containerTag);
+        // No registry-aware context reaches this ItemStack-only API shape (pre-existing TODO on
+        // IInventoryContainerItem to re-implement) - RegistryAccess.EMPTY is a stand-in until then.
+        inventory.read(RegistryAccess.EMPTY, containerTag);
         return inventory;
     }
 

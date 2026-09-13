@@ -9,12 +9,16 @@ import cofh.lib.common.inventory.SlotLocked;
 import cofh.lib.common.inventory.wrapper.InvWrapperFluids;
 import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -179,7 +183,8 @@ public class FluidFilterMenu extends ContainerMenuCoFH implements IFilterOptions
         filter.setFluids(filterInventory.getStacks());
 
         if (type == SELF || type == ITEM) {
-            filter.write(filterStack.getOrCreateTag());
+            // getOrCreateTag() is gone - see ItemFilterMenu#removed for the same fix.
+            CustomData.update(DataComponents.CUSTOM_DATA, filterStack, tag -> filter.write(player.registryAccess(), tag));
             filterableItem.onFilterChanged(filterStack);
         } else {
             filterable.onFilterChanged();
@@ -207,10 +212,18 @@ public class FluidFilterMenu extends ContainerMenuCoFH implements IFilterOptions
     @Override
     public FriendlyByteBuf getGuiPacket(FriendlyByteBuf buffer) {
 
+        // FriendlyByteBuf#writeFluidStack/readFluidStack were removed upstream - FluidStack's only
+        // serialization now is STREAM_CODEC/OPTIONAL_STREAM_CODEC, both of which need a
+        // RegistryFriendlyByteBuf, and this buffer is a plain scratch FriendlyByteBuf with no
+        // registry context available (see ContainerGuiPacket). Hand-encoding fluid id + amount is
+        // enough here - this only syncs what the client renders in the filter GUI, not anything
+        // that needs to round-trip a fluid's full data components.
         byte size = (byte) filter.getFluids().size();
         buffer.writeByte(size);
         for (int i = 0; i < size; ++i) {
-            buffer.writeFluidStack(getFilterStacks().get(i));
+            FluidStack stack = getFilterStacks().get(i);
+            buffer.writeResourceLocation(BuiltInRegistries.FLUID.getKey(stack.getFluid()));
+            buffer.writeVarInt(stack.getAmount());
         }
         return buffer;
     }
@@ -221,7 +234,9 @@ public class FluidFilterMenu extends ContainerMenuCoFH implements IFilterOptions
         byte size = buffer.readByte();
         List<FluidStack> fluidStacks = new ArrayList<>(size);
         for (int i = 0; i < size; ++i) {
-            fluidStacks.add(buffer.readFluidStack());
+            ResourceLocation fluidId = buffer.readResourceLocation();
+            int amount = buffer.readVarInt();
+            fluidStacks.add(new FluidStack(BuiltInRegistries.FLUID.get(fluidId), amount));
         }
         filterInventory.readFromSource(fluidStacks);
     }

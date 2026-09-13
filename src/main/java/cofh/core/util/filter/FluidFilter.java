@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 public class FluidFilter extends BaseFluidFilter implements MenuProvider {
 
     public static final Component DISPLAY_NAME = Component.translatable("info.cofh.fluid_filter");
-    public static final IFilterFactory<IFilter> FACTORY = (nbt, holderType, id, pos) -> new FluidFilter(15, holderType, id, pos).read(nbt);
+    public static final IFilterFactory<IFilter> FACTORY = (provider, nbt, holderType, id, pos) -> new FluidFilter(15, holderType, id, pos).read(provider, nbt);
 
     protected final FilterHolderType holderType;
     protected final int id;

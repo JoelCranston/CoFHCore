@@ -2,6 +2,7 @@ package cofh.core.util.filter;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -31,26 +32,26 @@ public class FilterRegistry {
         return true;
     }
 
-    public static IFilter getFilter(String type, CompoundTag nbt) {
+    public static IFilter getFilter(HolderLookup.Provider provider, String type, CompoundTag nbt) {
 
         if (FILTER_FACTORY_MAP.containsKey(type)) {
-            return FILTER_FACTORY_MAP.get(type).createFilter(nbt, ITEM, -1, BlockPos.ZERO);
+            return FILTER_FACTORY_MAP.get(type).createFilter(provider, nbt, ITEM, -1, BlockPos.ZERO);
         }
         return EmptyFilter.INSTANCE;
     }
 
-    public static IFilter getFilter(String type, CompoundTag nbt, BlockEntity tile) {
+    public static IFilter getFilter(HolderLookup.Provider provider, String type, CompoundTag nbt, BlockEntity tile) {
 
         if (FILTER_FACTORY_MAP.containsKey(type)) {
-            return FILTER_FACTORY_MAP.get(type).createFilter(nbt, TILE, -1, tile.getBlockPos());
+            return FILTER_FACTORY_MAP.get(type).createFilter(provider, nbt, TILE, -1, tile.getBlockPos());
         }
         return EmptyFilter.INSTANCE;
     }
 
-    public static IFilter getFilter(String type, CompoundTag nbt, Entity entity) {
+    public static IFilter getFilter(HolderLookup.Provider provider, String type, CompoundTag nbt, Entity entity) {
 
         if (FILTER_FACTORY_MAP.containsKey(type)) {
-            return FILTER_FACTORY_MAP.get(type).createFilter(nbt, ENTITY, entity.getId(), BlockPos.ZERO);
+            return FILTER_FACTORY_MAP.get(type).createFilter(provider, nbt, ENTITY, entity.getId(), BlockPos.ZERO);
         }
         return EmptyFilter.INSTANCE;
     }
