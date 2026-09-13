@@ -1,7 +1,7 @@
 package cofh.lib.common.entity;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -55,33 +55,31 @@ public abstract class AbstractFieldSpell extends AbstractAoESpell implements IEn
         refreshDimensions();
     }
 
+    // getEyeHeight(Pose, EntityDimensions) was removed upstream - Entity#getEyeHeight(Pose) is
+    // final now and just reads EntityDimensions#eyeHeight() off whatever getDimensions(Pose)
+    // returns, so the 0.45F eye-height factor moves into the EntityDimensions built here instead.
     @Override
     public EntityDimensions getDimensions(Pose pose) {
 
-        return getType().getDimensions().scale(radius * 2, 1);
-    }
-
-    @Override
-    protected float getEyeHeight(Pose pose, EntityDimensions dimensions) {
-
-        return dimensions.height * 0.45F;
+        EntityDimensions dimensions = getType().getDimensions().scale(radius * 2, 1);
+        return dimensions.withEyeHeight(dimensions.height() * 0.45F);
     }
 
     @Override
     protected AABB makeBoundingBox() {
 
-        return dimensions.makeBoundingBox(position().subtract(0, dimensions.height * 0.5F, 0));
+        return dimensions.makeBoundingBox(position().subtract(0, dimensions.height() * 0.5F, 0));
     }
 
     @Override
-    public void writeSpawnData(FriendlyByteBuf buffer) {
+    public void writeSpawnData(RegistryFriendlyByteBuf buffer) {
 
         buffer.writeVarInt(getDuration());
         buffer.writeFloat(getRadius());
     }
 
     @Override
-    public void readSpawnData(FriendlyByteBuf additionalData) {
+    public void readSpawnData(RegistryFriendlyByteBuf additionalData) {
 
         duration = additionalData.readVarInt();
         setRadius(additionalData.readFloat());

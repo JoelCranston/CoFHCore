@@ -69,10 +69,16 @@ public class ThrownKnife extends AbstractArrow {
     }
 
     @Override
-    protected void defineSynchedData() {
+    protected ItemStack getDefaultPickupItem() {
 
-        super.defineSynchedData();
-        this.entityData.define(DATA_ITEM_STACK, ItemStack.EMPTY);
+        return getPickupItem();
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+
+        super.defineSynchedData(builder);
+        builder.define(DATA_ITEM_STACK, ItemStack.EMPTY);
     }
 
     @Override
@@ -131,11 +137,11 @@ public class ThrownKnife extends AbstractArrow {
         ItemStack stack = getPickupItem();
         if (stack.getItem() instanceof KnifeItem) {
             float velocity = (float) this.getDeltaMovement().length();
-            float damage = ((KnifeItem) stack.getItem()).getDamage();
+            float damage = ((KnifeItem) stack.getItem()).getDamage(stack);
 
             damage = (float) MathHelper.clamp(velocity * damage, 0.0D, damage * 3);
             if (target instanceof LivingEntity) {
-                damage += EnchantmentHelper.getDamageBonus(stack, ((LivingEntity) target).getMobType());
+                damage += EnchantmentHelper.getDamageBonus(stack, target.getType());
             }
             Entity owner = this.getOwner();
             if (target.hurt(this.damageSource(), damage)) {
@@ -154,7 +160,7 @@ public class ThrownKnife extends AbstractArrow {
                         }
                     }
                     this.doPostHurtEffects(livingTarget);
-                    target.setSecondsOnFire(4 * Utils.getItemEnchantmentLevel(Enchantments.FIRE_ASPECT, stack));
+                    target.igniteForSeconds(4 * Utils.getItemEnchantmentLevel(Enchantments.FIRE_ASPECT, stack));
                 }
             }
             this.setDeltaMovement(this.getDeltaMovement().multiply(-0.01D, -0.1D, -0.01D));
@@ -182,7 +188,7 @@ public class ThrownKnife extends AbstractArrow {
 
         super.readAdditionalSaveData(nbt);
         if (nbt.contains("Knife", TAG_COMPOUND)) {
-            this.entityData.set(DATA_ITEM_STACK, ItemStack.of(nbt.getCompound("Knife")));
+            this.entityData.set(DATA_ITEM_STACK, ItemStack.parseOptional(this.registryAccess(), nbt.getCompound("Knife")));
         }
         this.hitTime = nbt.getInt("HitTime");
     }
@@ -191,7 +197,7 @@ public class ThrownKnife extends AbstractArrow {
     public void addAdditionalSaveData(CompoundTag nbt) {
 
         super.addAdditionalSaveData(nbt);
-        nbt.put("Knife", getPickupItem().save(new CompoundTag()));
+        nbt.put("Knife", getPickupItem().save(this.registryAccess()));
         nbt.putInt("HitTime", this.hitTime);
     }
 
