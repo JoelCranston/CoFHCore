@@ -1,14 +1,16 @@
 package cofh.core.client.particle.types;
 
 import cofh.core.client.particle.options.CylindricalParticleOptions;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.network.codec.StreamCodec;
 
 public class CylindricalParticleType extends ParticleType<CylindricalParticleOptions> {
 
     public CylindricalParticleType(boolean overrideLimit) {
 
-        super(overrideLimit, CylindricalParticleOptions.DESERIALIZER);
+        super(overrideLimit);
     }
 
     public CylindricalParticleType() {
@@ -17,9 +19,15 @@ public class CylindricalParticleType extends ParticleType<CylindricalParticleOpt
     }
 
     @Override
-    public Codec<CylindricalParticleOptions> codec() {
+    public MapCodec<CylindricalParticleOptions> codec() {
 
-        return CylindricalParticleOptions.CODEC.apply(this);
+        return CylindricalParticleOptions.cylindricalCodec(this);
+    }
+
+    @Override
+    public StreamCodec<? super ByteBuf, CylindricalParticleOptions> streamCodec() {
+
+        return CylindricalParticleOptions.cylindricalStreamCodec(this);
     }
 
 }

@@ -1,14 +1,16 @@
 package cofh.core.client.particle.types;
 
 import cofh.core.client.particle.options.ColorParticleOptions;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.network.codec.StreamCodec;
 
 public class ColorParticleType extends ParticleType<ColorParticleOptions> {
 
     public ColorParticleType(boolean overrideLimit) {
 
-        super(overrideLimit, ColorParticleOptions.DESERIALIZER);
+        super(overrideLimit);
     }
 
     public ColorParticleType() {
@@ -17,9 +19,15 @@ public class ColorParticleType extends ParticleType<ColorParticleOptions> {
     }
 
     @Override
-    public Codec<ColorParticleOptions> codec() {
+    public MapCodec<ColorParticleOptions> codec() {
 
-        return ColorParticleOptions.CODEC.apply(this);
+        return ColorParticleOptions.codec(this);
+    }
+
+    @Override
+    public StreamCodec<? super ByteBuf, ColorParticleOptions> streamCodec() {
+
+        return ColorParticleOptions.streamCodec(this);
     }
 
 }

@@ -1,14 +1,12 @@
 package cofh.core.client.particle.options;
 
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.network.FriendlyByteBuf;
-
-import javax.annotation.Nonnull;
-import java.util.function.Function;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 public class CylindricalParticleOptions extends ColorParticleOptions {
 
@@ -35,50 +33,30 @@ public class CylindricalParticleOptions extends ColorParticleOptions {
         this(type, 1.0F, 1.0F, 1.0F);
     }
 
-    protected CylindricalParticleOptions(ParticleType<? extends CylindricalParticleOptions> type, StringReader reader) throws CommandSyntaxException {
+    // Named distinctly from ColorParticleOptions#codec/streamCodec - a static method here with the
+    // same erased signature as the superclass's would be a "name clash" (generic return types
+    // aren't substitutable the way an instance-method override would be).
+    public static MapCodec<CylindricalParticleOptions> cylindricalCodec(ParticleType<CylindricalParticleOptions> type) {
 
-        super(type, reader);
-        reader.expect(' ');
-        this.height = (float) reader.readDouble();
+        return RecordCodecBuilder.mapCodec(builder -> builder.group(
+                Codec.FLOAT.fieldOf("size").forGetter(options -> options.size),
+                Codec.FLOAT.fieldOf("duration").forGetter(options -> options.duration),
+                Codec.FLOAT.fieldOf("delay").forGetter(options -> options.delay),
+                Codec.INT.fieldOf("rgba0").forGetter(options -> options.rgba0),
+                Codec.FLOAT.fieldOf("height").forGetter(options -> options.height)
+        ).apply(builder, (size, duration, delay, rgba, height) -> new CylindricalParticleOptions(type, size, duration, delay, rgba, height)));
     }
 
-    @Override
-    public void writeToNetwork(FriendlyByteBuf buf) {
+    public static StreamCodec<? super ByteBuf, CylindricalParticleOptions> cylindricalStreamCodec(ParticleType<CylindricalParticleOptions> type) {
 
-        super.writeToNetwork(buf);
-        buf.writeFloat(height);
+        return StreamCodec.composite(
+                ByteBufCodecs.FLOAT, options -> options.size,
+                ByteBufCodecs.FLOAT, options -> options.duration,
+                ByteBufCodecs.FLOAT, options -> options.delay,
+                ByteBufCodecs.INT, options -> options.rgba0,
+                ByteBufCodecs.FLOAT, options -> options.height,
+                (size, duration, delay, rgba, height) -> new CylindricalParticleOptions(type, size, duration, delay, rgba, height)
+        );
     }
-
-    @Override
-    public String writeToString() {
-
-        return super.writeToString() + ", " + height;
-    }
-
-    public static final Function<ParticleType<CylindricalParticleOptions>, Codec<CylindricalParticleOptions>> CODEC = (type) -> RecordCodecBuilder.create(
-            (builder) -> builder.group(
-                    Codec.FLOAT.fieldOf("size").forGetter((options) -> options.size),
-                    Codec.FLOAT.fieldOf("duration").forGetter((options) -> options.duration),
-                    Codec.FLOAT.fieldOf("delay").forGetter((options) -> options.delay),
-                    Codec.INT.fieldOf("rgba0").forGetter((options) -> options.rgba0),
-                    Codec.FLOAT.fieldOf("height").forGetter((options) -> options.height)
-            ).apply(builder, (size, duration, delay, rgba, height) -> new CylindricalParticleOptions(type, size, duration, delay, rgba, height))
-    );
-    public static final Deserializer<CylindricalParticleOptions> DESERIALIZER = new Deserializer<>() {
-
-        @Override
-        @Nonnull
-        public CylindricalParticleOptions fromCommand(ParticleType<CylindricalParticleOptions> type, StringReader reader) throws CommandSyntaxException {
-
-            return new CylindricalParticleOptions(type, reader);
-        }
-
-        @Override
-        @Nonnull
-        public CylindricalParticleOptions fromNetwork(ParticleType<CylindricalParticleOptions> type, FriendlyByteBuf buf) {
-
-            return new CylindricalParticleOptions(type, buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readInt(), buf.readFloat());
-        }
-    };
 
 }

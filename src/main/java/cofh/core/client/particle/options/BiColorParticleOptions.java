@@ -1,14 +1,12 @@
 package cofh.core.client.particle.options;
 
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.network.FriendlyByteBuf;
-
-import javax.annotation.Nonnull;
-import java.util.function.Function;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 public class BiColorParticleOptions extends ColorParticleOptions {
 
@@ -35,50 +33,29 @@ public class BiColorParticleOptions extends ColorParticleOptions {
         this(type, 1.0F, 1.0F, 0.0F);
     }
 
-    protected BiColorParticleOptions(ParticleType<? extends BiColorParticleOptions> type, StringReader reader) throws CommandSyntaxException {
+    // Named distinctly from ColorParticleOptions#codec/streamCodec - see the same note on
+    // CylindricalParticleOptions for why (static erasure "name clash" across the hierarchy).
+    public static MapCodec<BiColorParticleOptions> biColorCodec(ParticleType<BiColorParticleOptions> type) {
 
-        super(type, reader);
-        reader.expect(' ');
-        this.rgba1 = reader.readInt();
+        return RecordCodecBuilder.mapCodec(builder -> builder.group(
+                Codec.FLOAT.fieldOf("size").forGetter(options -> options.size),
+                Codec.FLOAT.fieldOf("duration").forGetter(options -> options.duration),
+                Codec.FLOAT.fieldOf("delay").forGetter(options -> options.delay),
+                Codec.INT.fieldOf("rgba0").forGetter(options -> options.rgba0),
+                Codec.INT.fieldOf("rgba1").forGetter(options -> options.rgba1)
+        ).apply(builder, (size, duration, delay, rgba0, rgba1) -> new BiColorParticleOptions(type, size, duration, delay, rgba0, rgba1)));
     }
 
-    @Override
-    public void writeToNetwork(FriendlyByteBuf buf) {
+    public static StreamCodec<? super ByteBuf, BiColorParticleOptions> biColorStreamCodec(ParticleType<BiColorParticleOptions> type) {
 
-        super.writeToNetwork(buf);
-        buf.writeInt(rgba1);
+        return StreamCodec.composite(
+                ByteBufCodecs.FLOAT, options -> options.size,
+                ByteBufCodecs.FLOAT, options -> options.duration,
+                ByteBufCodecs.FLOAT, options -> options.delay,
+                ByteBufCodecs.INT, options -> options.rgba0,
+                ByteBufCodecs.INT, options -> options.rgba1,
+                (size, duration, delay, rgba0, rgba1) -> new BiColorParticleOptions(type, size, duration, delay, rgba0, rgba1)
+        );
     }
-
-    @Override
-    public String writeToString() {
-
-        return super.writeToString() + ", " + String.format("0x%08X", rgba1);
-    }
-
-    public static final Function<ParticleType<BiColorParticleOptions>, Codec<BiColorParticleOptions>> CODEC = (type) -> RecordCodecBuilder.create(
-            (builder) -> builder.group(
-                    Codec.FLOAT.fieldOf("size").forGetter((options) -> options.size),
-                    Codec.FLOAT.fieldOf("duration").forGetter((options) -> options.duration),
-                    Codec.FLOAT.fieldOf("delay").forGetter((options) -> options.delay),
-                    Codec.INT.fieldOf("rgba0").forGetter((options) -> options.rgba0),
-                    Codec.INT.fieldOf("rgba1").forGetter((options) -> options.rgba1)
-            ).apply(builder, (size, duration, delay, rgba0, rgba1) -> new BiColorParticleOptions(type, size, duration, delay, rgba0, rgba1))
-    );
-    public static final Deserializer<BiColorParticleOptions> DESERIALIZER = new Deserializer<>() {
-
-        @Override
-        @Nonnull
-        public BiColorParticleOptions fromCommand(ParticleType<BiColorParticleOptions> type, StringReader reader) throws CommandSyntaxException {
-
-            return new BiColorParticleOptions(type, reader);
-        }
-
-        @Override
-        @Nonnull
-        public BiColorParticleOptions fromNetwork(ParticleType<BiColorParticleOptions> type, FriendlyByteBuf buf) {
-
-            return new BiColorParticleOptions(type, buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readInt(), buf.readInt());
-        }
-    };
 
 }

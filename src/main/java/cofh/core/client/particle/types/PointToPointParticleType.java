@@ -1,14 +1,16 @@
 package cofh.core.client.particle.types;
 
 import cofh.core.client.particle.options.BiColorParticleOptions;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.particles.ParticleType;
+import net.minecraft.network.codec.StreamCodec;
 
 public class PointToPointParticleType extends ParticleType<BiColorParticleOptions> {
 
     public PointToPointParticleType(boolean overrideLimit) {
 
-        super(overrideLimit, BiColorParticleOptions.DESERIALIZER);
+        super(overrideLimit);
     }
 
     public PointToPointParticleType() {
@@ -17,9 +19,15 @@ public class PointToPointParticleType extends ParticleType<BiColorParticleOption
     }
 
     @Override
-    public Codec<BiColorParticleOptions> codec() {
+    public MapCodec<BiColorParticleOptions> codec() {
 
-        return BiColorParticleOptions.CODEC.apply(this);
+        return BiColorParticleOptions.biColorCodec(this);
+    }
+
+    @Override
+    public StreamCodec<? super ByteBuf, BiColorParticleOptions> streamCodec() {
+
+        return BiColorParticleOptions.biColorStreamCodec(this);
     }
 
 }

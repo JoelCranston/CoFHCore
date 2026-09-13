@@ -1,11 +1,19 @@
 package cofh.core.client.particle.options;
 
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.network.FriendlyByteBuf;
 
+/**
+ * Shared fields (size/duration/delay) for CoFH's particle options. {@link ParticleOptions} no
+ * longer carries network/command serialization itself upstream - {@code writeToNetwork},
+ * {@code writeToString}, and the {@code Deserializer} inner class were all removed. Each leaf
+ * subclass now owns its own {@code MapCodec} (for {@link ParticleType#codec()}) and
+ * {@code StreamCodec} (for {@link ParticleType#streamCodec()}) built by a static factory that
+ * takes the owning {@link ParticleType}, following vanilla's {@code ColorParticleOption} pattern.
+ * <p>
+ * This base class is never registered as its own leaf {@link ParticleType} (only its subclasses
+ * are), so it has no codec/streamCodec of its own.
+ */
 public class CoFHParticleOptions implements ParticleOptions {
 
     public final ParticleType<? extends CoFHParticleOptions> type;
@@ -23,46 +31,13 @@ public class CoFHParticleOptions implements ParticleOptions {
 
     public CoFHParticleOptions(ParticleType<? extends CoFHParticleOptions> type, float size, float duration) {
 
-        this.type = type;
-        this.size = size;
-        this.duration = duration;
-        this.delay = 0.0F;
-    }
-
-    public CoFHParticleOptions(ParticleType<? extends ColorParticleOptions> type) {
-
-        this(type, 1.0F, 1.0F, 0.0F);
-    }
-
-    protected CoFHParticleOptions(ParticleType<? extends CoFHParticleOptions> type, StringReader reader) throws CommandSyntaxException {
-
-        this.type = type;
-        reader.expect(' ');
-        this.size = (float) reader.readDouble();
-        reader.expect(' ');
-        this.duration = (float) reader.readDouble();
-        reader.expect(' ');
-        this.delay = (float) reader.readDouble();
+        this(type, size, duration, 0.0F);
     }
 
     @Override
     public ParticleType<? extends CoFHParticleOptions> getType() {
 
         return type;
-    }
-
-    @Override
-    public void writeToNetwork(FriendlyByteBuf buf) {
-
-        buf.writeFloat(size);
-        buf.writeFloat(duration);
-        buf.writeFloat(delay);
-    }
-
-    @Override
-    public String writeToString() {
-
-        return size + ", " + duration + ", " + delay;
     }
 
 }

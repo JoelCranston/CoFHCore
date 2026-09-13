@@ -1,15 +1,12 @@
 package cofh.core.client.particle.options;
 
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.particles.ParticleOptions;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.particles.ParticleType;
-import net.minecraft.network.FriendlyByteBuf;
-
-import javax.annotation.Nonnull;
-import java.util.function.Function;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 public class ColorParticleOptions extends CoFHParticleOptions {
 
@@ -36,49 +33,25 @@ public class ColorParticleOptions extends CoFHParticleOptions {
         this(type, 1.0F, 1.0F);
     }
 
-    protected ColorParticleOptions(ParticleType<? extends ColorParticleOptions> type, StringReader reader) throws CommandSyntaxException {
+    public static MapCodec<ColorParticleOptions> codec(ParticleType<ColorParticleOptions> type) {
 
-        super(type, reader);
-        reader.expect(' ');
-        this.rgba0 = reader.readInt();
+        return RecordCodecBuilder.mapCodec(builder -> builder.group(
+                Codec.FLOAT.fieldOf("size").forGetter(options -> options.size),
+                Codec.FLOAT.fieldOf("duration").forGetter(options -> options.duration),
+                Codec.FLOAT.fieldOf("delay").forGetter(options -> options.delay),
+                Codec.INT.fieldOf("rgba0").forGetter(options -> options.rgba0)
+        ).apply(builder, (size, duration, delay, rgba) -> new ColorParticleOptions(type, size, duration, delay, rgba)));
     }
 
-    @Override
-    public void writeToNetwork(FriendlyByteBuf buf) {
+    public static StreamCodec<? super ByteBuf, ColorParticleOptions> streamCodec(ParticleType<ColorParticleOptions> type) {
 
-        super.writeToNetwork(buf);
-        buf.writeInt(rgba0);
+        return StreamCodec.composite(
+                ByteBufCodecs.FLOAT, options -> options.size,
+                ByteBufCodecs.FLOAT, options -> options.duration,
+                ByteBufCodecs.FLOAT, options -> options.delay,
+                ByteBufCodecs.INT, options -> options.rgba0,
+                (size, duration, delay, rgba) -> new ColorParticleOptions(type, size, duration, delay, rgba)
+        );
     }
-
-    @Override
-    public String writeToString() {
-
-        return super.writeToString() + ", " + String.format("0x%08X", rgba0);
-    }
-
-    public static final Function<ParticleType<ColorParticleOptions>, Codec<ColorParticleOptions>> CODEC = (type) -> RecordCodecBuilder.create(
-            (builder) -> builder.group(
-                    Codec.FLOAT.fieldOf("size").forGetter((options) -> options.size),
-                    Codec.FLOAT.fieldOf("duration").forGetter((options) -> options.duration),
-                    Codec.FLOAT.fieldOf("delay").forGetter((options) -> options.delay),
-                    Codec.INT.fieldOf("rgba0").forGetter((options) -> options.rgba0)
-            ).apply(builder, (size, duration, delay, rgba) -> new ColorParticleOptions(type, size, duration, delay, rgba))
-    );
-    public static final ParticleOptions.Deserializer<ColorParticleOptions> DESERIALIZER = new ParticleOptions.Deserializer<>() {
-
-        @Override
-        @Nonnull
-        public ColorParticleOptions fromCommand(ParticleType<ColorParticleOptions> type, StringReader reader) throws CommandSyntaxException {
-
-            return new ColorParticleOptions(type, reader);
-        }
-
-        @Override
-        @Nonnull
-        public ColorParticleOptions fromNetwork(ParticleType<ColorParticleOptions> type, FriendlyByteBuf buf) {
-
-            return new ColorParticleOptions(type, buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readInt());
-        }
-    };
 
 }
