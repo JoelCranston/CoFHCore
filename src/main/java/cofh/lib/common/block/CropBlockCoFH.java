@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -124,13 +123,16 @@ public class CropBlockCoFH extends CropBlock implements IHarvestable {
         }
     }
 
+    // Block#use split upstream into useWithoutItem/useItemOn - this logic never looked at the
+    // held item itself, just which hand, and useWithoutItem carries no hand at all now (there's
+    // no per-hand dispatch left to replicate), so the old MAIN_HAND-only restriction is dropped.
     @Override
-    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level worldIn, BlockPos pos, Player player, BlockHitResult hit) {
 
-        if (handIn == InteractionHand.MAIN_HAND && canHarvest(state)) {
+        if (canHarvest(state)) {
             return harvest(worldIn, pos, state, player, false) ? InteractionResult.SUCCESS : InteractionResult.PASS;
         }
-        return super.use(state, worldIn, pos, player, handIn, hit);
+        return super.useWithoutItem(state, worldIn, pos, player, hit);
     }
 
     // TODO: Revisit; vanilla crop logic effectively overrides

@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
@@ -46,19 +47,29 @@ public class CakeBlockCoFH extends CakeBlock {
         return tall ? SHAPE_BY_BITE_TALL[state.getValue(BITES)] : SHAPE_BY_BITE[state.getValue(BITES)];
     }
 
+    // Block#use (item-independent - eating a cake slice doesn't care what's in your hand) split
+    // upstream into useWithoutItem/useItemOn; both are overridden here since a held item still
+    // routes through useItemOn first (falling back to useWithoutItem only on
+    // PASS_TO_DEFAULT_BLOCK_INTERACTION), and the old logic's CONSUME-on-empty-hand branch needs
+    // the stack to check emptiness.
     @Override
-    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level worldIn, BlockPos pos, Player player, BlockHitResult hit) {
+
+        return this.eatPiece(worldIn, pos, state, player);
+    }
+
+    @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 
         if (worldIn.isClientSide) {
-            ItemStack stack = player.getItemInHand(handIn);
             if (this.eatPiece(worldIn, pos, state, player).consumesAction()) {
-                return InteractionResult.SUCCESS;
+                return ItemInteractionResult.SUCCESS;
             }
             if (stack.isEmpty()) {
-                return InteractionResult.CONSUME;
+                return ItemInteractionResult.CONSUME;
             }
         }
-        return this.eatPiece(worldIn, pos, state, player);
+        return this.eatPiece(worldIn, pos, state, player) == InteractionResult.SUCCESS ? ItemInteractionResult.SUCCESS : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     protected InteractionResult eatPiece(Level world, BlockPos pos, BlockState state, Player player) {

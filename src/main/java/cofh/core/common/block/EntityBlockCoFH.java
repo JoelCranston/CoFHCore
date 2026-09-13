@@ -13,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -60,41 +61,54 @@ public class EntityBlockCoFH extends Block implements EntityBlock, IDismantleabl
         return ITickableTile.createTicker(level, actualType, blockEntityType.get(), tileClass);
     }
 
+    // Block#use split upstream into useWithoutItem(no hand/stack)/useItemOn(has both). This
+    // method's logic is a mix of both (the wrench check needs the held item; everything else
+    // doesn't), and useItemOn is tried first with a real fallback to useWithoutItem only on
+    // PASS_TO_DEFAULT_BLOCK_INTERACTION - so all of it lives in useItemOn (which now gets the
+    // stack directly instead of re-fetching via player.getItemInHand(handIn)), and
+    // useWithoutItem delegates into it with an empty stack (the wrench check naturally no-ops on
+    // ItemStack.EMPTY) so an empty-handed right click still gets identical behavior.
     @Override
-    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 
         if (Utils.isClientWorld(worldIn)) {
-            return InteractionResult.SUCCESS;
+            return ItemInteractionResult.SUCCESS;
         }
         BlockEntity tile = worldIn.getBlockEntity(pos);
         if (tile instanceof BlockEntityCoFH cofhTile && !tile.isRemoved()) {
             if (!cofhTile.canPlayerChange(player) && SecurityHelper.hasSecurity(tile)) {
                 ProxyUtils.setOverlayMessage(player, Component.translatable("info.cofh.secure_warning", SecurityHelper.getOwnerName(tile)));
-                return InteractionResult.PASS;
+                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
             }
-            if (Utils.isWrench(player.getItemInHand(handIn))) {
+            if (Utils.isWrench(stack)) {
                 if (player.isSecondaryUseActive()) {
                     if (canDismantle(worldIn, pos, state, player)) {
                         dismantleBlock(worldIn, pos, state, hit, player, returnDismantleDrops());
-                        return InteractionResult.SUCCESS;
+                        return ItemInteractionResult.SUCCESS;
                     }
                 } else {
                     BlockState rotState = rotate(state, worldIn, pos, Rotation.CLOCKWISE_90);
                     if (rotState != state) {
                         worldIn.setBlockAndUpdate(pos, rotState);
-                        return InteractionResult.SUCCESS;
+                        return ItemInteractionResult.SUCCESS;
                     }
                 }
             }
             if (onBlockActivatedDelegate(worldIn, pos, state, player, handIn, hit)) {
-                return InteractionResult.SUCCESS;
+                return ItemInteractionResult.SUCCESS;
             }
             if (cofhTile.canOpenGui()) {
                 player.openMenu((MenuProvider) tile, tile.getBlockPos());
-                return InteractionResult.SUCCESS;
+                return ItemInteractionResult.SUCCESS;
             }
         }
-        return InteractionResult.PASS;
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level worldIn, BlockPos pos, Player player, BlockHitResult hit) {
+
+        return useItemOn(ItemStack.EMPTY, state, worldIn, pos, player, InteractionHand.MAIN_HAND, hit).result();
     }
 
     protected boolean onBlockActivatedDelegate(Level world, BlockPos pos, BlockState state, Player player, InteractionHand hand, BlockHitResult result) {

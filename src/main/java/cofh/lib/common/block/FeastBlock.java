@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
@@ -98,19 +99,27 @@ public class FeastBlock extends DirectionalBlock4Way {
         }
     }
 
+    // Same useWithoutItem/useItemOn split as CakeBlockCoFH - and note this deliberately does NOT
+    // fall back to DirectionalBlock4Way's wrench-rotate useItemOn (it fully shadows it), matching
+    // the old use() override here which unconditionally replaced the parent's use() too.
     @Override
-    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level worldIn, BlockPos pos, Player player, BlockHitResult hit) {
+
+        return this.serve(worldIn, pos, state, player);
+    }
+
+    @Override
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 
         if (worldIn.isClientSide) {
-            ItemStack stack = player.getItemInHand(handIn);
             if (this.serve(worldIn, pos, state, player).consumesAction()) {
-                return InteractionResult.SUCCESS;
+                return ItemInteractionResult.SUCCESS;
             }
             if (stack.isEmpty()) {
-                return InteractionResult.CONSUME;
+                return ItemInteractionResult.CONSUME;
             }
         }
-        return this.serve(worldIn, pos, state, player);
+        return this.serve(worldIn, pos, state, player) == InteractionResult.SUCCESS ? ItemInteractionResult.SUCCESS : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     @Override

@@ -4,7 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.ColorRGBA;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -36,13 +36,14 @@ public class GunpowderBlock extends ColoredFallingBlock {
         return false;
     }
 
+    // Item-dependent (checks the held item for flint & steel / fire charge) - moves wholesale to
+    // useItemOn, which now gets the stack directly.
     @Override
-    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 
-        ItemStack stack = player.getItemInHand(handIn);
         Item item = stack.getItem();
         if (item != Items.FLINT_AND_STEEL && item != Items.FIRE_CHARGE) {
-            return super.use(state, worldIn, pos, player, handIn, hit);
+            return super.useItemOn(stack, state, worldIn, pos, player, handIn, hit);
         } else {
             onCaughtFire(state, worldIn, pos, hit.getDirection(), player);
             worldIn.setBlock(pos, Blocks.AIR.defaultBlockState(), 11);
@@ -53,7 +54,7 @@ public class GunpowderBlock extends ColoredFallingBlock {
                     stack.shrink(1);
                 }
             }
-            return InteractionResult.SUCCESS;
+            return ItemInteractionResult.SUCCESS;
         }
     }
 
