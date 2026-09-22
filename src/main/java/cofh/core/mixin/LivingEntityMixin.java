@@ -34,10 +34,10 @@ public abstract class LivingEntityMixin {
 
         LivingEntity living = (LivingEntity) (Object) this;
 
-        if (effectInstance.getEffect() == CHILLED.get() && living.hasEffect(COLD_RESISTANCE.get())) {
+        if (effectInstance.getEffect() == CHILLED && living.hasEffect(COLD_RESISTANCE)) {
             callback.setReturnValue(false);
         }
-        if (effectInstance.getEffect() == SHOCKED.get() && living.hasEffect(LIGHTNING_RESISTANCE.get())) {
+        if (effectInstance.getEffect() == SHOCKED && living.hasEffect(LIGHTNING_RESISTANCE)) {
             callback.setReturnValue(false);
         }
     }
@@ -51,7 +51,7 @@ public abstract class LivingEntityMixin {
 
         LivingEntity living = (LivingEntity) (Object) this;
 
-        if (living.hasEffect(COLD_RESISTANCE.get())) {
+        if (living.hasEffect(COLD_RESISTANCE)) {
             callback.setReturnValue(false);
         }
     }
@@ -66,19 +66,19 @@ public abstract class LivingEntityMixin {
         LivingEntity living = (LivingEntity) (Object) this;
 
         if (source.is(IS_FIRE)) {
-            living.removeEffect(CHILLED.get());
+            living.removeEffect(CHILLED);
         }
         if (!source.is(BYPASSES_ENCHANTMENTS)) {
-            if (source.is(IS_EXPLOSION) && living.hasEffect(EXPLOSION_RESISTANCE.get())) {
+            if (source.is(IS_EXPLOSION) && living.hasEffect(EXPLOSION_RESISTANCE)) {
                 callback.setReturnValue(false);
             }
-            if (source.is(IS_MAGIC) && living.hasEffect(MAGIC_RESISTANCE.get())) {
+            if (source.is(IS_MAGIC) && living.hasEffect(MAGIC_RESISTANCE)) {
                 callback.setReturnValue(false);
             }
-            if (source == living.level.damageSources().freeze() && living.hasEffect(COLD_RESISTANCE.get())) {
+            if (source == living.level.damageSources().freeze() && living.hasEffect(COLD_RESISTANCE)) {
                 callback.setReturnValue(false);
             }
-            if (source == living.level.damageSources().lightningBolt() && living.hasEffect(LIGHTNING_RESISTANCE.get())) {
+            if (source == living.level.damageSources().lightningBolt() && living.hasEffect(LIGHTNING_RESISTANCE)) {
                 callback.setReturnValue(false);
             }
         }
@@ -92,7 +92,7 @@ public abstract class LivingEntityMixin {
     private void trueInvisibility(CallbackInfo callback) {
 
         LivingEntity living = (LivingEntity) (Object) this;
-        if (living.hasEffect(TRUE_INVISIBILITY.get())) {
+        if (living.hasEffect(TRUE_INVISIBILITY)) {
             living.removeEffectParticles();
             living.setInvisible(true);
             callback.cancel();

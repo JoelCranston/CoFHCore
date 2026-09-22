@@ -3,7 +3,9 @@ package cofh.core.common.network.packet.client;
 import cofh.core.common.network.data.client.EffectAddedPayload;
 import cofh.core.util.ProxyUtils;
 import cofh.lib.util.Utils;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -29,7 +31,7 @@ public class EffectAddedPacket {
 
         context.enqueueWork(() -> {
             int id = payload.entityId();
-            MobEffect effectType = BuiltInRegistries.MOB_EFFECT.get(payload.effect());
+            Holder<MobEffect> effectType = BuiltInRegistries.MOB_EFFECT.getHolder(payload.effect()).orElse(null);
             int effectDur = payload.duration();
 
             MobEffectInstance effect = effectType != null ? new MobEffectInstance(effectType, effectDur) : null;
@@ -53,7 +55,7 @@ public class EffectAddedPacket {
         if (entity == null || effect == null) {
             return;
         }
-        Utils.sendNear(entity, new EffectAddedPayload(entity.getId(), getRegistryName(effect.getEffect()), effect.getDuration()));
+        Utils.sendNear(entity, new EffectAddedPayload(entity.getId(), effect.getEffect().unwrapKey().map(ResourceKey::location).orElse(null), effect.getDuration()));
 
     }
 
@@ -63,7 +65,7 @@ public class EffectAddedPacket {
             return;
         }
         if (player instanceof ServerPlayer serverPlayer) {
-            PacketDistributor.sendToPlayer(serverPlayer, new EffectAddedPayload(entity.getId(), getRegistryName(effect.getEffect()), effect.getDuration()));
+            PacketDistributor.sendToPlayer(serverPlayer, new EffectAddedPayload(entity.getId(), effect.getEffect().unwrapKey().map(ResourceKey::location).orElse(null), effect.getDuration()));
         }
     }
 

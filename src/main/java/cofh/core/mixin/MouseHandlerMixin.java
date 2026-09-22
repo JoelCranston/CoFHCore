@@ -31,7 +31,7 @@ public abstract class MouseHandlerMixin {
         if (player == null) {
             return sensitivity;
         }
-        MobEffectInstance effect = player.getEffect(CHILLED.get());
+        MobEffectInstance effect = player.getEffect(CHILLED);
         if (effect == null) {
             return sensitivity;
         }

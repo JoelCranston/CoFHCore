@@ -65,7 +65,7 @@ public class CoreCommonEvents {
         }
         if (event.getDistance() >= 3.0) {
             LivingEntity living = event.getEntity();
-            if (living.hasEffect(SLIMED.get())) {
+            if (living.hasEffect(SLIMED)) {
                 Vec3 motion = living.getDeltaMovement();
                 living.setDeltaMovement(motion.x, 0.08 * Math.sqrt(event.getDistance() / 0.08), motion.z);
                 living.hurtMarked = true;

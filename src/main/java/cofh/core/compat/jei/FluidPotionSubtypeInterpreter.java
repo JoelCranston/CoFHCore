@@ -2,13 +2,12 @@ package cofh.core.compat.jei;
 
 import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
 import mezz.jei.api.ingredients.subtypes.UidContext;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.neoforged.neoforge.fluids.FluidStack;
 
-import java.util.List;
 
 public class FluidPotionSubtypeInterpreter implements IIngredientSubtypeInterpreter<FluidStack> {
 
@@ -21,20 +20,14 @@ public class FluidPotionSubtypeInterpreter implements IIngredientSubtypeInterpre
     @Override
     public String apply(FluidStack ingredient, UidContext context) {
 
-        if (!ingredient.hasTag()) {
+        // The potion is one component now, and its getAllEffects() already merges the potion's
+        // own effects with any custom ones - no need to read the two halves separately.
+        PotionContents contents = ingredient.get(DataComponents.POTION_CONTENTS);
+        if (contents == null) {
             return IIngredientSubtypeInterpreter.NONE;
         }
-        CompoundTag tag = ingredient.getOrCreateTag();
-        Potion potionType = PotionUtils.getPotion(tag);
-        String potionTypeString = potionType.getName("");
-
-        StringBuilder stringBuilder = new StringBuilder(potionTypeString);
-        List<MobEffectInstance> effects = PotionUtils.getCustomEffects(tag);
-
-        for (MobEffectInstance effect : potionType.getEffects()) {
-            stringBuilder.append(";").append(effect);
-        }
-        for (MobEffectInstance effect : effects) {
+        StringBuilder stringBuilder = new StringBuilder(Potion.getName(contents.potion(), ""));
+        for (MobEffectInstance effect : contents.getAllEffects()) {
             stringBuilder.append(";").append(effect);
         }
         return stringBuilder.toString();

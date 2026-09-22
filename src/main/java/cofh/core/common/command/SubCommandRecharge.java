@@ -32,7 +32,7 @@ public class SubCommandRecharge {
     private static int chargeEntities(CommandSourceStack source, Collection<? extends ServerPlayer> targets) {
 
         for (ServerPlayer entity : targets) {
-            entity.addEffect(new MobEffectInstance(SUPERCHARGE.get(), 1200, 0, false, false));
+            entity.addEffect(new MobEffectInstance(SUPERCHARGE, 1200, 0, false, false));
         }
         if (targets.size() == 1) {
             source.sendSuccess(() -> Component.translatable("commands.cofh.recharge.success.single", targets.iterator().next().getDisplayName()), true);

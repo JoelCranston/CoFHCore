@@ -21,7 +21,7 @@ public class ChilledMobEffect extends CustomParticleMobEffect {
     }
 
     @Override
-    public void applyEffectTick(LivingEntity living, int amplifier) {
+    public boolean applyEffectTick(LivingEntity living, int amplifier) {
 
         super.applyEffectTick(living, amplifier);
 
@@ -29,6 +29,7 @@ public class ChilledMobEffect extends CustomParticleMobEffect {
             living.isInPowderSnow = true;
             living.setTicksFrozen(Math.min(living.getTicksRequiredToFreeze(), living.getTicksFrozen() + 2 + amplifier * 2));
         }
+        return true;
     }
 
     @Override
@@ -46,16 +47,16 @@ public class ChilledMobEffect extends CustomParticleMobEffect {
     public static void applyChilled(LivingEntity target, float power, RandomGenerator rand) {
 
         int add = MathHelper.round(power * 8);
-        MobEffectInstance instance = target.getEffect(CHILLED.get());
+        MobEffectInstance instance = target.getEffect(CHILLED);
         if (instance == null) {
-            target.addEffect(new MobEffectInstance(CHILLED.get(), add, 0, true, false, true));
+            target.addEffect(new MobEffectInstance(CHILLED, add, 0, true, false, true));
         } else {
             int duration = instance.getDuration();
             int amplifier = instance.getAmplifier();
             if (amplifier < 5 && rand.nextFloat(250) < duration) {
-                target.addEffect(new MobEffectInstance(CHILLED.get(), add, amplifier + 1, true, false, true));
+                target.addEffect(new MobEffectInstance(CHILLED, add, amplifier + 1, true, false, true));
             } else if (duration < 250) {
-                target.addEffect(new MobEffectInstance(CHILLED.get(), duration + add, amplifier, true, false, true));
+                target.addEffect(new MobEffectInstance(CHILLED, duration + add, amplifier, true, false, true));
             }
         }
     }

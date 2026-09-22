@@ -19,7 +19,7 @@ public class EnergyChargeMobEffect extends MobEffectCoFH {
     }
 
     @Override
-    public void applyEffectTick(LivingEntity entityLivingBaseIn, int amplifier) {
+    public boolean applyEffectTick(LivingEntity entityLivingBaseIn, int amplifier) {
 
         if (entityLivingBaseIn instanceof ServerPlayer player) {
 
@@ -31,6 +31,7 @@ public class EnergyChargeMobEffect extends MobEffectCoFH {
                 chargeRedstoneFlux(player, amount);
             }
         }
+        return true;
     }
 
     // region HELPERS

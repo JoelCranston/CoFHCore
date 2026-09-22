@@ -25,7 +25,7 @@ public class LoveMobEffect extends MobEffectCoFH {
     }
 
     @Override
-    public void applyEffectTick(LivingEntity entityLivingBaseIn, int amplifier) {
+    public boolean applyEffectTick(LivingEntity entityLivingBaseIn, int amplifier) {
 
         // TODO: Revisit if potion logic ever changes. Instant potions don't need this.
         //        Level level = entityLivingBaseIn.world;
@@ -34,6 +34,7 @@ public class LoveMobEffect extends MobEffectCoFH {
         //                setLoveFlag(null, (AnimalEntity) entityLivingBaseIn);
         //            }
         //        }
+        return true;
     }
 
     @Override

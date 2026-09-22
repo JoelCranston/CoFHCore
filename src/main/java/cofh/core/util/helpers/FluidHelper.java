@@ -6,6 +6,8 @@ import cofh.lib.init.tags.FluidTagsCoFH;
 import cofh.lib.util.helpers.BlockHelper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -17,7 +19,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -37,6 +39,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -67,7 +70,7 @@ public final class FluidHelper {
 
     public static int fluidHashcode(FluidStack stack) {
 
-        return stack.getTag() != null ? stack.getFluid().hashCode() + 31 * stack.getTag().hashCode() : stack.getFluid().hashCode();
+        return FluidStack.hashFluidAndComponents(stack);
     }
 
     // region COMPARISON
@@ -414,19 +417,25 @@ public final class FluidHelper {
     // endregion
 
     // region POTION HELPERS
+    // A potion in a fluid is the POTION_CONTENTS component now, same as on an item stack -
+    // FluidStack is a DataComponentHolder too since 1.20.5. There is no Potions.EMPTY any more;
+    // "no potion" is an empty Optional on the contents.
     public static boolean hasPotionTag(FluidStack stack) {
 
-        return !stack.isEmpty() && stack.getTag() != null && stack.getTag().contains(TAG_POTION);
+        return !stack.isEmpty() && stack.has(DataComponents.POTION_CONTENTS);
     }
 
-    public static Potion getPotionFromFluid(FluidStack fluid) {
+    public static PotionContents getPotionContents(FluidStack fluid) {
 
-        return fluid.getFluid() == net.minecraft.world.level.material.Fluids.WATER ? Potions.WATER : getPotionFromFluidTag(fluid.getTag());
+        if (fluid.getFluid() == net.minecraft.world.level.material.Fluids.WATER) {
+            return new PotionContents(Potions.WATER);
+        }
+        return fluid.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
     }
 
-    public static Potion getPotionFromFluidTag(@Nullable CompoundTag tag) {
+    public static Optional<Holder<Potion>> getPotionFromFluid(FluidStack fluid) {
 
-        return tag == null || !tag.contains(TAG_POTION) ? Potions.EMPTY : Potion.byName(tag.getString(TAG_POTION));
+        return getPotionContents(fluid).potion();
     }
 
     public static void addPotionTooltipStrings(FluidStack stack, List<Component> list) {
@@ -446,12 +455,12 @@ public final class FluidHelper {
         if (stack.isEmpty()) {
             return;
         }
-        PotionUtils.addPotionTooltip(PotionUtils.getAllEffects(stack.getTag()), lores, durationFactor, 20.F);
+        PotionContents.addPotionTooltip(getPotionContents(stack).getAllEffects(), lores::add, durationFactor, 20.F);
     }
 
     public static void addPotionTooltip(List<MobEffectInstance> list, List<Component> lores, float durationFactor) {
 
-        PotionUtils.addPotionTooltip(list, lores, durationFactor, 20.F);
+        PotionContents.addPotionTooltip(list, lores::add, durationFactor, 20.F);
     }
 
     //    public static void addPotionTooltip(List<MobEffectInstance> list, List<Component> lores, float durationFactor) {

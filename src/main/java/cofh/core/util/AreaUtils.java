@@ -51,7 +51,7 @@ public class AreaUtils {
             target.setSecondsOnFire(duration / 20);
         }
         if (target instanceof LivingEntity living) {
-            living.removeEffect(CHILLED.get());
+            living.removeEffect(CHILLED);
         }
     };
 
@@ -61,21 +61,21 @@ public class AreaUtils {
             target.setRemainingFireTicks(0);
         }
         if (target instanceof LivingEntity living) {
-            living.addEffect(new MobEffectInstance(CHILLED.get(), duration, power));
+            living.addEffect(new MobEffectInstance(CHILLED, duration, power));
         }
     };
 
     public static final IEffectApplier SUNDER_ENTITIES = (target, duration, power, source) -> {
 
         if (target instanceof LivingEntity living) {
-            living.addEffect(new MobEffectInstance(SUNDERED.get(), duration, power));
+            living.addEffect(new MobEffectInstance(SUNDERED, duration, power));
         }
     };
 
     public static final IEffectApplier SHOCK_ENTITIES = (target, duration, power, source) -> {
 
-        if (target instanceof LivingEntity living && !living.hasEffect(LIGHTNING_RESISTANCE.get())) {
-            living.addEffect(new MobEffectInstance(SHOCKED.get(), duration, power));
+        if (target instanceof LivingEntity living && !living.hasEffect(LIGHTNING_RESISTANCE)) {
+            living.addEffect(new MobEffectInstance(SHOCKED, duration, power));
         }
     };
 
@@ -263,7 +263,7 @@ public class AreaUtils {
 
         if (target instanceof EnderMan || target instanceof Endermite) {
             LivingEntity living = (LivingEntity) target;
-            living.addEffect(new MobEffectInstance(ENDERFERENCE.get(), duration, power));
+            living.addEffect(new MobEffectInstance(ENDERFERENCE, duration, power));
             living.hurt(living.level.damageSources().indirectMagic(source instanceof LivingEntity ? source : null, null), 4.0F);
         }
     };

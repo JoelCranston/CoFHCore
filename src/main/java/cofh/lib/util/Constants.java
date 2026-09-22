@@ -72,23 +72,27 @@ public class Constants {
 
     public static final UUID EMPTY_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
-    public static final UUID UUID_ARMOR_TOUGHNESS = UUID.fromString("D1ADBCE5-95CE-470C-BF99-6C59843084A2");
-    public static final UUID UUID_WEAPON_KNOCKBACK = UUID.fromString("D5A16EFA-3B80-11EC-8D3D-0242AC130003");
-    public static final UUID UUID_WEAPON_RANGE = UUID.fromString("DCED55C6-2D54-405A-B77B-30024694ABAB");
-    public static final UUID UUID_TOOL_REACH = UUID.fromString("DAE66BD6-BAAE-4702-9F9F-9327C3BB6581");
-    public static final UUID UUID_DUAL_WIELD_ATTACK_SPEED = UUID.fromString("173E4578-9E79-4197-AF3A-A00AB3C5D545");
+    // 1.21: an AttributeModifier is identified by a ResourceLocation, not a UUID plus a display
+    // name (AttributeInstance#getModifier/removeModifier/hasModifier all take the id). The old
+    // UUIDs are dropped - they identified nothing else - and each modifier gets a stable
+    // cofh_core: id instead. Names kept so dependent repos need no rename.
+    public static final ResourceLocation UUID_ARMOR_TOUGHNESS = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "armor_toughness");
+    public static final ResourceLocation UUID_WEAPON_KNOCKBACK = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "weapon_knockback");
+    public static final ResourceLocation UUID_WEAPON_RANGE = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "weapon_range");
+    public static final ResourceLocation UUID_TOOL_REACH = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "tool_reach");
+    public static final ResourceLocation UUID_DUAL_WIELD_ATTACK_SPEED = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "dual_wield_attack_speed");
 
-    public static final UUID UUID_EFFECT_CHILLED_MOVEMENT_SPEED = UUID.fromString("D99513AE-6F0E-4987-82DE-80DCBAF058BC");
-    public static final UUID UUID_EFFECT_CHILLED_ATTACK_SPEED = UUID.fromString("DF93E7E2-5056-49FA-B425-0D8C46902105");
+    public static final ResourceLocation UUID_EFFECT_CHILLED_MOVEMENT_SPEED = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "effect_chilled_movement_speed");
+    public static final ResourceLocation UUID_EFFECT_CHILLED_ATTACK_SPEED = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "effect_chilled_attack_speed");
 
-    public static final UUID UUID_EFFECT_SHOCKED_ATTACK_DAMAGE = UUID.fromString("DD252988-17CC-4352-9EFF-88E11E925748");
-    public static final UUID UUID_EFFECT_SUNDERED_ARMOR = UUID.fromString("D01654D3-EB8B-40AB-BB2B-1E8EE3E2E694");
-    public static final UUID UUID_EFFECT_SUNDERED_ARMOR_TOUGHNESS = UUID.fromString("D415470F-AE7E-4986-8034-679CFC3128CC");
+    public static final ResourceLocation UUID_EFFECT_SHOCKED_ATTACK_DAMAGE = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "effect_shocked_attack_damage");
+    public static final ResourceLocation UUID_EFFECT_SUNDERED_ARMOR = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "effect_sundered_armor");
+    public static final ResourceLocation UUID_EFFECT_SUNDERED_ARMOR_TOUGHNESS = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "effect_sundered_armor_toughness");
 
-    public static final UUID UUID_ENCH_BULWARK_KNOCKBACK_RESISTANCE = UUID.fromString("DA9976EC-C764-4450-B5AA-1B11B10143E2");
-    public static final UUID UUID_ENCH_PHALANX_MOVEMENT_SPEED = UUID.fromString("DBFFDB74-4607-4C2E-9573-A14D6A73397A");
-    public static final UUID UUID_ENCH_REACH_DISTANCE = UUID.fromString("D7476206-4A89-4522-9D1D-9BB34076FFDA");
-    public static final UUID UUID_ENCH_VITALITY_HEALTH = UUID.fromString("D9239D8A-AC3A-4A0D-8834-D50A80DFEE2B");
+    public static final ResourceLocation UUID_ENCH_BULWARK_KNOCKBACK_RESISTANCE = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "ench_bulwark_knockback_resistance");
+    public static final ResourceLocation UUID_ENCH_PHALANX_MOVEMENT_SPEED = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "ench_phalanx_movement_speed");
+    public static final ResourceLocation UUID_ENCH_REACH_DISTANCE = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "ench_reach_distance");
+    public static final ResourceLocation UUID_ENCH_VITALITY_HEALTH = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "ench_vitality_health");
 
     public static final int RGB_DURABILITY_FLUX = 0xD01010;
     public static final int RGB_DURABILITY_WATER = 0x4060FF;

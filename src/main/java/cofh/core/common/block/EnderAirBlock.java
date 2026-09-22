@@ -69,7 +69,7 @@ public class EnderAirBlock extends AirBlock implements EntityBlock {
         if (!worldIn.getBlockState(randPos).isSolid()) {
             if (entityIn instanceof LivingEntity) {
                 if (Utils.teleportEntityTo(entityIn, randPos)) {
-                    ((LivingEntity) entityIn).addEffect(new MobEffectInstance(ENDERFERENCE.get(), duration, 0, false, false));
+                    ((LivingEntity) entityIn).addEffect(new MobEffectInstance(ENDERFERENCE, duration, 0, false, false));
                 }
             } else if (worldIn.getGameTime() % duration == 0) {
                 entityIn.setPos(randPos.getX(), randPos.getY(), randPos.getZ());

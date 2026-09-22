@@ -10,7 +10,7 @@ import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.crafting.IShapedRecipe;
@@ -35,7 +35,7 @@ public class ShapedPotionNBTRecipe implements CraftingRecipe, IShapedRecipe<Craf
         for (int i = 0; i < inv.getContainerSize(); ++i) {
             ItemStack stack = inv.getItem(i);
             if (stack.getItem() == Items.POTION) {
-                if (!PotionUtils.getMobEffects(stack).isEmpty()) {
+                if (stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).hasEffects()) {
                     potionItem = true;
                     break;
                 }

@@ -20,9 +20,10 @@ public class PanaceaMobEffect extends MobEffectCoFH {
     }
 
     @Override
-    public void applyEffectTick(LivingEntity entityLivingBaseIn, int amplifier) {
+    public boolean applyEffectTick(LivingEntity entityLivingBaseIn, int amplifier) {
 
         clearHarmfulEffects(entityLivingBaseIn);
+        return true;
     }
 
     @Override
@@ -41,7 +42,7 @@ public class PanaceaMobEffect extends MobEffectCoFH {
 
         while (iterator.hasNext()) {
             MobEffectInstance effect = iterator.next();
-            if (!effect.isAmbient() && effect.getEffect().getCategory() == MobEffectCategory.HARMFUL && !NeoForge.EVENT_BUS.post(new MobEffectEvent.Remove(entity, effect, null)).isCanceled()) {
+            if (!effect.isAmbient() && effect.getEffect().value().getCategory() == MobEffectCategory.HARMFUL && !NeoForge.EVENT_BUS.post(new MobEffectEvent.Remove(entity, effect, null)).isCanceled()) {
                 entity.onEffectRemoved(effect);
                 iterator.remove();
             }

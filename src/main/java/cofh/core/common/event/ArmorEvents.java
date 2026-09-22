@@ -188,8 +188,8 @@ public class ArmorEvents {
         HAZARD_EFFECTS.add(POISON);
         HAZARD_EFFECTS.add(WITHER);
 
-        HAZARD_EFFECTS.add(CHILLED.get());
-        HAZARD_EFFECTS.add(SHOCKED.get());
+        HAZARD_EFFECTS.add(CHILLED);
+        HAZARD_EFFECTS.add(SHOCKED);
     }
 
 }

@@ -25,9 +25,10 @@ public class AmplificationMobEffect extends MobEffectCoFH {
     }
 
     @Override
-    public void applyEffectTick(LivingEntity entityLivingBaseIn, int amplifier) {
+    public boolean applyEffectTick(LivingEntity entityLivingBaseIn, int amplifier) {
 
         // TODO: Revisit if potion logic ever changes. Instant potions don't need this.
+        return true;
     }
 
     @Override

@@ -249,7 +249,7 @@ public class CoreClientEvents {
     public static <T extends LivingEntity, M extends EntityModel<T>> void handleTrueInvisibility(RenderLivingEvent.Pre<T, M> event) {
 
         LivingEntity entity = event.getEntity();
-        if (entity.hasEffect(TRUE_INVISIBILITY.get()) && entity.isInvisible()) {
+        if (entity.hasEffect(TRUE_INVISIBILITY) && entity.isInvisible()) {
             event.setCanceled(true);
         }
     }
@@ -258,7 +258,7 @@ public class CoreClientEvents {
     public static <T extends LivingEntity, M extends EntityModel<T>> void handleTrueInvisibility(RenderHandEvent event) {
 
         Player player = Minecraft.getInstance().player;
-        if (player != null && player.hasEffect(TRUE_INVISIBILITY.get()) && player.isInvisible()) {
+        if (player != null && player.hasEffect(TRUE_INVISIBILITY) && player.isInvisible()) {
             event.setCanceled(true);
         }
     }

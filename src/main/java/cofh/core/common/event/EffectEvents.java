@@ -6,7 +6,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.alchemy.PotionUtils;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -15,7 +14,6 @@ import net.neoforged.neoforge.event.entity.EntityStruckByLightningEvent;
 import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
-import net.neoforged.neoforge.event.entity.living.PotionColorCalculationEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerXpEvent;
 
@@ -40,7 +38,7 @@ public class EffectEvents {
             return;
         }
         LivingEntity entity = event.getEntityLiving();
-        if (entity.hasEffect(ENDERFERENCE.get())) {
+        if (entity.hasEffect(ENDERFERENCE)) {
             event.setCanceled(true);
         }
     }
@@ -52,7 +50,7 @@ public class EffectEvents {
             return;
         }
         LivingEntity entity = event.getEntityLiving();
-        if (entity.hasEffect(ENDERFERENCE.get())) {
+        if (entity.hasEffect(ENDERFERENCE)) {
             event.setCanceled(true);
         }
     }
@@ -64,7 +62,7 @@ public class EffectEvents {
             return;
         }
         LivingEntity entity = event.getPlayer();
-        if (entity.hasEffect(ENDERFERENCE.get())) {
+        if (entity.hasEffect(ENDERFERENCE)) {
             event.setCanceled(true);
         }
     }
@@ -77,31 +75,18 @@ public class EffectEvents {
         }
         Entity entity = event.getEntity();
         if (entity instanceof LivingEntity living) {
-            if (living.hasEffect(LIGHTNING_RESISTANCE.get())) {
+            if (living.hasEffect(LIGHTNING_RESISTANCE)) {
                 event.setCanceled(true);
             } else {
-                living.addEffect(new MobEffectInstance(SHOCKED.get(), 100, 0));
+                living.addEffect(new MobEffectInstance(SHOCKED, 100, 0));
             }
         }
     }
 
-    @SubscribeEvent (priority = EventPriority.HIGH)
-    public static void handlePotionColorEvent(PotionColorCalculationEvent event) {
-
-        Collection<MobEffectInstance> effects = event.getEffects();
-        if (effects.isEmpty()) {
-            return;
-        }
-        Predicate<MobEffectInstance> hasCustomParticle = effect -> effect.getEffect() instanceof CustomParticleMobEffect;
-        if (effects.stream().anyMatch(hasCustomParticle)) {
-            List<MobEffectInstance> nonCustom = effects.stream().filter(hasCustomParticle.negate()).toList();
-            if (nonCustom.isEmpty()) {
-                event.shouldHideParticles(true);
-            } else {
-                event.setColor(PotionUtils.getColor(nonCustom));
-            }
-        }
-    }
+    // handlePotionColorEvent is gone: NeoForge removed PotionColorCalculationEvent in 21.0.
+    // Its job - keeping CoFH's self-rendering effects out of the vanilla swirl colour and
+    // hiding the swirl when they are the only effects present - is now done per effect by
+    // CustomParticleMobEffect#createParticleOptions returning null.
 
     @SubscribeEvent (priority = EventPriority.LOWEST)
     public static void handlePotionAddEvent(MobEffectEvent.Added event) {
@@ -158,7 +143,7 @@ public class EffectEvents {
     public static void handleTargetChangeEvent(LivingEvent.LivingVisibilityEvent event) {
 
         LivingEntity entity = event.getEntity();
-        if (entity.hasEffect(TRUE_INVISIBILITY.get())) {
+        if (entity.hasEffect(TRUE_INVISIBILITY)) {
             float armor = Math.max(entity.getArmorCoverPercentage(), 0.1F) * 0.7F;
             event.modifyVisibility(0.07F / armor);
         }
@@ -172,7 +157,7 @@ public class EffectEvents {
         }
         Player player = event.getEntity();
 
-        MobEffectInstance clarityEffect = player.getEffect(CLARITY.get());
+        MobEffectInstance clarityEffect = player.getEffect(CLARITY);
         if (clarityEffect == null) {
             return;
         }
