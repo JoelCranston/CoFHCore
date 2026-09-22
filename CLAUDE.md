@@ -7,7 +7,7 @@
 | **This file** | Always. Context, decisions, and current state. |
 | [docs/port-plan.md](docs/port-plan.md) | **Starting any porting work.** The approved plan (2026-09-21): 1.20.6-partial → 1.21.1 → 26.1.2 directly, with every version, coordinate, replacement API and reference location stated. Phase/category order lives there, not here. |
 | `docs/reference/` (**local only, gitignored**) | Confirming an API shape. Vendored primers (1.20.5 → 26.1), NeoForge release notes, the 26.1 and 1.21.1 docs, NeoForge/JEI source file lists and key source files. `scripts/fetch_reference.sh` recreates it. `grep` it. |
-| [docs/api-notes-26.1.2.md](docs/api-notes-26.1.2.md) | **Writing any code against a 26.1.2 API (Phase B, in progress).** Shapes confirmed against `minecraft-patched-26.1.2.109-sources.jar`, category by category as each lands: B.0 through B.6 so far. Check it, then Pyronetics' notes, before deriving anything. |
+| [docs/api-notes-26.1.2.md](docs/api-notes-26.1.2.md) | **Writing any code against a 26.1.2 API (Phase B, in progress).** Shapes confirmed against `minecraft-patched-26.1.2.109-sources.jar`, category by category: B.0 through B.9. Check it, then Pyronetics' notes, before deriving anything. |
 | [docs/api-notes-1.21.1.md](docs/api-notes-1.21.1.md) | **Writing any code against a 1.21.1 API**, or when a 26.1 change needs its 1.21.1 starting point. Every shape confirmed during the completed 1.21.1 hop, in the port plan's category order — including the four sweeps that had to be partly reverted. |
 | [docs/api-notes-1.20.6.md](docs/api-notes-1.20.6.md) | The 1.20.5/1.20.6 predecessor (all still valid on 1.21.1, but 1.21.1's notes supersede it where they overlap). |
 | [docs/code-style.md](docs/code-style.md) | **Before writing any code, in any of the four repos.** Upstream CoFH's style, measured from the `1.20.4` code: one-line comments at most, a blank line opening every method body, `@Annotation (args)`, regions, imports over qualified names. |
@@ -80,11 +80,11 @@ It is a *reference* here, never a dependency.
 
 ## Current state
 
-**Phase A (1.21.1) is code-complete; Phase B (26.1.2) is in progress on CoFHCore.** (2026-09-22)
+**Phase A (1.21.1) is code-complete; Phase B (26.1.2): CoFHCore compiles, the Thermal repos are next.** (2026-09-22)
 
 | Repo | Branch | State |
 |---|---|---|
-| CoFHCore | `26.1.2` | B.0-B.6 done; **723 errors** (baseline 2445): ~715 client (B.7), 4 mixins (B.9). **Next: B.7 client** |
+| CoFHCore | `26.1.2` | **0 errors** (baseline 2445), B.0-B.9 done. Not yet run. **Next: B.8 `runData`, headless boot, then B.10** |
 | CoFHCore | `1.21.1` | 0 errors, boots headless, `runData` clean |
 | ThermalCore | `1.21.1` | 0 errors, boots headless, `runData` clean. Waits for CoFHCore 26.1.2 (B.10) |
 | ThermalDynamics | `1.21.1` | same |
@@ -101,7 +101,7 @@ switching branches doesn't rebuild them. The Thermal repos `includeBuild('../CoF
 
 - **Where things stand**: [docs/TODO.md](docs/TODO.md) has the per-step table (commit and error
   count per step), what B.10 inherits from each step, and the Inbox of behaviour changes the new
-  API forced. [docs/api-notes-26.1.2.md](docs/api-notes-26.1.2.md) has every confirmed shape, B.0–B.6.
+  API forced. [docs/api-notes-26.1.2.md](docs/api-notes-26.1.2.md) has every confirmed shape, B.0–B.9.
 - **Design principle, chosen by Joel for B.3 and applied again in B.4: bridge at the edge.** Keep
   CoFH's own layers (`CompoundTag` read/write chains, legacy `IItemHandler`/`IFluidHandler`/
   `IEnergyStorage` storages) and adapt only at the vanilla/NeoForge boundary. That keeps the
