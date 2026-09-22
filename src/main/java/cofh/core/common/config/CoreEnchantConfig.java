@@ -1,12 +1,11 @@
 package cofh.core.common.config;
 
-import cofh.lib.common.enchantment.EnchantmentCoFH;
+import cofh.core.init.CoreEnchantments;
+import cofh.lib.util.Utils;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.function.Supplier;
 
-import static cofh.core.CoFHCore.ENCHANTMENTS;
-import static cofh.core.util.references.CoreIDs.ID_HOLDING;
 import static cofh.lib.util.Constants.TRUE;
 
 public class CoreEnchantConfig implements IBaseConfig {
@@ -41,12 +40,12 @@ public class CoreEnchantConfig implements IBaseConfig {
     @Override
     public void refresh() {
 
-        if (ENCHANTMENTS.get(ID_HOLDING) instanceof EnchantmentCoFH enc) {
-            enc.setEnable(enableHolding.get());
-            enc.setTreasureEnchantment(treasureHolding.get());
-            // Max level is now baked into the Enchantment's definition at construction and can no
-            // longer be changed at runtime (Enchantment#getMaxLevel() is final as of 1.20.5).
-        }
+        // 1.21: an enchantment is datapack-defined, so nothing about it can be set from code.
+        // "Enable" is honoured centrally instead - Utils' level lookups report 0 for a disabled
+        // enchantment, which is what the flag did. "Treasure" is the minecraft:treasure
+        // enchantment tag now and is a datapack decision; the option is left in place but only a
+        // data pack can act on it.
+        Utils.setEnchantmentEnabled(CoreEnchantments.HOLDING, enableHolding.get());
     }
 
     public static boolean improvedFeatherFalling() {

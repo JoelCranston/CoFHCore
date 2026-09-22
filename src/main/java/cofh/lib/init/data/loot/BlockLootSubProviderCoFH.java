@@ -9,13 +9,18 @@ import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.ContainerComponentManipulators;
 import net.minecraft.world.level.storage.loot.entries.AlternativesEntry;
 import net.minecraft.world.level.storage.loot.entries.DynamicLoot;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
@@ -36,9 +41,11 @@ public abstract class BlockLootSubProviderCoFH extends BlockLootSubProvider {
 
     private final Set<Block> knownBlocks = new ReferenceOpenHashSet<>();
 
-    protected BlockLootSubProviderCoFH() {
+    // 1.21: the provider needs the registries (enchantments are datapack objects now), so every
+    // subclass passes them down - the no-arg form cannot work any more.
+    protected BlockLootSubProviderCoFH(HolderLookup.Provider registries) {
 
-        super(Collections.emptySet(), FeatureFlags.VANILLA_SET);
+        super(Collections.emptySet(), FeatureFlags.VANILLA_SET, registries);
     }
 
     @Override
@@ -65,6 +72,15 @@ public abstract class BlockLootSubProviderCoFH extends BlockLootSubProvider {
         add(block, getSyncDropTable(block));
     }
 
+    /**
+     * Fortune as a {@link Holder}: 1.21 loot functions take holders, and {@code Enchantments.*}
+     * are {@link net.minecraft.resources.ResourceKey}s. BLOCK_FORTUNE was renamed to FORTUNE.
+     */
+    protected Holder<Enchantment> fortune() {
+
+        return this.registries.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE);
+    }
+
     // region TABLE HELPERS
     protected LootTable.Builder getSilkTouchTable(String name, Block block, Item lootItem, float min, float max, int bonus) {
 
@@ -72,10 +88,9 @@ public abstract class BlockLootSubProviderCoFH extends BlockLootSubProvider {
                 .name(name)
                 .setRolls(ConstantValue.exactly(1))
                 .add(AlternativesEntry.alternatives(LootItem.lootTableItem(block)
-                        .when(MatchTool.toolMatches(ItemPredicate.Builder.item()
-                                .hasEnchantment(new EnchantmentPredicate(Enchantments.SILK_TOUCH, MinMaxBounds.Ints.atLeast(1))))), LootItem.lootTableItem(lootItem)
+                        .when(hasSilkTouch()), LootItem.lootTableItem(lootItem)
                         .apply(SetItemCountFunction.setCount(UniformGenerator.between(min, max)))
-                        .apply(ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE, bonus))
+                        .apply(ApplyBonusCount.addUniformBonusCount(fortune(), bonus))
                         .apply(ApplyExplosionDecay.explosionDecay())));
         return LootTable.lootTable().withPool(builder);
     }
@@ -85,9 +100,8 @@ public abstract class BlockLootSubProviderCoFH extends BlockLootSubProvider {
         LootPool.Builder builder = LootPool.lootPool()
                 .setRolls(ConstantValue.exactly(1))
                 .add(AlternativesEntry.alternatives(LootItem.lootTableItem(block)
-                        .when(MatchTool.toolMatches(ItemPredicate.Builder.item()
-                                .hasEnchantment(new EnchantmentPredicate(Enchantments.SILK_TOUCH, MinMaxBounds.Ints.atLeast(1))))), LootItem.lootTableItem(lootItem)
-                        .apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE))
+                        .when(hasSilkTouch()), LootItem.lootTableItem(lootItem)
+                        .apply(ApplyBonusCount.addOreBonusCount(fortune()))
                         .apply(ApplyExplosionDecay.explosionDecay())));
         return LootTable.lootTable().withPool(builder);
     }
@@ -104,7 +118,7 @@ public abstract class BlockLootSubProviderCoFH extends BlockLootSubProvider {
                         .when(harvestAge)
                         .add(LootItem.lootTableItem(seed)
                                 // These are Mojang's numbers. No idea.
-                                .apply(ApplyBonusCount.addBonusBinomialDistributionCount(Enchantments.BLOCK_FORTUNE, 0.5714286F, 3))))
+                                .apply(ApplyBonusCount.addBonusBinomialDistributionCount(fortune(), 0.5714286F, 3))))
                 .apply(ApplyExplosionDecay.explosionDecay());
     }
 
@@ -117,7 +131,7 @@ public abstract class BlockLootSubProviderCoFH extends BlockLootSubProvider {
                 .withPool(LootPool.lootPool()
                         .when(harvestAge)
                         .add(LootItem.lootTableItem(crop)
-                                .apply(ApplyBonusCount.addBonusBinomialDistributionCount(Enchantments.BLOCK_FORTUNE, 0.5714286F, 3)))
+                                .apply(ApplyBonusCount.addBonusBinomialDistributionCount(fortune(), 0.5714286F, 3)))
                         .apply(ApplyExplosionDecay.explosionDecay()));
     }
 
@@ -142,11 +156,16 @@ public abstract class BlockLootSubProviderCoFH extends BlockLootSubProvider {
                 .setRolls(ConstantValue.exactly(1))
                 .add(LootItem.lootTableItem(block)
                         .apply(CopyNameFunction.copyName(CopyNameFunction.NameSource.BLOCK_ENTITY))
-                        .apply(CopyNbtFunction.copyData(ContextNbtProvider.BLOCK_ENTITY)
-                                .copy("Info", "BlockEntityTag.Info", CopyNbtFunction.MergeStrategy.REPLACE)
-                                .copy("Items", "BlockEntityTag.Items", CopyNbtFunction.MergeStrategy.REPLACE)
-                                .copy("Energy", "BlockEntityTag.Energy", CopyNbtFunction.MergeStrategy.REPLACE))
-                        .apply(SetContainerContents.setContents(type)
+                        // 1.20.5: CopyNbtFunction is CopyCustomDataFunction (a stack's mod NBT is
+                        // the custom_data component), and the destination paths no longer go
+                        // through a "BlockEntityTag" wrapper - block entity data is its own
+                        // component, which copy_components handles; what stays here is the plain
+                        // custom data this mod writes.
+                        .apply(CopyCustomDataFunction.copyData(ContextNbtProvider.BLOCK_ENTITY)
+                                .copy("Info", "Info", CopyCustomDataFunction.MergeStrategy.REPLACE)
+                                .copy("Items", "Items", CopyCustomDataFunction.MergeStrategy.REPLACE)
+                                .copy("Energy", "Energy", CopyCustomDataFunction.MergeStrategy.REPLACE))
+                        .apply(SetContainerContents.setContents(ContainerComponentManipulators.CONTAINER)
                                 .withEntry(DynamicLoot.dynamicEntry(ResourceLocation.withDefaultNamespace("contents")))));
         return LootTable.lootTable().withPool(builder);
     }

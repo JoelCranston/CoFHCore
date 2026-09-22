@@ -1,8 +1,9 @@
 package cofh.lib.util;
 
-import cofh.lib.common.enchantment.EnchantmentCoFH;
 import cofh.lib.init.tags.ItemTagsCoFH;
 import cofh.lib.util.helpers.MathHelper;
+import cofh.core.util.ProxyUtils;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import com.google.gson.Gson;
@@ -11,9 +12,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -41,6 +44,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
@@ -64,6 +68,8 @@ import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static cofh.lib.util.Constants.MAX_CAPACITY;
 import static cofh.lib.util.Constants.NETWORK_UPDATE_DISTANCE;
@@ -471,9 +477,44 @@ public class Utils {
     // endregion
 
     // region ENCHANT UTILS
-    public static Enchantment getEnchantment(String modId, String enchantId) {
+    // 1.21: enchantments are datapack objects. They cannot be subclassed for behaviour, code
+    // refers to them by ResourceKey (identity, no registry access needed) or Holder, and a level
+    // is read off the stack's ENCHANTMENTS component. The old per-class "enable" flag lives here
+    // now, as a set of ids the config has switched off - the level lookups all consult it, so a
+    // disabled enchantment reads as level 0 everywhere, exactly as before.
+    private static final Set<ResourceKey<Enchantment>> DISABLED_ENCHANTMENTS = ConcurrentHashMap.newKeySet();
 
-        return BuiltInRegistries.ENCHANTMENT.get(ResourceLocation.fromNamespaceAndPath(modId, enchantId));
+    public static void setEnchantmentEnabled(ResourceKey<Enchantment> enchant, boolean enabled) {
+
+        if (enabled) {
+            DISABLED_ENCHANTMENTS.remove(enchant);
+        } else {
+            DISABLED_ENCHANTMENTS.add(enchant);
+        }
+    }
+
+    public static boolean isEnchantmentEnabled(ResourceKey<Enchantment> enchant) {
+
+        return enchant != null && !DISABLED_ENCHANTMENTS.contains(enchant);
+    }
+
+    public static ResourceKey<Enchantment> getEnchantment(String modId, String enchantId) {
+
+        return ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.fromNamespaceAndPath(modId, enchantId));
+    }
+
+    /**
+     * The {@link Holder} for an enchantment key, or null if no loaded datapack defines it -
+     * needed only where vanilla insists on a holder (applying an enchantment, for instance).
+     */
+    @Nullable
+    public static Holder<Enchantment> getEnchantmentHolder(ResourceKey<Enchantment> enchant) {
+
+        if (enchant == null) {
+            return null;
+        }
+        HolderLookup.Provider registries = ProxyUtils.registryAccess();
+        return registries.lookup(Registries.ENCHANTMENT).flatMap(lookup -> lookup.get(enchant)).orElse(null);
     }
 
     public static int getEnchantedCapacity(int amount, int holding) {
@@ -481,44 +522,64 @@ public class Utils {
         return MathHelper.clamp(amount + amount * holding / 2, 0, MAX_CAPACITY);
     }
 
-    public static int getItemEnchantmentLevel(Enchantment ench, ItemStack stack) {
+    public static int getItemEnchantmentLevel(ResourceKey<Enchantment> enchant, ItemStack stack) {
 
-        if (ench == null || ench instanceof EnchantmentCoFH && !((EnchantmentCoFH) ench).isEnabled()) {
+        if (!isEnchantmentEnabled(enchant) || stack.isEmpty()) {
             return 0;
         }
-        return EnchantmentHelper.getItemEnchantmentLevel(ench, stack);
+        return getLevel(stack.getEnchantments(), enchant);
     }
 
-    public static int getHeldEnchantmentLevel(LivingEntity living, Enchantment ench) {
+    public static int getHeldEnchantmentLevel(LivingEntity living, ResourceKey<Enchantment> enchant) {
 
-        if (ench == null || ench instanceof EnchantmentCoFH && !((EnchantmentCoFH) ench).isEnabled()) {
+        if (!isEnchantmentEnabled(enchant)) {
             return 0;
         }
-        return Math.max(EnchantmentHelper.getItemEnchantmentLevel(ench, living.getMainHandItem()), EnchantmentHelper.getItemEnchantmentLevel(ench, living.getOffhandItem()));
+        return Math.max(getItemEnchantmentLevel(enchant, living.getMainHandItem()), getItemEnchantmentLevel(enchant, living.getOffhandItem()));
     }
 
-    public static int getMaxEquippedEnchantmentLevel(LivingEntity living, Enchantment ench) {
+    public static int getMaxEquippedEnchantmentLevel(LivingEntity living, ResourceKey<Enchantment> enchant) {
 
-        if (ench == null || ench instanceof EnchantmentCoFH && !((EnchantmentCoFH) ench).isEnabled()) {
+        if (!isEnchantmentEnabled(enchant)) {
             return 0;
         }
-        return getEnchantmentLevel(ench, living);
+        int max = 0;
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            max = Math.max(max, getItemEnchantmentLevel(enchant, living.getItemBySlot(slot)));
+        }
+        return max;
     }
 
-    public static void addEnchantment(ItemStack stack, Enchantment ench, int level) {
+    public static void addEnchantment(ItemStack stack, ResourceKey<Enchantment> enchant, int level) {
 
-        stack.enchant(ench, level);
+        Holder<Enchantment> holder = getEnchantmentHolder(enchant);
+        if (holder != null) {
+            stack.enchant(holder, level);
+        }
     }
 
-    public static void removeEnchantment(ItemStack stack, Enchantment ench) {
+    public static void removeEnchantment(ItemStack stack, ResourceKey<Enchantment> enchant) {
 
         ItemEnchantments enchantments = stack.get(DataComponents.ENCHANTMENTS);
-        if (enchantments == null || enchantments.getLevel(ench) <= 0) {
+        if (enchantments == null || getLevel(enchantments, enchant) <= 0) {
             return;
         }
         ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(enchantments);
-        mutable.removeIf(holder -> holder.value() == ench);
+        mutable.removeIf(holder -> holder.is(enchant));
         stack.set(DataComponents.ENCHANTMENTS, mutable.toImmutable());
+    }
+
+    private static int getLevel(ItemEnchantments enchantments, ResourceKey<Enchantment> enchant) {
+
+        if (enchant == null) {
+            return 0;
+        }
+        for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
+            if (entry.getKey().is(enchant)) {
+                return entry.getIntValue();
+            }
+        }
+        return 0;
     }
     // endregion
 

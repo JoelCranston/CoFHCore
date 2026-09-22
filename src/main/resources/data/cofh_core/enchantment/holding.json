@@ -1,0 +1,20 @@
+{
+  "description": {
+    "translate": "enchantment.cofh_core.holding"
+  },
+  "supported_items": "#cofh_core:enchantable/holding",
+  "weight": 10,
+  "max_level": 4,
+  "min_cost": {
+    "base": 1,
+    "per_level_above_first": 5
+  },
+  "max_cost": {
+    "base": 51,
+    "per_level_above_first": 5
+  },
+  "anvil_cost": 1,
+  "slots": [
+    "any"
+  ]
+}

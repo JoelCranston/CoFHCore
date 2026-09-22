@@ -7,6 +7,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.FishingRodItem;
@@ -68,9 +69,10 @@ public class FishingRodItemCoFH extends FishingRodItem implements ICoFHItem {
             worldIn.playSound(null, playerIn.getX(), playerIn.getY(), playerIn.getZ(), SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.NEUTRAL, 1.0F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));
         } else {
             worldIn.playSound(null, playerIn.getX(), playerIn.getY(), playerIn.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.NEUTRAL, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));
-            if (!worldIn.isClientSide) {
-                int luck = EnchantmentHelper.getFishingLuckBonus(stack) + luckModifier;
-                int speed = EnchantmentHelper.getFishingSpeedBonus(stack) + speedModifier;
+            if (worldIn instanceof ServerLevel serverLevel) {
+                // Both bonuses are enchantment-effect driven now and need the level and holder.
+                int luck = EnchantmentHelper.getFishingLuckBonus(serverLevel, stack, playerIn) + luckModifier;
+                int speed = Math.round(EnchantmentHelper.getFishingTimeReduction(serverLevel, stack, playerIn)) + speedModifier;
                 worldIn.addFreshEntity(new FishingHook(playerIn, worldIn, luck, speed));
             }
 

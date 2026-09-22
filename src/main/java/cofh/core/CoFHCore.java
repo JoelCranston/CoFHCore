@@ -8,7 +8,6 @@ import cofh.core.client.renderer.entity.KnifeRenderer;
 import cofh.core.client.renderer.entity.model.ArmorFullSuitModel;
 import cofh.core.common.command.CoFHCommand;
 import cofh.core.common.config.*;
-import cofh.core.common.enchantment.HoldingEnchantment;
 import cofh.core.common.event.ArmorEvents;
 import cofh.core.common.network.PacketHandler;
 import cofh.core.compat.curios.CuriosProxy;
@@ -32,7 +31,6 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
@@ -77,7 +75,6 @@ public class CoFHCore {
     public static final DeferredRegisterCoFH<Fluid> FLUIDS = DeferredRegisterCoFH.create(BuiltInRegistries.FLUID, ID_COFH_CORE);
 
     public static final DeferredRegisterCoFH<MenuType<?>> CONTAINERS = DeferredRegisterCoFH.create(BuiltInRegistries.MENU, ID_COFH_CORE);
-    public static final DeferredRegisterCoFH<Enchantment> ENCHANTMENTS = DeferredRegisterCoFH.create(BuiltInRegistries.ENCHANTMENT, ID_COFH_CORE);
     public static final DeferredRegisterCoFH<EntityType<?>> ENTITIES = DeferredRegisterCoFH.create(BuiltInRegistries.ENTITY_TYPE, ID_COFH_CORE);
     public static final DeferredRegisterCoFH<MobEffect> MOB_EFFECTS = DeferredRegisterCoFH.create(BuiltInRegistries.MOB_EFFECT, ID_COFH_CORE);
     public static final DeferredRegisterCoFH<ParticleType<?>> PARTICLES = DeferredRegisterCoFH.create(BuiltInRegistries.PARTICLE_TYPE, ID_COFH_CORE);
@@ -115,7 +112,6 @@ public class CoFHCore {
         FLUIDS.register(modEventBus);
 
         CONTAINERS.register(modEventBus);
-        ENCHANTMENTS.register(modEventBus);
         ENTITIES.register(modEventBus);
         MOB_EFFECTS.register(modEventBus);
         PARTICLES.register(modEventBus);
@@ -204,7 +200,11 @@ public class CoFHCore {
                     if (msg.method().equalsIgnoreCase(IMCMethods.ADD_BOW_COMPATIBILITY) && msg.messageSupplier().get() instanceof Item bow) {
                         ArcheryHelper.addValidBow(bow);
                     } else if (msg.method().equalsIgnoreCase(IMCMethods.ADD_HOLDING_COMPATIBILITY) && msg.messageSupplier().get() instanceof Item container) {
-                        HoldingEnchantment.addValidItem(container);
+                        // 1.21: what Holding can be applied to is the cofh_core:enchantable/holding
+                        // item tag, which a mod joins from its own data pack - this cannot be done
+                        // from code at IMC time any more.
+                        LOG.warn("{} asked to make {} Holding-compatible over IMC. Add the item to the cofh_core:enchantable/holding item tag instead.",
+                                msg.senderModId(), Utils.getRegistryName(container));
                     }
                 }
         );
