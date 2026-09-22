@@ -1,80 +1,62 @@
 # TODO — CoFHCore
 
-Current, outstanding work only. See [progress-log.md](progress-log.md) for what's already
-done and why, and [api-notes-1.20.6.md](api-notes-1.20.6.md) for the API shapes already
-confirmed this hop.
+Current, outstanding work only. The phase/category plan is [port-plan.md](port-plan.md);
+this file tracks where we are in it and what has been noticed along the way. See
+[progress-log.md](progress-log.md) for what's already done and why, and
+[api-notes-1.20.6.md](api-notes-1.20.6.md) for API shapes already confirmed (all still valid
+on 1.21.1).
 
-**Snapshot**: `396 errors / 104 files` from a fresh `./gradlew compileJava` on branch
-`1.20.6` at commit `2db3521` (2026-09-22). Re-run before trusting these numbers — they
-shift every session. Anything noticed mid-session that doesn't fit elsewhere goes in the
-Inbox at the bottom.
+**Snapshot**: branch `1.21.1`, still building against `neo_version=20.6.141` until Phase 0.3/A.0
+land. The last count on that target was `396 errors / 104 files` (2026-09-22, commit `2db3521`);
+it will be replaced by a fresh baseline after the bump to 21.1.251 — don't reason from it.
 
-## Next up, by error count (this compile run)
+## Phase 0 — preparation (port-plan.md §4)
 
-1. **Raw `ItemStack` NBT API, everywhere else** (by far the largest remaining bucket —
-   dozens of call sites across the codebase). `ItemHelper`/`ItemStorageCoFH` were
-   already migrated to `DataComponents.CUSTOM_DATA` (see api-notes), but that was only
-   two files — most callers of `stack.getTag()`/`setTag()`/`getOrCreateTag()`/
-   `getTagElement()`/`addTagElement()`/`hasCustomHoverName()`/`setHoverName()`/
-   `getEnchantmentTags()` elsewhere in the repo are still broken. This is a mechanical
-   sweep once the `ItemStorageCoFH`/`CustomData` pattern is settled — the risk is
-   missing a call site where the old NBT shape meant something subtly different (e.g. a
-   tag that was implicitly shared/mutable vs. `CustomData`'s copy-on-read).
-2. **`Matrix3f` → `Pose` incompatible (44 occurrences)** — not yet triaged. Likely a
-   rendering-math API change (`PoseStack`/`Quaternion` rework); confirm the real 1.20.6
-   shape via `javap` before touching, same discipline as every category in api-notes.
-3. **`MobEffect` → `Holder<MobEffect>` incompatible (34 occurrences)** — the same shape
-   change already fixed once in `ElectricField` (api-notes, entity category) recurs
-   throughout the codebase. Likely another mechanical sweep, but check for spots
-   holding onto a raw `MobEffect` reference longer-term (equality/lookup code) where
-   `Holder` identity semantics might matter.
-4. **`Mod.EventBusSubscriber` cannot find symbol (10 occurrences, several files)** —
-   previously assumed to be javac error-recovery cascades from unrelated breaks in the
-   same file (confirmed true for the TickEvent and armor/dispenser categories in
-   api-notes). **Re-verify this assumption now** — with those files otherwise fixed,
-   these may be a real annotation move/rename in 1.20.6, not a cascade. Check one file
-   in isolation (temporarily silence its other errors, or check a file that has only
-   this error) before assuming either way.
-5. **`CommonHooks.onCropsGrowPre`/`onCropsGrowPost` signature changed** —
-   `CropBlockCoFH`, `CropBlockTall`, `CropBlockMushroom`. Flagged in api-notes' Block#use
-   commit, not yet started.
-6. **`Enchantments.BLOCK_FORTUNE`** — import broken, constant relocated/renamed
-   upstream. `CropBlockCoFH`, `CropBlockTall`. Flagged in api-notes, not yet started.
-7. **`FoodProperties#getNutrition`/`getSaturationModifier`/`getEffects`** —
-   `CakeBlockCoFH`, `FeastBlock`. Flagged in api-notes, not yet started.
-8. **`event.getResult() == Event.Result.DENY`** (2 occurrences) — the old
-   cancelable-with-`Result` event pattern; find what replaced it for these specific
-   events before assuming it's the same `setCanceled(true)` swap used for
-   `SaplingGrowTreeEvent`/`BlockGrowFeatureEvent` in api-notes.
-9. **`PotionUtils` import broken** (5 occurrences) — class relocated or restructured;
-   not yet looked at.
-10. **`EnchantmentPredicate`/`MinMaxBounds.Ints`** in a loot table condition builder —
-    loot condition API shape likely changed alongside the enchantment system rewrite;
-    check against the `EnchantmentDefinition`/`ItemEnchantments` shapes already
-    confirmed in api-notes before assuming a fresh API.
-11. **`entity.getArmorSlots()`** — `LivingEntity` iterable-armor-slots method appears
-    gone or renamed; not yet looked at.
-12. **`Reference<SoundEvent>` vs `SoundEvent`** (3), **`getRegistryName(Holder<MobEffect>)`
-    no suitable method** (3) — smaller, not yet triaged.
-13. **`CrossbowItemCoFH`** — the whole ammo-loading system is incompatible with
-    vanilla's `ChargedProjectiles` data component rewrite (`CrossbowItem.setCharged`
-    doesn't exist in the old shape anymore). Comparable in size to the enchantment
-    rewrite — deliberately deferred, see api-notes. Don't half-fix it.
+- [x] 0.1 `scripts/fetch_reference.sh` written and run → `docs/reference/` (126 files);
+      `../ThermalDynamicsForNeoForge` cloned.
+- [x] 0.2 `1.21.1` branches in all four repos; `.DS_Store` ignored here (do the same in the
+      other three when their Phase 0 starts).
+- [ ] 0.3 **Switch all four repos to ModDevGradle 2.0.147** (template in port-plan.md §4.3,
+      source `../Pyronetics/build.gradle`). `rm -rf build .gradle` first. Keep the
+      `MixinConfigs` manifest attribute, publishing, curse/modrinth, signing blocks.
+- [ ] 0.4 `git mv META-INF/mods.toml META-INF/neoforge.mods.toml` in all four; fix the
+      hardcoded `versionRange = "1.20.4"`; update `processResources` `filesMatching`.
+- [x] 0.5 docs updated (this file, CLAUDE.md, progress-log.md, port-plan.md copied in).
 
-## After CoFHCore compiles clean on 1.20.6
+## Phase A — 1.21.1 (port-plan.md §5), CoFHCore first
 
-- Commit the `1.20.6` version bump in **ThermalCore**, **ThermalDynamics**, and
-  **ThermalExpansion** (currently sitting uncommitted in each — see their own
-  `docs/TODO.md`) and begin each repo's own 1.20.6 migration. Many of the API shapes
-  above (ItemStack NBT, MobEffect/Holder, particle system if any repo has custom
-  particles) will very likely recur — check this file and api-notes-1.20.6.md first
-  before re-deriving them.
-- Continue the primer climb: 1.20.6 → 1.21 is next
-  (`docs.neoforged.net/primer/docs/1.21/`, Neo changes at `/primer/docs/1.21/neo`). Full
-  chain to the 26.1.2 target: 1.21 → 1.21.1 → 1.21.2/3 → 1.21.4 → 1.21.5 → 1.21.6 →
-  1.21.7 → 1.21.8 → 1.21.9 → 1.21.10 → 1.21.11 → 26.1 (stop within the 26.1.x line at
-  26.1.2 — no need for 26.2).
+- [ ] A.0 bump `gradle.properties` (values in §5 A.0), first compile → record the baseline here.
+- [ ] A.1 categories 1–16, in order (§5 A.1). Tick each as it lands with its before/after count:
+  1. [ ] mod metadata & bus (`@EventBusSubscriber`, `Bus.GAME`, `ModContainer#registerConfig`)
+  2. [ ] `ResourceLocation` factories (all four repos in one sweep)
+  3. [ ] ItemStack NBT → data components (remaining ~140 sites family-wide)
+  4. [ ] vertex/rendering API (`Matrix3f`→`Pose`, `addVertex`/`setColor`/…, `buildOrThrow`)
+  5. [ ] `MobEffect`→`Holder<MobEffect>`, `PotionUtils`→`PotionContents`, `PotionColorCalculationEvent` gone
+  6. [ ] enchantments → datapack (`HoldingEnchantment` JSON + key, `EnchantmentHelperCoFH.getLevel`)
+  7. [ ] attribute modifier ids
+  8. [ ] tools/armor/crossbow (`CHARGED_PROJECTILES`, `hurtAndBreak`, `getUseDuration`)
+  9. [ ] events (damage pipeline, item pickup, spawn placements, `Event.Result` leftovers)
+  10. [ ] blocks (crop hooks `canCropGrow`/`fireCropGrowPost`, `SpecialPlantable`, `FoodProperties` record)
+  11. [ ] recipes (`RecipeInput`, stream codecs, `IShapedRecipe` gone)
+  12. [ ] loot/datagen, `ItemAbilities`, `DamageSource#isDirect`
+  13. [ ] mixins re-targeted (10 classes; 2 not in `mixins.cofhcore.json` — dead?)
+  14. [ ] access transformers (fix everything `validateAccessTransformers` reports)
+  15. [ ] resources: singular tag/data folders, `forge:`→`c:` (392 files family-wide)
+  16. [ ] Curios 9.5.1 API check
+- [ ] A exit: `build` clean, `verify_runserver.sh` passes, Joel's `runClient` pass,
+      `docs/api-notes-1.21.1.md` written.
+- [ ] Then ThermalCore (SPLIGAN diff-driven), ThermalExpansion, ThermalDynamics (§5 A.2–A.3).
+
+## Phase B — 26.1.2 (port-plan.md §6)
+
+Not started. Branch `26.1.2` is created from `1.21.1` only after Phase A's exit criteria.
 
 ## Inbox
 
-_(nothing yet — add anything noticed mid-session here rather than letting it get lost)_
+- `ThermalExpansion`'s hand-written machine recipes use `{"item": …, "count": n}` /
+  `{"tag": "forge:…"}` parsed by CoFH's own `RecipeJsonUtils` — survives the 1.21.2 ingredient
+  format change, but check `RecipeJsonUtils.parseIngredient` compiles (`Ingredient.fromJson` is gone).
+- `PotionColorCalculationEvent` was deleted in NeoForge 21.0 with no replacement event;
+  `EffectEvents` needs a decision (use `PotionContents#getColor()` or drop the tweak).
+- Two mixin classes (`ClientPacketListenerMixin`, `ClientboundSetEntityMotionPacketMixin`) exist
+  in `cofh.core.mixin` but are not listed in `mixins.cofhcore.json` — decide keep/delete in A.1.13.

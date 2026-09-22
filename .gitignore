@@ -21,8 +21,14 @@
 # Include Important Folders
 !src/
 !docs/
+!scripts/
 
 # Session context exports are local-only, not for the repo
 docs/context/
+# Vendored porting reference material (primers, release notes, docs, source listings) - local-only, refetch with scripts/fetch_reference.sh
+docs/reference/
 
 /src/main/generated/.cache/
+
+# macOS
+.DS_Store

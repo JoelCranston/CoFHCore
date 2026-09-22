@@ -99,3 +99,43 @@ surfaced clearly before this compile.
 - Track the error count before/after every commit. It's the only reliable signal that a
   category is actually closed, not just moved — and the `-Xmaxerrs` discovery (step 7)
   is a reminder to sanity-check that the count itself is trustworthy.
+
+## Phase 2, revised — two hops, not fourteen (2026-09-21)
+
+Joel asked for the plan to be re-checked against current NeoForge documentation with no
+trust in earlier assumptions, and for the route to be 1.21.1 then 26.1.2 with no other
+intermediates. The re-verification (live maven metadata, the `1.21.1` and `26.1.x` NeoForge
+source trees, the primers and release posts, the JEI/Curios/Patchouli mavens, and the code
+on this machine) produced [port-plan.md](port-plan.md). What it changed:
+
+- **The remaining 1.20.6 work is not finished as 1.20.6.** The `1.21.1` branch was created
+  from `1.20.6` at `a33bd27`; the twelve 1.20.6 commits are all still correct on 1.21.1 and
+  the ~396 outstanding errors get fixed once against 1.21.1's shapes. 1.21.1 → 26.1.2 is then
+  one jump, which is the route the 26.1 release post itself recommends for 1.21.1 mods.
+- **Two earlier conclusions were wrong.** `@Mod.EventBusSubscriber` → `@EventBusSubscriber`
+  (top-level) and `Bus.FORGE` → `Bus.GAME` are real 1.20.5 changes (NeoForge 20.5 release
+  notes, "Event System"), not javac cascades — the api-notes' armor/dispenser entry and
+  TODO item 4 said otherwise. And `mods.toml` has been `neoforge.mods.toml` since 20.5; a jar
+  with the old name is silently skipped. All four repos still had the old name.
+- **Toolchain**: ModDevGradle 2.0.147 replaces NeoGradle userdev in Phase 0 — it is what
+  `../Pyronetics` builds 26.1.2.109 with on this machine, and its patched-sources jar replaces
+  `javap` against `build/neoForm/.../raw.jar` as the shape oracle. Latest versions confirmed
+  2026-09-21: NeoForge 21.1.251 (1.21.1) and 26.1.2.109 (26.1.2); JEI 19.57.0.446 / 29.40.0.101;
+  Curios 9.5.1+1.21.1 / 15.0.0+26.1.2; Patchouli 1.21.1-93 on maven and 26.1-94 only as a
+  GitHub release jar (kept, as a `libs/` dependency in ThermalCore).
+- **References found on disk**: Pyronetics is a working 26.1.2 implementation of nearly every
+  subsystem this port has to migrate (screens, block-entity renderers, transfer API, fluids,
+  recipes, networking) with 631 lines of confirmed shapes in its `docs/api-notes-26.1.2.md`;
+  SPLIGAN's forks are minimal-diff 1.21.1 ports of ThermalCore (158 files changed),
+  ThermalExpansion and — newly cloned today — ThermalDynamics. The forks compiled against a
+  `cofh_core` build that only existed in SPLIGAN's `mavenLocal()`, so CoFHCore is still ported
+  by hand.
+- **Other findings that become work**: recipes stop being synced to clients in 1.21.2
+  (`OnDatapackSyncEvent#sendRecipes` + `RecipesReceivedEvent` is the replacement for
+  ThermalCore's client caches and JEI); 392 resource files reference `forge:` tags that never
+  existed on NeoForge (`c:`); the transfer API rework (21.9) and the model/GUI/render-pipeline
+  rewrites (1.21.4–26.1) are the two XL items of Phase B.
+
+Phase 0 done today: reference material vendored to `docs/reference/` (gitignored,
+`scripts/fetch_reference.sh`), `1.21.1` branches in all four repos, docs updated. Still to do
+before Phase A: the ModDevGradle switch and the `neoforge.mods.toml` rename (TODO.md).
