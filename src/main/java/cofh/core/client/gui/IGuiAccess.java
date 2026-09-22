@@ -79,13 +79,12 @@ public interface IGuiAccess {
         RenderSystem.setShaderColor(r, g, b, a);
 
         Matrix4f mat = poseStack.last().pose();
-        BufferBuilder buffer = Tesselator.getInstance().getBuilder();
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        buffer.vertex(mat, x1, y2, blitOffset()).endVertex();
-        buffer.vertex(mat, x2, y2, blitOffset()).endVertex();
-        buffer.vertex(mat, x2, y1, blitOffset()).endVertex();
-        buffer.vertex(mat, x1, y1, blitOffset()).endVertex();
-        Tesselator.getInstance().end();
+        BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+        buffer.addVertex(mat, (float) (x1), (float) (y2), (float) (blitOffset()));
+        buffer.addVertex(mat, (float) (x2), (float) (y2), (float) (blitOffset()));
+        buffer.addVertex(mat, (float) (x2), (float) (y1), (float) (blitOffset()));
+        buffer.addVertex(mat, (float) (x1), (float) (y1), (float) (blitOffset()));
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
     }
 
     default void drawColoredModalRect(PoseStack poseStack, int x1, int y1, int x2, int y2, int color) {
@@ -111,13 +110,12 @@ public interface IGuiAccess {
         RenderSystem.setShaderColor(r, g, b, a);
 
         Matrix4f mat = poseStack.last().pose();
-        BufferBuilder buffer = Tesselator.getInstance().getBuilder();
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        buffer.vertex(mat, x1, y2, blitOffset()).endVertex();
-        buffer.vertex(mat, x2, y2, blitOffset()).endVertex();
-        buffer.vertex(mat, x2, y1, blitOffset()).endVertex();
-        buffer.vertex(mat, x1, y1, blitOffset()).endVertex();
-        Tesselator.getInstance().end();
+        BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+        buffer.addVertex(mat, (float) (x1), (float) (y2), (float) (blitOffset()));
+        buffer.addVertex(mat, (float) (x2), (float) (y2), (float) (blitOffset()));
+        buffer.addVertex(mat, (float) (x2), (float) (y1), (float) (blitOffset()));
+        buffer.addVertex(mat, (float) (x1), (float) (y1), (float) (blitOffset()));
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
         RenderSystem.disableBlend();
     }
 
@@ -132,13 +130,12 @@ public interface IGuiAccess {
         Tesselator tesselator = Tesselator.getInstance();
 
         Matrix4f mat = poseStack.last().pose();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex(mat, x, (y + height), blitOffset()).uv(((float) textureX * f), ((float) (textureY + height) * f)).endVertex();
-        bufferbuilder.vertex(mat, (x + width), (y + height), blitOffset()).uv(((float) (textureX + width) * f), ((float) (textureY + height) * f)).endVertex();
-        bufferbuilder.vertex(mat, (x + width), y, blitOffset()).uv(((float) (textureX + width) * f), ((float) textureY * f)).endVertex();
-        bufferbuilder.vertex(mat, x, y, blitOffset()).uv(((float) textureX * f), ((float) textureY * f)).endVertex();
-        tesselator.end();
+        BufferBuilder bufferbuilder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferbuilder.addVertex(mat, (float) (x), (float) ((y + height)), (float) (blitOffset())).setUv(((float) textureX * f), ((float) (textureY + height) * f));
+        bufferbuilder.addVertex(mat, (float) ((x + width)), (float) ((y + height)), (float) (blitOffset())).setUv(((float) (textureX + width) * f), ((float) (textureY + height) * f));
+        bufferbuilder.addVertex(mat, (float) ((x + width)), (float) (y), (float) (blitOffset())).setUv(((float) (textureX + width) * f), ((float) textureY * f));
+        bufferbuilder.addVertex(mat, (float) (x), (float) (y), (float) (blitOffset())).setUv(((float) textureX * f), ((float) textureY * f));
+        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
     }
 
     default void drawTexturedModalRect(GuiGraphics guiGraphics, int x, int y, int u, int v, int width, int height, float texW, float texH) {
@@ -150,15 +147,14 @@ public interface IGuiAccess {
 
         float texU = 1 / texW;
         float texV = 1 / texH;
-        BufferBuilder buffer = Tesselator.getInstance().getBuilder();
+        BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
 
         Matrix4f mat = poseStack.last().pose();
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buffer.vertex(mat, x, y + height, blitOffset()).uv((u) * texU, (v + height) * texV).endVertex();
-        buffer.vertex(mat, x + width, y + height, blitOffset()).uv((u + width) * texU, (v + height) * texV).endVertex();
-        buffer.vertex(mat, x + width, y, blitOffset()).uv((u + width) * texU, (v) * texV).endVertex();
-        buffer.vertex(mat, x, y, blitOffset()).uv((u) * texU, (v) * texV).endVertex();
-        Tesselator.getInstance().end();
+        buffer.addVertex(mat, (float) (x), (float) (y + height), (float) (blitOffset())).setUv((u) * texU, (v + height) * texV);
+        buffer.addVertex(mat, (float) (x + width), (float) (y + height), (float) (blitOffset())).setUv((u + width) * texU, (v + height) * texV);
+        buffer.addVertex(mat, (float) (x + width), (float) (y), (float) (blitOffset())).setUv((u + width) * texU, (v) * texV);
+        buffer.addVertex(mat, (float) (x), (float) (y), (float) (blitOffset())).setUv((u) * texU, (v) * texV);
+        BufferUploader.drawWithShader(buffer.buildOrThrow());
     }
 
 }

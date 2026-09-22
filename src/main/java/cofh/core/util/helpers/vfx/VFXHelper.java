@@ -249,7 +249,8 @@ public final class VFXHelper {
     public static void renderTest(PoseStack stack, VertexConsumer consumer) {
 
         Vector4f center = new Vector4f(0, 0, 0, 1).mul(stack.last().pose());
-        Matrix3f normal = stack.last().normal();
+        // setNormal takes the Pose now; the bare Matrix3f overload is gone.
+        PoseStack.Pose pose = stack.last();
         float xp = center.x() + 0.5F;
         float xn = center.x() - 0.5F;
         float yp = center.y() + 0.5F;
@@ -260,10 +261,10 @@ public final class VFXHelper {
         int b = 255;
         int a = 255;
         int overlay = OverlayTexture.pack(0, false); //OverlayTexture.NO_OVERLAY
-        consumer.vertex(xp, yp, z).color(r, g, b, a).uv(0, 0).overlayCoords(overlay).uv2(RenderHelper.FULL_BRIGHT).normal(normal, 0, 1, 0).endVertex();
-        consumer.vertex(xn, yp, z).color(r, g, b, a).uv(0, 1).overlayCoords(overlay).uv2(RenderHelper.FULL_BRIGHT).normal(normal, 0, 1, 0).endVertex();
-        consumer.vertex(xn, yn, z).color(r, g, b, a).uv(1, 1).overlayCoords(overlay).uv2(RenderHelper.FULL_BRIGHT).normal(normal, 0, 1, 0).endVertex();
-        consumer.vertex(xp, yn, z).color(r, g, b, a).uv(1, 0).overlayCoords(overlay).uv2(RenderHelper.FULL_BRIGHT).normal(normal, 0, 1, 0).endVertex();
+        consumer.addVertex((float) (xp), (float) (yp), (float) (z)).setColor(r, g, b, a).setUv(0, 0).setOverlay(overlay).setLight(RenderHelper.FULL_BRIGHT).setNormal(pose, 0, 1, 0);
+        consumer.addVertex((float) (xn), (float) (yp), (float) (z)).setColor(r, g, b, a).setUv(0, 1).setOverlay(overlay).setLight(RenderHelper.FULL_BRIGHT).setNormal(pose, 0, 1, 0);
+        consumer.addVertex((float) (xn), (float) (yn), (float) (z)).setColor(r, g, b, a).setUv(1, 1).setOverlay(overlay).setLight(RenderHelper.FULL_BRIGHT).setNormal(pose, 0, 1, 0);
+        consumer.addVertex((float) (xp), (float) (yn), (float) (z)).setColor(r, g, b, a).setUv(1, 0).setOverlay(overlay).setLight(RenderHelper.FULL_BRIGHT).setNormal(pose, 0, 1, 0);
     }
 
     public static void renderTest(PoseStack stack, MultiBufferSource buffer) {
@@ -282,30 +283,30 @@ public final class VFXHelper {
         float xm = node.xMid();
         float ym = node.yMid();
 
-        builder.vertex(node.xp, node.yp, node.z).color(255, 0, 0, 255).endVertex();
-        builder.vertex(xm, ym, node.z).color(255, 0, 0, 255).endVertex();
-        builder.vertex(xm, ym, node.z).color(0, 0, 255, 255).endVertex();
-        builder.vertex(node.xn, node.yn, node.z).color(0, 0, 255, 255).endVertex();
-        builder.vertex(xm, ym, node.z).color(255, 255, 255, 255).endVertex();
+        builder.addVertex((float) (node.xp), (float) (node.yp), (float) (node.z)).setColor(255, 0, 0, 255);
+        builder.addVertex((float) (xm), (float) (ym), (float) (node.z)).setColor(255, 0, 0, 255);
+        builder.addVertex((float) (xm), (float) (ym), (float) (node.z)).setColor(0, 0, 255, 255);
+        builder.addVertex((float) (node.xn), (float) (node.yn), (float) (node.z)).setColor(0, 0, 255, 255);
+        builder.addVertex((float) (xm), (float) (ym), (float) (node.z)).setColor(255, 255, 255, 255);
         for (int i = 1; i < nodes.length - 1; ++i) {
             node = nodes[i];
             xm = node.xMid();
             ym = node.yMid();
-            builder.vertex(xm, ym, node.z).color(255, 255, 255, 255).endVertex();
-            builder.vertex(node.xp, node.yp, node.z).color(255, 0, 0, 255).endVertex();
-            builder.vertex(xm, ym, node.z).color(255, 0, 0, 255).endVertex();
-            builder.vertex(xm, ym, node.z).color(0, 0, 255, 255).endVertex();
-            builder.vertex(node.xn, node.yn, node.z).color(0, 0, 255, 255).endVertex();
-            builder.vertex(xm, ym, node.z).color(255, 255, 255, 255).endVertex();
+            builder.addVertex((float) (xm), (float) (ym), (float) (node.z)).setColor(255, 255, 255, 255);
+            builder.addVertex((float) (node.xp), (float) (node.yp), (float) (node.z)).setColor(255, 0, 0, 255);
+            builder.addVertex((float) (xm), (float) (ym), (float) (node.z)).setColor(255, 0, 0, 255);
+            builder.addVertex((float) (xm), (float) (ym), (float) (node.z)).setColor(0, 0, 255, 255);
+            builder.addVertex((float) (node.xn), (float) (node.yn), (float) (node.z)).setColor(0, 0, 255, 255);
+            builder.addVertex((float) (xm), (float) (ym), (float) (node.z)).setColor(255, 255, 255, 255);
         }
         node = nodes[nodes.length - 1];
         xm = node.xMid();
         ym = node.yMid();
-        builder.vertex(xm, ym, node.z).color(255, 255, 255, 255).endVertex();
-        builder.vertex(node.xp, node.yp, node.z).color(255, 0, 0, 255).endVertex();
-        builder.vertex(xm, ym, node.z).color(255, 0, 0, 255).endVertex();
-        builder.vertex(xm, ym, node.z).color(0, 0, 255, 255).endVertex();
-        builder.vertex(node.xn, node.yn, node.z).color(0, 0, 255, 255).endVertex();
+        builder.addVertex((float) (xm), (float) (ym), (float) (node.z)).setColor(255, 255, 255, 255);
+        builder.addVertex((float) (node.xp), (float) (node.yp), (float) (node.z)).setColor(255, 0, 0, 255);
+        builder.addVertex((float) (xm), (float) (ym), (float) (node.z)).setColor(255, 0, 0, 255);
+        builder.addVertex((float) (xm), (float) (ym), (float) (node.z)).setColor(0, 0, 255, 255);
+        builder.addVertex((float) (node.xn), (float) (node.yn), (float) (node.z)).setColor(0, 0, 255, 255);
     }
 
     private static void renderSkeleton(VFXNode[] nodes) {
@@ -689,8 +690,8 @@ public final class VFXHelper {
 
         public VFXNode renderStart(Vector3f normal, VertexConsumer builder, int packedLight, Color col, float u0, float v0, float u1, float v1) {
 
-            builder.vertex(xp, yp, z).color(col.r, col.g, col.b, col.a).uv(u0, v0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(normal.x, normal.y, normal.z).endVertex();
-            builder.vertex(xn, yn, z).color(col.r, col.g, col.b, col.a).uv(u1, v0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(normal.x, normal.y, normal.z).endVertex();
+            builder.addVertex((float) (xp), (float) (yp), (float) (z)).setColor(col.r, col.g, col.b, col.a).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(normal.x, normal.y, normal.z);
+            builder.addVertex((float) (xn), (float) (yn), (float) (z)).setColor(col.r, col.g, col.b, col.a).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(normal.x, normal.y, normal.z);
             return this;
         }
 
@@ -701,8 +702,8 @@ public final class VFXHelper {
 
         public VFXNode renderEnd(Vector3f normal, VertexConsumer builder, int packedLight, Color col, float u0, float v0, float u1, float v1) {
 
-            builder.vertex(xn, yn, z).color(col.r, col.g, col.b, col.a).uv(u1, v1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(normal.x, normal.y, normal.z).endVertex();
-            builder.vertex(xp, yp, z).color(col.r, col.g, col.b, col.a).uv(u0, v1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(normal.x, normal.y, normal.z).endVertex();
+            builder.addVertex((float) (xn), (float) (yn), (float) (z)).setColor(col.r, col.g, col.b, col.a).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(normal.x, normal.y, normal.z);
+            builder.addVertex((float) (xp), (float) (yp), (float) (z)).setColor(col.r, col.g, col.b, col.a).setUv(u0, v1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(normal.x, normal.y, normal.z);
             return this;
         }
 

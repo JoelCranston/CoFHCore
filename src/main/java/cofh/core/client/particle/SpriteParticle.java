@@ -108,10 +108,10 @@ public abstract class SpriteParticle extends ColorParticle {
         float v0 = sprite.getV0();
         float v1 = sprite.getV1();
 
-        consumer.vertex(x + a, y + b, z).uv(u1, v0).color(c0.r, c0.g, c0.b, c0.a).uv2(packedLight).endVertex();
-        consumer.vertex(x - b, y + a, z).uv(u0, v0).color(c0.r, c0.g, c0.b, c0.a).uv2(packedLight).endVertex();
-        consumer.vertex(x - a, y - b, z).uv(u0, v1).color(c0.r, c0.g, c0.b, c0.a).uv2(packedLight).endVertex();
-        consumer.vertex(x + b, y - a, z).uv(u1, v1).color(c0.r, c0.g, c0.b, c0.a).uv2(packedLight).endVertex();
+        consumer.addVertex((float) (x + a), (float) (y + b), (float) (z)).setUv(u1, v0).setColor(c0.r, c0.g, c0.b, c0.a).setLight(packedLight);
+        consumer.addVertex((float) (x - b), (float) (y + a), (float) (z)).setUv(u0, v0).setColor(c0.r, c0.g, c0.b, c0.a).setLight(packedLight);
+        consumer.addVertex((float) (x - a), (float) (y - b), (float) (z)).setUv(u0, v1).setColor(c0.r, c0.g, c0.b, c0.a).setLight(packedLight);
+        consumer.addVertex((float) (x + b), (float) (y - a), (float) (z)).setUv(u1, v1).setColor(c0.r, c0.g, c0.b, c0.a).setLight(packedLight);
     }
 
 }

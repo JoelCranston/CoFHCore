@@ -175,7 +175,7 @@ public class CoreClientEvents {
     @SubscribeEvent
     public static void renderTick(RenderFrameEvent.Pre event) {
 
-        renderFrame = event.getPartialTick();
+        renderFrame = event.getPartialTick().getGameTimeDeltaPartialTick(false);
     }
 
     @SubscribeEvent //(priority = EventPriority.LOWEST)
@@ -185,7 +185,7 @@ public class CoreClientEvents {
         if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
             for (PostEffect effect : PostEffect.getAllEffects()) {
                 if (effect.isEnabled()) {
-                    effect.begin(event.getPartialTick());
+                    effect.begin(event.getPartialTick().getGameTimeDeltaPartialTick(false));
                 }
             }
             Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
@@ -195,7 +195,7 @@ public class CoreClientEvents {
             Minecraft minecraft = Minecraft.getInstance();
             for (PostEffect effect : PostEffect.getAllEffects()) {
                 if (effect.isEnabled()) {
-                    effect.end(event.getPartialTick());
+                    effect.end(event.getPartialTick().getGameTimeDeltaPartialTick(false));
                     minecraft.getMainRenderTarget().bindWrite(false);
                     effect.apply(minecraft.getWindow());
                 }
@@ -212,12 +212,11 @@ public class CoreClientEvents {
         // PARTICLES
         if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
             PoseStack stack = event.getPoseStack();
-            float partialTick = event.getPartialTick();
+            float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
             Minecraft minecraft = Minecraft.getInstance();
             MultiBufferSource buffer = minecraft.renderBuffers().bufferSource();
             TextureManager manager = minecraft.getTextureManager();
             Tesselator tesselator = Tesselator.getInstance();
-            BufferBuilder consumer = tesselator.getBuilder();
             LightTexture light = minecraft.gameRenderer.lightTexture();
 
             light.turnOnLightLayer();
@@ -230,11 +229,15 @@ public class CoreClientEvents {
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 Queue<CoFHParticle> particles = delayedRenderParticles.get(renderType);
 
-                renderType.begin(consumer, manager);
+                // 1.21: begin() takes the Tesselator and hands back the BufferBuilder to write
+                // into; there is no end() - the built mesh is uploaded directly.
+                BufferBuilder particleBuffer = renderType.begin(tesselator, manager);
                 while (!particles.isEmpty()) {
-                    particles.poll().render(stack, buffer, consumer, partialTick);
+                    particles.poll().render(stack, buffer, particleBuffer, partialTick);
                 }
-                renderType.end(tesselator);
+                if (particleBuffer != null) {
+                    BufferUploader.drawWithShader(particleBuffer.buildOrThrow());
+                }
             }
             stack.popPose();
             light.turnOffLightLayer();
@@ -297,8 +300,8 @@ public class CoreClientEvents {
             yn /= d;
             zn /= d;
 
-            builder.vertex(mat, (float) x1, (float) y1, (float) z1).color(r, g, b, a).normal((float) xn, (float) yn, (float) zn).endVertex();
-            builder.vertex(mat, (float) x2, (float) y2, (float) z2).color(r, g, b, a).normal((float) xn, (float) yn, (float) zn).endVertex();
+            builder.addVertex(mat, (float) x1, (float) y1, (float) z1).setColor(r, g, b, a).setNormal((float) xn, (float) yn, (float) zn);
+            builder.addVertex(mat, (float) x2, (float) y2, (float) z2).setColor(r, g, b, a).setNormal((float) xn, (float) yn, (float) zn);
         });
     }
     // endregion
