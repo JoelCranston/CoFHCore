@@ -8,7 +8,6 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
-import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.client.model.IModelBuilder;
 import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
 import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
@@ -28,15 +27,15 @@ public class SimpleModel extends SimpleUnbakedGeometry<SimpleModel> {
     }
 
     @Override
-    public BakedModel bake(IGeometryBakingContext owner, ModelBaker bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
+    public BakedModel bake(IGeometryBakingContext owner, ModelBaker bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides) {
 
-        return factory.create(model.bake(owner, bakery, spriteGetter, modelTransform, overrides, modelLocation));
+        return factory.create(model.bake(owner, bakery, spriteGetter, modelTransform, overrides));
     }
 
     @Override
-    public void addQuads(IGeometryBakingContext owner, IModelBuilder<?> modelBuilder, ModelBaker bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ResourceLocation modelLocation) {
+    protected void addQuads(IGeometryBakingContext owner, IModelBuilder<?> modelBuilder, ModelBaker bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform) {
 
-        model.addQuads(owner, modelBuilder, bakery, spriteGetter, modelTransform, modelLocation);
+        model.addQuads(owner, modelBuilder, bakery, spriteGetter, modelTransform);
     }
 
     public interface IFactory<T extends BakedModel> {

@@ -9,6 +9,7 @@ import cofh.lib.util.constants.ModIds;
 import cofh.lib.util.raytracer.VoxelShapeBlockHitResult;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -24,11 +25,15 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.LivingEntity;
@@ -36,6 +41,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
@@ -102,15 +108,16 @@ public class CoreClientEvents {
             }
         }
         if (CoreClientConfig.enableEnchantmentDescriptions.get()) {
-            if (stack.getTag() != null) {
-                ListTag list = stack.getTag().getList(TAG_STORED_ENCHANTMENTS, TAG_COMPOUND);
-                if (list.size() == 1) {
-                    Enchantment ench = BuiltInRegistries.ENCHANTMENT.get(ResourceLocation.tryParse(list.getCompound(0).getString("id")));
-                    if (ench != null && BuiltInRegistries.ENCHANTMENT.getKey(ench) != null) {
-                        String enchKey = ench.getDescriptionId() + ".desc";
-                        if (canLocalize(enchKey)) {
-                            tooltip.add(getInfoTextComponent(enchKey));
-                        }
+            // 1.21: stored enchantments are a component, and an Enchantment no longer knows its
+            // own id - the holder's key supplies the "enchantment.<ns>.<path>" description id.
+            ItemEnchantments stored = stack.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY);
+            if (stored.size() == 1) {
+                Holder<Enchantment> ench = stored.keySet().iterator().next();
+                ResourceKey<Enchantment> key = ench.unwrapKey().orElse(null);
+                if (key != null) {
+                    String enchKey = Util.makeDescriptionId("enchantment", key.location()) + ".desc";
+                    if (canLocalize(enchKey)) {
+                        tooltip.add(getInfoTextComponent(enchKey));
                     }
                 }
             }

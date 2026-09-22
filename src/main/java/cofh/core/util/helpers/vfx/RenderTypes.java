@@ -133,24 +133,18 @@ public class RenderTypes {
 
     static ParticleRenderType translucentSheet(Supplier<ShaderInstance> shader) {
 
+        // 1.21: begin() is handed the Tesselator and returns the BufferBuilder for the batch;
+        // end() is gone - ParticleEngine draws the built mesh and restores depthMask/blend itself.
         return new ParticleRenderType() {
 
             @Override
-            public void begin(BufferBuilder builder, TextureManager manager) {
+            public BufferBuilder begin(Tesselator tess, TextureManager manager) {
 
                 RenderSystem.depthMask(false); // TODO post shader
                 RenderSystem.enableBlend();
                 RenderSystem.setShader(shader);
                 RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
-                builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
-            }
-
-            @Override
-            public void end(Tesselator tess) {
-
-                tess.end();
-                RenderSystem.depthMask(true);
-                RenderSystem.disableBlend();
+                return tess.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
             }
         };
     }

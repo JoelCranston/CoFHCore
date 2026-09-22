@@ -46,6 +46,8 @@ public final class FluidContainerItemModel implements IUnbakedGeometry<FluidCont
     // Transformer to set quads to max brightness
     private static final IQuadTransformer MAX_LIGHTMAP_TRANSFORMER = QuadTransformers.applyingLightmap(RenderHelper.FULL_BRIGHT);
 
+    private static final ResourceLocation MODEL_LOCATION = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "fluid_container");
+
     @Nonnull
     private final FluidStack fluidStack;
 
@@ -60,7 +62,7 @@ public final class FluidContainerItemModel implements IUnbakedGeometry<FluidCont
     }
 
     @Override
-    public BakedModel bake(IGeometryBakingContext context, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation) {
+    public BakedModel bake(IGeometryBakingContext context, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides) {
 
         Material particleLocation = context.hasMaterial("particle") ? context.getMaterial("particle") : null;
         Material fluidMaskLocation = context.hasMaterial("fluid_mask") ? context.getMaterial("fluid_mask") : null;
@@ -73,14 +75,14 @@ public final class FluidContainerItemModel implements IUnbakedGeometry<FluidCont
         if (particleSprite == null) {
             particleSprite = fluidSprite != null ? fluidSprite : spriteGetter.apply(baseLocation);
         }
-        var itemContext = StandaloneGeometryBakingContext.builder(context).withGui3d(false).withUseBlockLight(false).build(modelLocation);
+        var itemContext = StandaloneGeometryBakingContext.builder(context).withGui3d(false).withUseBlockLight(false).build(MODEL_LOCATION);
         var modelBuilder = CompositeModel.Baked.builder(itemContext, particleSprite, new ContainedFluidOverrideHandler(baker, itemContext, this), context.getTransforms());
         var normalRenderTypes = getLayerRenderTypes();
 
         if (baseLocation != null) {
             var baseSprite = spriteGetter.apply(baseLocation);
             var unbaked = UnbakedGeometryHelper.createUnbakedItemElements(0, baseSprite);
-            var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> baseSprite, modelState, modelLocation);
+            var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> baseSprite, modelState);
             modelBuilder.addQuads(normalRenderTypes, quads);
         }
 
@@ -90,7 +92,7 @@ public final class FluidContainerItemModel implements IUnbakedGeometry<FluidCont
                 // Fluid layer
                 var transformedState = new SimpleModelState(modelState.getRotation().compose(FLUID_TRANSFORM), modelState.isUvLocked());
                 var unbaked = UnbakedGeometryHelper.createUnbakedItemMaskElements(1, templateSprite); // Use template as mask
-                var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> fluidSprite, transformedState, modelLocation); // Bake with fluid texture
+                var quads = UnbakedGeometryHelper.bakeElements(unbaked, $ -> fluidSprite, transformedState); // Bake with fluid texture
 
                 var unlit = fluid.getFluidType().getLightLevel() > 0;
                 var renderTypes = getLayerRenderTypes();
@@ -149,7 +151,7 @@ public final class FluidContainerItemModel implements IUnbakedGeometry<FluidCont
             int fluidHash = FluidHelper.fluidHashcode(fluidStack);
             if (!cache.containsKey(fluidHash)) {
                 FluidContainerItemModel unbaked = this.parent.withProperties(fluidStack);
-                BakedModel bakedModel = unbaked.bake(owner, baker, Material::sprite, BlockModelRotation.X0_Y0, this, ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "fluid_container_override"));
+                BakedModel bakedModel = unbaked.bake(owner, baker, Material::sprite, BlockModelRotation.X0_Y0, this);
                 cache.put(fluidHash, bakedModel);
                 return bakedModel;
             }

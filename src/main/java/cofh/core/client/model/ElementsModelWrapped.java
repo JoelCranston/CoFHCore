@@ -11,7 +11,6 @@ import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.neoforged.neoforge.client.model.IModelBuilder;
 import net.neoforged.neoforge.client.model.SimpleModelState;
@@ -36,7 +35,7 @@ public class ElementsModelWrapped extends SimpleUnbakedGeometry<ElementsModelWra
     }
 
     @Override
-    public void addQuads(IGeometryBakingContext context, IModelBuilder<?> modelBuilder, ModelBaker bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState, ResourceLocation modelLocation) {
+    public void addQuads(IGeometryBakingContext context, IModelBuilder<?> modelBuilder, ModelBaker bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState) {
 
         var rootTransform = context.getRootTransform();
         if (!rootTransform.isIdentity())
@@ -45,13 +44,13 @@ public class ElementsModelWrapped extends SimpleUnbakedGeometry<ElementsModelWra
         for (BlockElement element : elements) {
             for (Direction direction : element.faces.keySet()) {
                 var face = element.faces.get(direction);
-                var sprite = spriteGetter.apply(context.getMaterial(face.texture));
-                var quad = BlockModel.bakeFace(element, face, sprite, direction, modelState, modelLocation);
+                var sprite = spriteGetter.apply(context.getMaterial(face.texture()));
+                var quad = BlockModel.bakeFace(element, face, sprite, direction, modelState);
 
-                if (face.cullForDirection == null)
+                if (face.cullForDirection() == null)
                     modelBuilder.addUnculledFace(quad);
                 else
-                    modelBuilder.addCulledFace(modelState.getRotation().rotateTransform(face.cullForDirection), quad);
+                    modelBuilder.addCulledFace(modelState.getRotation().rotateTransform(face.cullForDirection()), quad);
             }
         }
     }
