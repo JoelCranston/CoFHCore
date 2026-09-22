@@ -273,3 +273,71 @@ One pre-existing content gap surfaced rather than regressed: ThermalExpansion's
 its Inbox) — on 1.20.4 the old parser produced an empty recipe silently; 1.21's codec path logs
 the error.
 
+
+---
+
+## Phase B started — B.0-B.2 on CoFHCore (2026-09-22)
+
+Branch `26.1.2`, cut from `1.21.1`. Error counts are CoFHCore's `compileJava`.
+
+- **B.0** (`6eb201f`): `gradle.properties` to 26.1.2.109 / Java 25, JEI 29, Curios 15. The
+  surprise was ordering: with `validateAccessTransformers = true`, `createMinecraftArtifacts`
+  fails before `compileJava` runs, so **B.9's AT half has to come first**, not last. 21 of 132
+  lines had dead targets. `Slot.slot` had to go for a subtler reason: widening it shadows a local
+  in vanilla's own `ItemCombinerMenu` subclasses and breaks NeoForm's recompile. Baseline after
+  B.0: 2445 errors / 318 files.
+- **B.1** (`6f0c7a7`): `ResourceLocation` → `Identifier` (481 sites, pure rename), package moves,
+  `isClientSide()`/`getRandom()`, and `InteractionResult` collapsing its two siblings.
+  2445 → 1546. A follow-up (`e7896aa`) caught seven sites the regexes missed: `isClientSide`
+  reads on `tile.world()` rather than `level`, `level().random`, and one `sidedSuccess`. That
+  brought it to 1537.
+- **B.2** (`f02ba1b`): ids before construction (`DeferredRegisterCoFH#register(String,
+  Function<Identifier, I>)`), `new BlockEntityType<>(…)`, `EntityType.Builder#build(ResourceKey)`,
+  `EnumProperty<Direction>`, `KeyMapping.Category`. Only 1546 → 1545, because CoFHCore
+  registers very little itself; the overload is groundwork for B.10.
+
+B.2's key-category change was written by re-serializing `en_us.json`, which collapsed the
+file's repeated `"_comment"` section headers and blank-line grouping. No key was lost (checked
+by parsing both versions), but the layout was restored in `d029eb0`. **Edit lang files as text,
+not through a JSON round-trip**: duplicate keys are how these files mark their sections.
+
+Shapes are in [api-notes-26.1.2.md](api-notes-26.1.2.md). Next is B.3 (persistence).
+
+---
+
+## Phase A follow-up — `runData` in all four repos (2026-09-22)
+
+Run on the `1.21.1` branches (CoFHCore temporarily checked out there, since the Thermal repos
+`includeBuild('../CoFHCore')`). It was Phase A's second owed item, and it turned up more than
+expected.
+
+**The data run had never worked on 1.21.1.** All four `build.gradle`s declared `clientData()`,
+which MDG only offers from 1.21.4 on, so `prepareDataRun` failed with "unknown run: clientData".
+1.21.1's run type is plain `data()`; `clientData()` is right again on the 26.1.2 branch.
+ThermalExpansion's run also needs `--existing-mod thermal`, because its item textures
+(`slot_seal` and the rest) live in ThermalCore's namespace and `ModelBuilder#texture` rejects
+textures it can't find.
+
+**The data run is a client-dist launch, so it caught a client crash.** CoFHCore's
+`LevelRendererMixin` still declared `renderLevel`'s 1.20 parameters. Mixin rejected it with
+"Invalid descriptor" as soon as ThermalCore's run loaded `LevelRenderer`. Headless servers never
+load the class, which is how Phase A's boots missed it, and the client pass would have died on
+it. Fixed in CoFHCore `fa87214`. Checking the other client mixins against the sources jar found
+`GameRendererMixin` and `MultiPlayerGameModeMixin` fine, but `MouseHandlerMixin`'s
+`ordinal = 3` local capture probably drifted when `turnPlayer` gained a parameter. That one is
+filed in TODO for the client pass rather than changed blind.
+
+**The hand-migrated generated output was silently wrong in ways no boot reports.** 1.21's codecs
+ignore unknown fields instead of rejecting them, so stale 1.20 JSON loads without error and
+simply does something else:
+
+| Repo | What regenerating fixed |
+|---|---|
+| CoFHCore (`a9ce116`) | 19 `c:` tags and a loot table still in the 1.20 plural folders (`tags/items`, `loot_tables`), which 1.21 does not read at all. Contents byte-identical; only the paths moved. |
+| ThermalCore (`5a6ea0a`) | 77 recipe-unlock advancements on the 1.20 `{"tag": …}` item predicate, so each matched any item. 4 glass loot tables on the 1.20 `enchantments` `match_tool` form, so the glass dropped itself without silk touch. 2 stonecutting recipes with a top-level `count`. |
+| ThermalDynamics (`c179946`) | 8 recipe-unlock advancements that were never committed. |
+| ThermalExpansion (`ab68ab2`) | 9 more `{"tag": …}` advancements. Item models came out unchanged. |
+
+The rest of the diff is cosmetic: explicit `"count": 1`, single-item lists as bare strings, no
+trailing newline. The lesson for B.8 is to **regenerate rather than hand-migrate**, and diff the
+result: a clean boot proves nothing about data files.

@@ -257,6 +257,22 @@ A loot table is identified by `ResourceKey<LootTable>`, and `MinecraftServer#get
 `CompletableFuture<…>`); a `SubProviderEntry`'s factory takes them too.
 `PlacementModifierType#codec()` returns a `MapCodec`. `BootstapContext` → `BootstrapContext`.
 
+**The run.** MDG's 1.21.1 run type is `data()`. `clientData()` only exists from 1.21.4 and fails
+`prepareDataRun` with "unknown run: clientData". It is a client-dist launch, so client mixins
+apply during it, which makes it a cheap first check for a client crash. A mod whose models point
+at another mod's textures needs `'--existing-mod', '<modid>'` in its program arguments
+(ThermalExpansion → `thermal`).
+
+**Output formats a 1.20 hand-migration gets wrong.** 1.21 codecs ignore unknown fields, so none
+of these errors at load; they just behave differently:
+
+| Where | 1.20 | 1.21.1 |
+|---|---|---|
+| Folders | `tags/items`, `tags/blocks`, `tags/fluids`, `loot_tables`, `recipes`, `advancements` | `tags/item`, `tags/block`, `tags/fluid`, `loot_table`, `recipe`, `advancement` — plural folders are **not read** |
+| Item predicate (advancements, `match_tool`) | `{"tag": "c:ingots/iron"}` / `{"items": ["a:b"]}` | `{"items": "#c:ingots/iron"}` / `{"items": "a:b"}` (a `HolderSet`) |
+| Enchantment in an item predicate | `"enchantments": [{"enchantment": "minecraft:silk_touch", …}]` | `"predicates": {"minecraft:enchantments": [{"enchantments": "minecraft:silk_touch", …}]}` |
+| Stonecutting count | top-level `"count"` | `result.count` |
+
 ## 14. Resources
 
 Folders are singular: `tags/{block,item,fluid,entity_type}`, `recipe`, `advancement`,

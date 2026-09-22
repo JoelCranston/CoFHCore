@@ -84,3 +84,105 @@ hop can see what was dropped and why):
 
 `net.minecraft.client.renderer.rendertype` is the new home of `RenderType`, `RenderTypes`,
 `RenderSetup`, `LayeringTransform`, `OutputTarget`, `TextureTransform`.
+
+---
+
+## B.1 Mechanical renames
+
+All confirmed in `minecraft-patched-26.1.2.109-sources.jar`. 2445 → 1537 errors across B.1 and its
+stragglers.
+
+| 1.21.1 | 26.1.2 | Note |
+|---|---|---|
+| `net.minecraft.resources.ResourceLocation` | `net.minecraft.resources.Identifier` | Every static factory kept (`fromNamespaceAndPath`, `parse`, `withDefaultNamespace`, `tryParse`) — 481 sites in 95 files were a pure rename |
+| `FriendlyByteBuf#readResourceLocation/writeResourceLocation` | `readIdentifier/writeIdentifier` | |
+| `ResourceKey#location()` | `ResourceKey#identifier()` | **`TagKey#location()` is unchanged** — only `ResourceKey`'s was renamed; a blind `.location()` → `.identifier()` sweep breaks tag code |
+| `net.minecraft.Util` | `net.minecraft.util.Util` | |
+| `net.minecraft.advancements.critereon.*` | `net.minecraft.advancements.criterion.*` | spelling fix |
+| `world.entity.projectile.AbstractArrow` | `world.entity.projectile.arrow.AbstractArrow` | |
+| `world.entity.projectile.ThrowableItemProjectile` | `world.entity.projectile.throwableitemprojectile.ThrowableItemProjectile` | |
+| `world.entity.vehicle.AbstractMinecart` | `world.entity.vehicle.minecart.AbstractMinecart` | |
+| `world.entity.vehicle.Boat` / `ChestBoat` | `world.entity.vehicle.boat.Boat` / `ChestBoat` | |
+| `client.model.BoatModel` | `client.model.object.boat.BoatModel` | |
+| `neoforge.client.model.data.ModelData/ModelProperty` | `neoforge.model.data.ModelData/ModelProperty` | |
+| `Level#isClientSide` (field) | `Level#isClientSide()` | **Receivers other than `level` are easy to miss** — the first sweep missed five `tile.world().isClientSide` reads |
+| `Level#random` (public field) | `Level#getRandom()` | the field is `protected` now |
+| `FMLEnvironment.dist` / `.production` | `FMLEnvironment.getDist()` / `isProduction()` | |
+| `RegistryAccess#registryOrThrow` / `Registry#getHolderOrThrow` | `lookupOrThrow` / `getOrThrow` | |
+
+### `InteractionResult` (collapsed in 1.21.2)
+
+`InteractionResultHolder<ItemStack>` and `ItemInteractionResult` are both gone; everything returns
+`InteractionResult`.
+
+| Was | Now |
+|---|---|
+| `InteractionResultHolder.pass/fail/consume/success(stack)` | `InteractionResult.PASS/FAIL/CONSUME/SUCCESS` |
+| `InteractionResult.sidedSuccess(level.isClientSide())` | `InteractionResult.SUCCESS` |
+| `ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION` | `InteractionResult.TRY_WITH_EMPTY_HAND` |
+
+The sealed interface's constants are `SUCCESS` (client swing), `SUCCESS_SERVER` (server swing),
+`CONSUME` (no swing) — all three `InteractionResult.Success` — plus `FAIL`, `PASS` and
+`TRY_WITH_EMPTY_HAND`.
+
+Every CoFHCore site returned the held stack unchanged, so none needed
+`InteractionResult.SUCCESS.heldItemTransformedTo(stack)` — ThermalCore's bucket-like items will.
+`useItemOn`'s parameter list is unchanged; only its return type moved.
+
+---
+
+## B.2 Registration
+
+### Blocks and items need their id before construction
+
+`BlockBehaviour.Properties` and `Item.Properties` both require `setId(ResourceKey)` before the
+`Block`/`Item` constructor runs. The registration therefore has to see its own id, and
+`DeferredRegisterCoFH` gained the overload NeoForge's own `DeferredRegister` already has:
+
+```java
+public synchronized <I extends T> DeferredHolder<T, I> register(String name, Function<Identifier, ? extends I> func)
+```
+
+Call shape (`CoreBlocks`):
+
+```java
+BLOCKS.register(ID_GLOSSED_MAGMA, id -> new GlossedMagmaBlock(ofFullCopy(Blocks.MAGMA_BLOCK)
+        .lightLevel(lightValue(6)).setId(ResourceKey.create(Registries.BLOCK, id))));
+```
+
+Items are the same with `Registries.ITEM`. CoFHCore registers only five blocks and no plain items
+this way; the overload exists for ThermalCore/TD/TE (B.10), which register hundreds through
+`RegistrationHelper`.
+
+### Block entity and entity types
+
+| 1.21.1 | 26.1.2 |
+|---|---|
+| `BlockEntityType.Builder.of(Ctor::new, blocks…).build(null)` | `new BlockEntityType<>(Ctor::new, blocks…)` — the builder is gone; NeoForge makes the constructor public |
+| `EntityType.Builder#build(String)` | `build(ResourceKey<EntityType<?>>)` — so entity registration takes the `Function<Identifier, …>` overload too: `id -> …build(ResourceKey.create(Registries.ENTITY_TYPE, id))` |
+
+### `DirectionProperty` is deleted (1.21.2)
+
+Vanilla's `FACING`/`HORIZONTAL_FACING` are plain `EnumProperty<Direction>` now:
+
+```java
+EnumProperty.create("facing", Direction.class, Direction.Plane.HORIZONTAL)
+```
+
+### Key mapping categories
+
+A category is `KeyMapping.Category`, a record over an `Identifier`, not a free string.
+
+- **Build it with `new KeyMapping.Category(id)`**, not the deprecated
+  `KeyMapping.Category.register(Identifier)`. That one registers into a static set and **throws on a
+  duplicate id**. The port plan suggested `register`; the constructor is what works.
+- Register it with `RegisterKeyMappingsEvent#registerCategory(category)`, which is what puts it in
+  the controls screen's sort order.
+- Its label is `id.toLanguageKey("key.category")`: CoFH's category `cofh_core:cofh` reads
+  `key.category.cofh_core.cofh`, so en_us.json needs that key. The old category was a bare `"CoFH"`
+  string with no lang entry.
+
+### Deferred to later categories
+
+`CoreRecipeSerializers` (the `RecipeSerializer` record and the `RecipeType` `minecraft:` prefix) is
+B.6, and `CoreShaders` is B.7g. Both still fail to compile after B.2.

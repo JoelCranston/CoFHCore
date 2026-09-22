@@ -7,8 +7,9 @@
 | **This file** | Always. Context, decisions, and current state. |
 | [docs/port-plan.md](docs/port-plan.md) | **Starting any porting work.** The approved plan (2026-09-21): 1.20.6-partial → 1.21.1 → 26.1.2 directly, with every version, coordinate, replacement API and reference location stated. Phase/category order lives there, not here. |
 | `docs/reference/` (**local only, gitignored**) | Confirming an API shape. Vendored primers (1.20.5 → 26.1), NeoForge release notes, the 26.1 and 1.21.1 docs, NeoForge/JEI source file lists and key source files. `scripts/fetch_reference.sh` recreates it. `grep` it. |
-| [docs/api-notes-1.21.1.md](docs/api-notes-1.21.1.md) | **Writing any code against a 1.21.1 API.** Every shape confirmed against the real mapped jar during the completed 1.21.1 hop, in the port plan's category order — including the four sweeps that had to be partly reverted. Read before deriving a shape again, and before starting Phase B. |
-| [docs/api-notes-1.20.6.md](docs/api-notes-1.20.6.md) | The 1.20.5/1.20.6 predecessor (all still valid on 1.21.1, but 1.21.1's notes supersede it where they overlap). Successor for the next hop: `api-notes-26.1.2.md`. |
+| [docs/api-notes-26.1.2.md](docs/api-notes-26.1.2.md) | **Writing any code against a 26.1.2 API (Phase B, in progress).** Shapes confirmed against `minecraft-patched-26.1.2.109-sources.jar`, category by category as each lands: B.0, the AT sweep, B.1, B.2 so far. Check it, then Pyronetics' notes, before deriving anything. |
+| [docs/api-notes-1.21.1.md](docs/api-notes-1.21.1.md) | **Writing any code against a 1.21.1 API**, or when a 26.1 change needs its 1.21.1 starting point. Every shape confirmed during the completed 1.21.1 hop, in the port plan's category order — including the four sweeps that had to be partly reverted. |
+| [docs/api-notes-1.20.6.md](docs/api-notes-1.20.6.md) | The 1.20.5/1.20.6 predecessor (all still valid on 1.21.1, but 1.21.1's notes supersede it where they overlap). |
 | [docs/TODO.md](docs/TODO.md) | Picking up work. The live, current-priority list of what's still broken, by error count. **Anything noticed mid-session goes in its Inbox.** |
 | [docs/progress-log.md](docs/progress-log.md) | The story behind a decision, or the chronology of the hop so far — what's already fixed, in what order, why a number is what it is. Append-only. |
 | `docs/context/` (**local only, gitignored**) | The progress log doesn't have the detail you need. Full session transcript exports — this whole 4-repo porting effort runs in one shared session, exported under `ThermalExpansion/docs/context/` (that's the session's project directory) rather than duplicated into each repo. `grep` it, don't read it whole. |
@@ -74,29 +75,25 @@ It is a *reference* here, never a dependency.
 
 ## Current state
 
-**Phase A is code-complete: all four repos build clean and boot headless on NeoForge 21.1.251.**
-(2026-09-22)
+**Phase A (1.21.1) is code-complete; Phase B (26.1.2) is in progress on CoFHCore.** (2026-09-22)
 
-| Repo | Baseline errors | Now |
+| Repo | Branch | State |
 |---|---|---|
-| CoFHCore | 849 / 175 files | 0 |
-| ThermalCore | 575 / ~100 files | 0 |
-| ThermalDynamics | (never compiled standalone) | 0 |
-| ThermalExpansion | (never compiled standalone) | 0 |
+| CoFHCore | `26.1.2` | B.0-B.2 done; **1537 errors** (baseline 2445 / 318 files). Next: B.3 persistence |
+| CoFHCore | `1.21.1` | 0 errors, boots headless, `runData` clean |
+| ThermalCore | `1.21.1` | 0 errors, boots headless, `runData` clean. Waits for CoFHCore 26.1.2 (B.10) |
+| ThermalDynamics | `1.21.1` | same |
+| ThermalExpansion | `1.21.1` | same; its run loads CoFHCore + ThermalCore + ThermalExpansion together |
 
-Branch **`1.21.1`** in each, building with **ModDevGradle 2.0.147**. Each repo's
-`verify_runserver.sh` reaches `Done (…)` with no registry, recipe or loot-table errors;
-ThermalExpansion's run loads CoFHCore + ThermalCore + ThermalExpansion together.
+All repos build with **ModDevGradle 2.0.147**. Shape oracles differ by branch:
+`build/moddev/artifacts/minecraft-patched-26.1.2.109-sources.jar` on `26.1.2`,
+`neoforge-21.1.251-sources.jar` on `1.21.1`. MDG keeps both in `build/moddev/artifacts/`, so
+switching branches doesn't rebuild them. The Thermal repos `includeBuild('../CoFHCore')`, so
+**whatever branch CoFHCore has checked out is what they compile against**. Put CoFHCore on
+`1.21.1` to build or run any of them until B.10.
 
-Shape oracle on this target: `build/moddev/artifacts/neoforge-21.1.251-sources.jar`
-(`unzip -p … net/minecraft/…/X.java`); the MDG artifact names differ from 26.1's
-`minecraft-patched-<ver>` layout. Every shape confirmed during the hop is written up in
-[docs/api-notes-1.21.1.md](docs/api-notes-1.21.1.md) — **read that before deriving anything
-again**, and before starting Phase B.
-
-**Next step**: Phase A's remaining exit criterion is the client pass (§A.4 of the port plan) —
-a `runClient` session covering a machine GUI, an energy/fluid/item cell in world and in item
-form, a duct network, a JEI machine recipe page, the Patchouli guidebook, wrench side-config and
-particles. That is Joel's to run; headless boots cannot see model, texture or GUI breakage, so
-everything client-side is **owed verification**. After that, Phase B (26.1.2) per
-[docs/port-plan.md](docs/port-plan.md) §6.
+**Phase A's one owed item is the client pass** (port plan §A.4), which is Joel's to run. The
+`runData` pass already found and fixed one client crash (`LevelRendererMixin`), and
+`MouseHandlerMixin` is flagged in [docs/TODO.md](docs/TODO.md) as a specific thing to check.
+Phase B's order and contents are in [docs/port-plan.md](docs/port-plan.md) §6. Live status by
+category, with error counts, is in the TODO.
