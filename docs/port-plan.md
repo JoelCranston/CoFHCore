@@ -227,7 +227,7 @@ neoForge {
         server { server(); programArgument '--nogui' }
         gameTestServer { type = 'gameTestServer' }
         data {
-            clientData()      // 1.21.4+ has no 'data' run type; clientData generates both assets and data
+            data()            // 1.21.1; B.0 switches it to clientData() (1.21.4+)
             programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/main/generated/').absolutePath, '--existing', file('src/main/resources/').absolutePath
         }
         configureEach { systemProperty 'forge.logging.markers', 'REGISTRIES'; logLevel = org.slf4j.event.Level.DEBUG }
@@ -250,8 +250,9 @@ processResources { filesMatching('META-INF/neoforge.mods.toml') { expand 'file':
 
 Notes that matter:
 - Keep the `'MixinConfigs': 'mixins.cofhcore.json'` manifest attribute in CoFHCore's `jar`.
-- MDG's `data { data() }` no longer exists for 1.21.4+; using `clientData()` from the start
-  avoids touching it again in Phase B. On 1.21.1 `clientData()` behaves like `data()`.
+- MDG's `data { data() }` no longer exists for 1.21.4+, but `clientData()` doesn't exist *before*
+  it: on 1.21.1 `prepareDataRun` fails with "unknown run: clientData" (found 2026-09-22, see the
+  progress log's runData entry). Use `data()` on 1.21.1 and switch in B.0.
 - Delete `build/`, `.gradle/` before the first MDG sync (`./gradlew --stop; rm -rf build .gradle`).
 - Included builds: their jars have `neoforge.mods.toml`, so MDG loads them as mods in runs
   (MDG README, "External Dependencies: Runs"). Verify once with `runServer` in ThermalCore.

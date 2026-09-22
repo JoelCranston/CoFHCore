@@ -59,6 +59,22 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 
 ## Inbox
 
+- **Behaviour differences the style pass found (2026-09-22), left alone because that pass was
+  not allowed to change behaviour.** Each is a 1.21.1 fix to decide on:
+  - **Fluid buffers drop components.** TD's `FluidDuctWindowedBlockEntity` and its 4 fluid
+    filter/servo menus, plus CoFHCore's `FluidFilterMenu#getGuiPacket`, hand-encode fluid id and
+    amount. `FluidHelper.writeFluidStack`/`readFluidStack` exists to keep components. It's
+    harmless while the GUIs only show fluid and amount, but it's inconsistent with the API notes.
+  - **`CropBlockCoFH` lost its main-hand-only harvest check**, because `useWithoutItem` has no
+    hand. The check could move to `useItemOn`.
+  - **`InventoryContainerItem` reads with `RegistryAccess.EMPTY`**, which drops registry-bound
+    components. §11 of the API notes says to use `ProxyUtils.registryAccess()` outside
+    persistence.
+  - **`EntityBlockCoFH` routes `useWithoutItem` into `useItemOn` with an empty stack**, the
+    pattern §10 of the API notes warns about.
+  - **ThermalCore `WrenchItem`** applies its attribute modifiers to every slot group via
+    `MAINHAND`. Check that's intended.
+
 - ~~`RecipeManager#byType`~~ resolved: ThermalCore's 26 call sites use the public
   `getAllRecipesFor(type)`, which returns a `List<RecipeHolder<T>>` rather than a Map.
 - MDG artifact names for 1.21.1 are `build/moddev/artifacts/neoforge-21.1.251{,-sources,-merged}.jar`

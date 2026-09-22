@@ -10,6 +10,7 @@
 | [docs/api-notes-26.1.2.md](docs/api-notes-26.1.2.md) | **Writing any code against a 26.1.2 API (Phase B, in progress).** Shapes confirmed against `minecraft-patched-26.1.2.109-sources.jar`, category by category as each lands: B.0, the AT sweep, B.1, B.2 so far. Check it, then Pyronetics' notes, before deriving anything. |
 | [docs/api-notes-1.21.1.md](docs/api-notes-1.21.1.md) | **Writing any code against a 1.21.1 API**, or when a 26.1 change needs its 1.21.1 starting point. Every shape confirmed during the completed 1.21.1 hop, in the port plan's category order — including the four sweeps that had to be partly reverted. |
 | [docs/api-notes-1.20.6.md](docs/api-notes-1.20.6.md) | The 1.20.5/1.20.6 predecessor (all still valid on 1.21.1, but 1.21.1's notes supersede it where they overlap). |
+| [docs/code-style.md](docs/code-style.md) | **Before writing any code, in any of the four repos.** Upstream CoFH's style, measured from the `1.20.4` code: one-line comments at most, a blank line opening every method body, `@Annotation (args)`, regions, imports over qualified names. |
 | [docs/TODO.md](docs/TODO.md) | Picking up work. The live, current-priority list of what's still broken, by error count. **Anything noticed mid-session goes in its Inbox.** |
 | [docs/progress-log.md](docs/progress-log.md) | The story behind a decision, or the chronology of the hop so far — what's already fixed, in what order, why a number is what it is. Append-only. |
 | `docs/context/` (**local only, gitignored**) | The progress log doesn't have the detail you need. Full session transcript exports — this whole 4-repo porting effort runs in one shared session, exported under `ThermalExpansion/docs/context/` (that's the session's project directory) rather than duplicated into each repo. `grep` it, don't read it whole. |
@@ -66,6 +67,10 @@ It is a *reference* here, never a dependency.
 - **Branch per target version** (`1.20.4`, `1.20.6`, `1.21.1`, `26.1.2`), climbing in
   place rather than one long-lived branch — matches the sibling repos' branch strategy.
   `1.20.6` is a dead end kept for history; `1.21.1` was branched from it.
+- **Code style matches upstream CoFH** (Joel, 2026-09-22). The port is meant to go upstream as
+  pull requests, so every added line follows [docs/code-style.md](docs/code-style.md). Keep
+  comments brief (one line, no version tags, porting narration or doc pointers) unless the change
+  is major. API findings go in the api-notes docs, not in code comments.
 - **Verify every API shape against the real jar**, never against summarized docs or
   recollection of older versions. With ModDevGradle that is the patched *sources* jar:
   `unzip -p build/moddev/artifacts/neoforge-<neo_version>-sources.jar net/minecraft/.../X.java` (1.21.1 naming; 26.1's is `minecraft-patched-<neo_version>-sources.jar`)

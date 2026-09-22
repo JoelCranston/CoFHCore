@@ -315,3 +315,90 @@ enchantment explicitly (`"enchantment": "minecraft:looting"`) and wants a full n
 `compatibilityLevel` should be `JAVA_21` (the loader sets it there regardless). A client-only
 target listed under `mixins` rather than `client` fails to apply on a dedicated server —
 `MultiPlayerGameModeMixin` was in the wrong list.
+
+## 17. Recovered from code comments (style pass, 2026-09-22)
+
+The port originally recorded these facts in code comments. The upstream style pass removed the
+comments, so the facts live here now. Each was confirmed against the jar when the code was
+written. They are grouped by the categories above.
+
+**Items, tools, armour (§8)**
+- `ItemStack#hurtAndBreak` applies Unbreaking itself, so the old `RandomSource` argument has no
+  replacement. Overloads: `(int, ServerLevel, @Nullable ServerPlayer|LivingEntity, Consumer<Item>)`
+  and `(int, LivingEntity, EquipmentSlot)`. Get the slot from `LivingEntity.getSlotForHand(hand)`.
+- `Inventory#hurtArmor` is gone and `LivingEntity#hurtArmor` is `protected`. CoFH's
+  `ArmorEvents` damages each piece directly: a quarter of the damage, minimum 1.
+- `FoodProperties` is a record. Its effects are `PossibleEffect` (`effect()`, `probability()`),
+  eating is `player.getFoodData().eat(food)`, and `isFastFood()` became
+  `eatDurationTicks() < 32`. **`saturation` is absolute now** (it was a modifier, with
+  saturation = nutrition × modifier × 2).
+- `CrossbowItem`:
+  - Ammo is the `CHARGED_PROJECTILES` component; `setCharged` and the `"AMMO"` tag are gone.
+  - `setShotFromCrossbow` and `setPierceLevel` are gone. Use `arrow.firedFromWeapon` and
+    `EnchantmentHelper.onProjectileSpawned`, which also covers `setKnockback`/`setSecondsOnFire`.
+- `AbstractArrow` constructors take the weapon stack. Damage enchantments go through
+  `EnchantmentHelper.modifyDamage`, and the two post-hit hooks merged into
+  `doPostAttackEffectsWithItemSource`.
+- Fishing bonuses are `EnchantmentHelper.getFishingLuckBonus(ServerLevel, stack, entity)` and
+  `getFishingTimeReduction(…)`. Only CoFH's own tiers still carry a numeric level.
+- `Enchantment#getSlotItems` is gone; walk every `EquipmentSlot` instead. Loyalty on a CoFH
+  item works through a `supportsEnchantment` override.
+- `ProjectileItem.DispenseConfig` replaces per-item dispense-behaviour subclasses.
+
+**Mob effects, potions (§5)**
+- `Potion.getName(Optional<Holder<Potion>>, prefix)` builds the whole translation key.
+  `PotionContents#getColor` prefers the custom colour. The old `display`/`HideFlags` NBT maps to
+  `CUSTOM_NAME` / `HIDE_ADDITIONAL_TOOLTIP`.
+- `PotionBrewing`'s mixes are private lists that can't be enumerated, so ThermalCore's brewer
+  conversion tries each potion against each ingredient.
+
+**Enchantments (§6)**
+- Frost Walker is the datapack effect `minecraft:replace_disk`; there's no `FrostWalkerEnchantment`
+  to call. Blizz re-implements the level-1 disk: radius 3, frosted ice ticking 60–120.
+  `Entity#onChangedBlock`'s `super` runs the location-changed effects, Soul Speed included.
+- CoFH's "enable" config works through `Utils.setEnchantmentEnabled`; a disabled enchantment
+  reads as level 0. The "Treasure" option is now the `minecraft:treasure` tag, which only a data
+  pack can change.
+
+**Entities, projectiles (§8/§10)**
+- `AbstractHurtingProjectile`'s per-axis power fields (`xPower`/`yPower`/`zPower`) became a
+  movement `Vec3` plus `accelerationPower`.
+- Dimension travel is the `Portal` interface (`setAsInsidePortal`). `TheEndGatewayBlockEntity`'s
+  static teleport helpers are gone.
+- A `DeferredHolder` is a `Holder`; pass it without `.get()`.
+- `LivingDamageEvent.Pre` can't be cancelled; set the amount to zero instead.
+
+**Blocks (§10)**
+- `Block#getExpDrop` is `(state, LevelAccessor, pos, BlockEntity, Entity breaker, ItemStack tool)`;
+  read silk touch off the tool.
+- `useWithoutItem` has no hand, so a main-hand-only check can't live there.
+
+**Persistence, network (§11)**
+- `SavedData.Factory`'s load function takes the registry lookup.
+- Block items keep augments and security in `BLOCK_ENTITY_DATA`, which vanilla restores on
+  placement. Everything else uses `CUSTOM_DATA`.
+- A payload record component can't be named `type`: it clashes with `CustomPacketPayload#type()`.
+- `connection.connection.isConnected()` → `connection.isAcceptingMessages()`.
+- `Component.Serializer.toJson`/`fromJsonLenient` take a registries argument.
+- `Player#getBlockReach()` → `blockInteractionRange()`.
+
+**Recipes, datagen (§12/§13)**
+- `Ingredient.fromJson` is gone; use `Ingredient.CODEC.parse(JsonOps.INSTANCE, json)`. A custom
+  ingredient is keyed `"neoforge:ingredient_type": "cofh_core:with_count"`, and it must report
+  `isSimple() == false`, since stack size can't be matched by item alone.
+- `CopyNbtFunction` → `CopyCustomDataFunction`, without the `BlockEntityTag.` destination
+  prefix. `SetContainerContents` takes `ContainerComponentManipulators.CONTAINER`.
+- The bottled item takes the fluid's component patch through `applyComponents`, which is how
+  potion contents reach the bottle.
+
+**Client (§14/§15)**
+- `BakedQuad#getIntegerSize()` is gone; use `getVertexSize() / 4`.
+- `MultiBufferSource.immediateWithBuffers` takes a `SequencedMap<RenderType, ByteBufferBuilder>`,
+  so use a `LinkedHashMap`.
+- A `static` codec factory can't share an erased signature with a superclass's static method,
+  hence `BiColorParticleOptions`/`CylindricalParticleOptions`' distinct names.
+
+**Build**
+- `-Xmaxerrs 100000`: javac otherwise caps output at 100, which hides a hop's true error count.
+- Upstream's `commonManifest` was defined but never applied to the jar. Its `MixinConfigs` entry is
+  what loads mixins in a production jar, so the port applies it.

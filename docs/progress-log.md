@@ -341,3 +341,36 @@ simply does something else:
 The rest of the diff is cosmetic: explicit `"count": 1`, single-item lists as bare strings, no
 trailing newline. The lesson for B.8 is to **regenerate rather than hand-migrate**, and diff the
 result: a clean boot proves nothing about data files.
+
+---
+
+## Upstream style pass — all four repos (2026-09-22)
+
+Joel plans to submit the port upstream as pull requests to the CoFH repos, so every line the port
+added now has to read like CoFH's own code. The rules are in [code-style.md](code-style.md),
+measured from the untouched `1.20.4` code. Upstream has only a few dozen prose comments in
+CoFHCore and ThermalCore combined. 3,241 of its 3,245 method bodies open with a blank line, and
+annotation arguments take a space.
+
+The port had drifted furthest on comments: about 600 lines of `// 1.21:` notes, migration
+narration and doc pointers. Four agents worked in parallel on `1.21.1` (CoFHCore `lib` + build
+files, CoFHCore `core`, ThermalCore, and TD + TE). They removed roughly 530 comment lines and
+left about 45 one-line reasons in upstream's voice. They also:
+- put ~100 files' imports into IntelliJ order, and removed ~160 unused imports
+- restored upstream forms the port had changed without needing to: commented-out code,
+  parameter names, wrapping, member order, and about 90 redundant `(float)` casts
+
+No behaviour changed: all four repos build, and TE/TD boot headless. The API facts those
+comments held moved to [api-notes-1.21.1.md](api-notes-1.21.1.md) §17, and the behaviour
+differences the agents noticed are in the TODO Inbox.
+
+`26.1.2` took the pass by merge, not rebase (14 conflicts). Three things came out of that merge:
+- **B.1's rename sweep had also rewritten upstream's commented-out code** (38 lines, e.g.
+  `new ResourceLocation(…)` → `new Identifier(…)`, which isn't even valid). Those lines are
+  restored verbatim. Sweep only live code.
+- **The merge silently took 1.21.1's `data()` run type.** `26.1.2` needs `clientData()`.
+  Check `build.gradle` after every merge between version branches.
+- **The access transformer's `# REMOVED 26.1.2:` notes are gone.** Git history records dropped
+  lines; api-notes-26.1.2 records why.
+
+The error count was 1537 before and after, which confirms the merge changed no code.
