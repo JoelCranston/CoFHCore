@@ -11,7 +11,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Endermite;
 import net.minecraft.world.level.Level;
@@ -48,7 +48,7 @@ public class AreaUtils {
     public static final IEffectApplier IGNITE_ENTITIES = (target, duration, power, source) -> {
 
         if (!target.fireImmune() && !target.isInWater() && target.getRemainingFireTicks() <= 0) {
-            target.setSecondsOnFire(duration / 20);
+            target.igniteForSeconds((float) (duration / 20));
         }
         if (target instanceof LivingEntity living) {
             living.removeEffect(CHILLED);
@@ -252,9 +252,10 @@ public class AreaUtils {
 
         if (target instanceof LivingEntity living) {
             living.addEffect(new MobEffectInstance(MobEffects.GLOWING, duration, power));
-            if (living.getMobType() == MobType.UNDEAD) {
-                living.hurt(living.level.damageSources().indirectMagic(source instanceof LivingEntity ? source : null, null), 4.0F);
-                living.setSecondsOnFire(duration / 20);
+            // MobType is gone; "undead" is the minecraft:undead entity type tag now.
+            if (living.getType().is(EntityTypeTags.UNDEAD)) {
+                living.hurt(living.level().damageSources().indirectMagic(source instanceof LivingEntity ? source : null, null), 4.0F);
+                living.igniteForSeconds(duration / 20.0F);
             }
         }
     };
@@ -505,7 +506,7 @@ public class AreaUtils {
         mobs.removeIf(Entity::fireImmune);
         mobs.removeIf(mob -> mob instanceof EnderMan);
         for (LivingEntity mob : mobs) {
-            mob.setSecondsOnFire(duration);
+            mob.igniteForSeconds((float) (duration));
         }
     }
 

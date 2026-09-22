@@ -39,7 +39,7 @@ public class SubCommandIgnite {
     private static int igniteEntities(CommandSourceStack source, Collection<? extends Entity> targets, int duration) {
 
         for (Entity entity : targets) {
-            entity.setSecondsOnFire(duration);
+            entity.igniteForSeconds((float) (duration));
         }
         if (targets.size() == 1) {
             source.sendSuccess(() -> Component.translatable("commands.cofh.ignite.success.single", targets.iterator().next().getDisplayName()), true);
