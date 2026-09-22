@@ -6,7 +6,6 @@ import cofh.core.init.CoreShaders;
 import cofh.core.util.helpers.vfx.VFXHelper;
 import cofh.lib.util.helpers.MathHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
@@ -21,16 +20,18 @@ import static cofh.core.util.helpers.vfx.RenderTypes.BLANK_TEXTURE;
 
 public class WindSpiralParticle extends CylindricalParticle {
 
+    protected float roll;
+
     private WindSpiralParticle(CylindricalParticleOptions data, ClientLevel level, double x, double y, double z, double xDir, double yDir, double zDir) {
 
         super(data, level, x, y, z, xDir, yDir, zDir);
         //alpha = 0.20F * (1.0F + random.nextFloat());
         //rCol = gCol = bCol = 1.0F - 0.1F * random.nextFloat();
-        oRoll = roll = random.nextFloat() * MathHelper.F_TAU;
+        roll = random.nextFloat() * MathHelper.F_TAU;
     }
 
     @Override
-    public void render(PoseStack stack, MultiBufferSource buffer, VertexConsumer consumer, int packedLightIn, float time, float pTicks) {
+    public void render(PoseStack stack, MultiBufferSource buffer, int packedLightIn, float time, float pTicks) {
 
         SplittableRandom rand = new SplittableRandom(this.seed);
         if (!rotation.equals(new Quaternionf())) {
@@ -59,7 +60,7 @@ public class WindSpiralParticle extends CylindricalParticle {
     @Nonnull
     public static ParticleProvider<CylindricalParticleOptions> factory(SpriteSet spriteSet) {
 
-        return WindSpiralParticle::new;
+        return (data, level, x, y, z, xDir, yDir, zDir, random) -> new WindSpiralParticle(data, level, x, y, z, xDir, yDir, zDir);
     }
 
 }

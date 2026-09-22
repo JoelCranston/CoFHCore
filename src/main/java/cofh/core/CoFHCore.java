@@ -191,7 +191,6 @@ public class CoFHCore {
 
     private void clientSetup(final FMLClientSetupEvent event) {
 
-        event.enqueueWork(ProxyClient::registerItemModelProperties);
         event.enqueueWork(() -> CoreClientEvents.addNamespace(ID_COFH_CORE));
     }
 

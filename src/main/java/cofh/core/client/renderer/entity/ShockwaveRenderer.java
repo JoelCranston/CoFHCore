@@ -1,14 +1,14 @@
 package cofh.core.client.renderer.entity;
 
 import cofh.core.common.entity.Shockwave;
-import cofh.core.util.helpers.vfx.VFXHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.Identifier;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 
-public class ShockwaveRenderer extends EntityRenderer<Shockwave> {
+public class ShockwaveRenderer extends EntityRenderer<Shockwave, EntityRenderState> {
 
     public ShockwaveRenderer(EntityRendererProvider.Context pContext) {
 
@@ -16,19 +16,14 @@ public class ShockwaveRenderer extends EntityRenderer<Shockwave> {
     }
 
     @Override
-    public void render(Shockwave entity, float entityYaw, float partialTicks, PoseStack stack, MultiBufferSource buffer, int packedLight) {
+    public void submit(EntityRenderState state, PoseStack stack, SubmitNodeCollector collector, CameraRenderState camera) {
 
-        float time = entity.tickCount + partialTicks;
-        stack.pushPose();
-        stack.translate(-0.5, 0, -0.5);
-        VFXHelper.renderShockwave(stack, buffer, entity.level, entity.blockPosition(), time * entity.getSpeed(), entity.getBbWidth() * 0.5F, entity.getBbHeight());
-        stack.popPose();
     }
 
     @Override
-    public Identifier getTextureLocation(Shockwave pEntity) {
+    public EntityRenderState createRenderState() {
 
-        return null;
+        return new EntityRenderState();
     }
 
 }

@@ -7,7 +7,6 @@ import cofh.core.util.helpers.vfx.VFXHelper;
 import cofh.lib.util.helpers.MathHelper;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import it.unimi.dsi.fastutil.PriorityQueue;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectHeapPriorityQueue;
@@ -52,7 +51,7 @@ public class StreamParticle extends PointToPointParticle {
     }
 
     @Override
-    public void render(PoseStack stack, MultiBufferSource buffer, VertexConsumer consumer, int packedLight, float time, float pTicks) {
+    public void render(PoseStack stack, MultiBufferSource buffer, int packedLight, float time, float pTicks) {
 
         if (c0.a <= 0) {
             return;
@@ -227,7 +226,7 @@ public class StreamParticle extends PointToPointParticle {
     @Nonnull
     public static ParticleProvider<BiColorParticleOptions> factory(SpriteSet spriteSet) {
 
-        return StreamParticle::new;
+        return (data, level, sx, sy, sz, ex, ey, ez, random) -> new StreamParticle(data, level, sx, sy, sz, ex, ey, ez);
     }
 
 }

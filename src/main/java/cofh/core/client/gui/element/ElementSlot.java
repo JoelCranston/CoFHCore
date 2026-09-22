@@ -1,9 +1,7 @@
 package cofh.core.client.gui.element;
 
 import cofh.core.client.gui.IGuiAccess;
-import cofh.core.util.helpers.RenderHelper;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 
 import java.util.function.Supplier;
@@ -57,41 +55,34 @@ public class ElementSlot extends ElementBase {
     }
 
     @Override
-    public void drawBackground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawBackground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
-        PoseStack poseStack = pGuiGraphics.pose();
-        drawSlot(poseStack);
-        drawUnderlayTexture(poseStack);
+        drawSlot(pGuiGraphics);
+        drawUnderlayTexture(pGuiGraphics);
     }
 
     @Override
-    public void drawForeground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawForeground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
-        drawOverlayTexture(pGuiGraphics.pose());
+        drawOverlayTexture(pGuiGraphics);
     }
 
-    protected void drawSlot(PoseStack poseStack) {
+    protected void drawSlot(GuiGraphicsExtractor pGuiGraphics) {
 
-        RenderHelper.setPosTexShader();
-        RenderHelper.setShaderTexture0(texture);
-        drawTexturedModalRect(poseStack, posX(), posY(), 0, 0, width, height);
+        drawTexturedModalRect(pGuiGraphics, texture, posX(), posY(), 0, 0, width, height);
     }
 
-    protected void drawUnderlayTexture(PoseStack poseStack) {
+    protected void drawUnderlayTexture(GuiGraphicsExtractor pGuiGraphics) {
 
         if (drawUnderlay.get() && underlayTexture != null) {
-            RenderHelper.setPosTexShader();
-            RenderHelper.setShaderTexture0(underlayTexture);
-            drawTexturedModalRect(poseStack, posX(), posY(), 0, 0, width, height);
+            drawTexturedModalRect(pGuiGraphics, underlayTexture, posX(), posY(), 0, 0, width, height);
         }
     }
 
-    protected void drawOverlayTexture(PoseStack poseStack) {
+    protected void drawOverlayTexture(GuiGraphicsExtractor pGuiGraphics) {
 
         if (drawOverlay.get() && overlayTexture != null) {
-            RenderHelper.setPosTexShader();
-            RenderHelper.setShaderTexture0(overlayTexture);
-            drawTexturedModalRect(poseStack, posX(), posY(), 0, 0, width, height);
+            drawTexturedModalRect(pGuiGraphics, overlayTexture, posX(), posY(), 0, 0, width, height);
         }
     }
 

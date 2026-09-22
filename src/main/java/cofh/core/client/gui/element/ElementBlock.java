@@ -2,7 +2,7 @@ package cofh.core.client.gui.element;
 
 import cofh.core.client.gui.IGuiAccess;
 import cofh.core.util.helpers.RenderHelper;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -39,7 +39,7 @@ public class ElementBlock extends ElementBase {
     }
 
     @Override
-    public void drawForeground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawForeground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
         Block block = blockSup.get();
         if (block != Blocks.AIR) {
@@ -54,9 +54,9 @@ public class ElementBlock extends ElementBase {
                 renderBlock = block;
             }
             if (!renderStack.isEmpty()) {
-                pGuiGraphics.renderItem(renderStack, posX(), posY());
+                pGuiGraphics.item(renderStack, posX(), posY());
             } else {
-                RenderHelper.drawFluid(posX(), posY(), renderFluid, 16, 16);
+                RenderHelper.drawFluid(pGuiGraphics, posX(), posY(), renderFluid, 16, 16);
             }
         }
     }

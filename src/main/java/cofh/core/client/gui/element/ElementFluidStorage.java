@@ -5,7 +5,7 @@ import cofh.core.util.helpers.FluidHelper;
 import cofh.core.util.helpers.RenderHelper;
 import cofh.lib.common.fluid.FluidStorageCoFH;
 import cofh.lib.util.helpers.StringHelper;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 
@@ -29,7 +29,7 @@ public class ElementFluidStorage extends ElementResourceStorage {
     }
 
     @Override
-    protected void drawResource(PoseStack poseStack) {
+    protected void drawResource(GuiGraphicsExtractor pGuiGraphics) {
 
         int resourceHeight = height - 2;
         int resourceWidth = width - 2;
@@ -38,24 +38,22 @@ public class ElementFluidStorage extends ElementResourceStorage {
         boolean invert = FluidHelper.density(tank.getFluidStack()) < 0;
 
         if (fluidTexture != null) {
-            RenderHelper.setBlockTextureSheet();
-            RenderHelper.drawTiledTexture(guiLeft() + posX() + 1, guiTop() + posY() + 1 + (invert ? 0 : resourceHeight - amount), fluidTexture, resourceWidth, amount);
+            RenderHelper.drawTiledTexture(pGuiGraphics, posX() + 1, posY() + 1 + (invert ? 0 : resourceHeight - amount), fluidTexture, resourceWidth, amount);
         } else {
-            RenderHelper.drawFluid(guiLeft() + posX() + 1, guiTop() + posY() + 1 + (invert ? 0 : resourceHeight - amount), tank.getFluidStack(), resourceWidth, amount);
+            RenderHelper.drawFluid(pGuiGraphics, posX() + 1, posY() + 1 + (invert ? 0 : resourceHeight - amount), tank.getFluidStack(), resourceWidth, amount);
         }
     }
 
     @Override
-    protected void drawOverlayTexture(PoseStack poseStack) {
+    protected void drawOverlayTexture(GuiGraphicsExtractor pGuiGraphics) {
 
         if (!drawOverlay.get()) {
             return;
         }
         if (storage.isCreative() && creativeTexture != null) {
-            RenderHelper.setShaderTexture0(creativeTexture);
-            drawTexturedModalRect(poseStack, posX(), posY(), 0, 0, width, height);
+            drawTexturedModalRect(pGuiGraphics, creativeTexture, posX(), posY(), 0, 0, width, height);
         } else {
-            super.drawOverlayTexture(poseStack);
+            super.drawOverlayTexture(pGuiGraphics);
         }
     }
 

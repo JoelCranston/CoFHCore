@@ -5,7 +5,6 @@ import cofh.core.client.particle.options.ColorParticleOptions;
 import cofh.core.util.helpers.RenderHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 
 import javax.annotation.Nonnull;
@@ -21,13 +20,13 @@ public class BlastParticle extends SpriteParticle {
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
+    protected Layer getLayer() {
 
-        return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
+        return Layer.OPAQUE;
     }
 
     @Override
-    protected int getLightColor(float pTicks, double x, double y, double z) {
+    public int getLightCoords(float pTicks) {
 
         return RenderHelper.FULL_BRIGHT;
     }
@@ -45,7 +44,7 @@ public class BlastParticle extends SpriteParticle {
     @Nonnull
     public static ParticleProvider<ColorParticleOptions> factory(SpriteSet spriteSet) {
 
-        return (data, level, x, y, z, dx, dy, dz) -> new BlastParticle(data, level, spriteSet, x, y, z, dx, dy, dz);
+        return (data, level, x, y, z, dx, dy, dz, random) -> new BlastParticle(data, level, spriteSet, x, y, z, dx, dy, dz);
     }
 
 }

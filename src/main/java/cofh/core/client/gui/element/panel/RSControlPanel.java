@@ -1,12 +1,11 @@
 package cofh.core.client.gui.element.panel;
 
 import cofh.core.client.gui.IGuiAccess;
-import cofh.core.util.helpers.RenderHelper;
 import cofh.lib.api.control.IRedstoneControllable;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
 
 import java.util.List;
 
@@ -48,15 +47,15 @@ public class RSControlPanel extends PanelBase {
 
     // TODO: Fully support new Redstone Control system.
     @Override
-    protected void drawForeground(GuiGraphics pGuiGraphics) {
+    protected void drawForeground(GuiGraphicsExtractor pGuiGraphics) {
 
         drawPanelIcon(pGuiGraphics, ICON_REDSTONE_ON);
         if (!fullyOpen) {
             return;
         }
-        pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.redstone_control"), sideOffset() + 18, 6, headerColor, true);
-        pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.control_status") + ":", sideOffset() + 6, 42, subheaderColor, true);
-        pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.signal_required") + ":", sideOffset() + 6, 66, subheaderColor, true);
+        drawString(pGuiGraphics, localize("info.cofh.redstone_control"), sideOffset() + 18, 6, headerColor, true);
+        drawString(pGuiGraphics, localize("info.cofh.control_status") + ":", sideOffset() + 6, 42, subheaderColor, true);
+        drawString(pGuiGraphics, localize("info.cofh.signal_required") + ":", sideOffset() + 6, 66, subheaderColor, true);
 
         gui.drawIcon(pGuiGraphics, ICON_BUTTON, 28, 20);
         gui.drawIcon(pGuiGraphics, ICON_BUTTON, 48, 20);
@@ -65,18 +64,18 @@ public class RSControlPanel extends PanelBase {
         switch (myRSControllable.getMode()) {
             case DISABLED -> {
                 gui.drawIcon(pGuiGraphics, ICON_BUTTON_HIGHLIGHT, 28, 20);
-                pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.disabled"), sideOffset() + 14, 54, textColor, false);
-                pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.ignored"), sideOffset() + 14, 78, textColor, false);
+                drawString(pGuiGraphics, localize("info.cofh.disabled"), sideOffset() + 14, 54, textColor, false);
+                drawString(pGuiGraphics, localize("info.cofh.ignored"), sideOffset() + 14, 78, textColor, false);
             }
             case LOW -> {
                 gui.drawIcon(pGuiGraphics, ICON_BUTTON_HIGHLIGHT, 48, 20);
-                pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.enabled"), sideOffset() + 14, 54, textColor, false);
-                pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.low"), sideOffset() + 14, 78, textColor, false);
+                drawString(pGuiGraphics, localize("info.cofh.enabled"), sideOffset() + 14, 54, textColor, false);
+                drawString(pGuiGraphics, localize("info.cofh.low"), sideOffset() + 14, 78, textColor, false);
             }
             case HIGH -> {
                 gui.drawIcon(pGuiGraphics, ICON_BUTTON_HIGHLIGHT, 68, 20);
-                pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.enabled"), sideOffset() + 14, 54, textColor, false);
-                pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.high"), sideOffset() + 14, 78, textColor, false);
+                drawString(pGuiGraphics, localize("info.cofh.enabled"), sideOffset() + 14, 54, textColor, false);
+                drawString(pGuiGraphics, localize("info.cofh.high"), sideOffset() + 14, 78, textColor, false);
             }
             default -> {
             }
@@ -85,24 +84,18 @@ public class RSControlPanel extends PanelBase {
         gui.drawIcon(pGuiGraphics, ICON_RS_TORCH_OFF, 48, 20);
         gui.drawIcon(pGuiGraphics, ICON_RS_TORCH_ON, 68, 20);
 
-        RenderHelper.resetShaderColor();
     }
 
     @Override
-    protected void drawBackground(GuiGraphics pGuiGraphics) {
+    protected void drawBackground(GuiGraphicsExtractor pGuiGraphics) {
 
         super.drawBackground(pGuiGraphics);
 
         if (!fullyOpen) {
             return;
         }
-        float colorR = (backgroundColor >> 16 & 255) / 255.0F * 0.6F;
-        float colorG = (backgroundColor >> 8 & 255) / 255.0F * 0.6F;
-        float colorB = (backgroundColor & 255) / 255.0F * 0.6F;
-        RenderHelper.setPosTexShader();
-        RenderSystem.setShaderColor(colorR, colorG, colorB, 1.0F);
-        gui.drawTexturedModalRect(pGuiGraphics, 24, 16, 16, 20, 64, 24);
-        RenderHelper.resetShaderColor();
+        int color = ARGB.scaleRGB(backgroundColor, 0.6F);
+        gui.drawTexturedModalRect(pGuiGraphics, texture, 24, 16, 16, 20, 64, 24, color);
     }
 
     @Override

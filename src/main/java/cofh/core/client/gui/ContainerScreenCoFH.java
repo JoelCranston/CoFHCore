@@ -4,10 +4,11 @@ import cofh.core.client.gui.element.ElementBase;
 import cofh.core.client.gui.element.panel.InfoPanel;
 import cofh.core.client.gui.element.panel.PanelBase;
 import cofh.core.client.gui.element.panel.PanelTracker;
-import cofh.core.util.helpers.RenderHelper;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -45,6 +46,12 @@ public class ContainerScreenCoFH<T extends AbstractContainerMenu> extends Abstra
         player = inv.player;
     }
 
+    public ContainerScreenCoFH(T container, Inventory inv, Component titleIn, int imageWidth, int imageHeight) {
+
+        super(container, inv, titleIn, imageWidth, imageHeight);
+        player = inv.player;
+    }
+
     @Override
     public void init() {
 
@@ -58,7 +65,7 @@ public class ContainerScreenCoFH<T extends AbstractContainerMenu> extends Abstra
     }
 
     @Override
-    public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+    public void extractBackground(GuiGraphicsExtractor pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
 
         mX = pMouseX - leftPos;
         mY = pMouseY - topPos;
@@ -66,47 +73,43 @@ public class ContainerScreenCoFH<T extends AbstractContainerMenu> extends Abstra
         updatePanels();
         updateElements();
 
-        renderBackground(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
-        super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
-        renderTooltip(pGuiGraphics, pMouseX, pMouseY);
+        super.extractBackground(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
+
+        drawTexturedModalRect(pGuiGraphics, texture, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+
+        pGuiGraphics.pose().pushMatrix();
+        pGuiGraphics.pose().translate(leftPos, topPos);
+
+        drawPanels(pGuiGraphics, false);
+        drawElements(pGuiGraphics, false);
+
+        pGuiGraphics.pose().popMatrix();
+    }
+
+    @Override
+    protected void extractLabels(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
+
+        if (drawTitle & title != null) {
+            drawString(pGuiGraphics, localize(title.getString()), getCenteredOffset(localize(title.getString())), 6, 0x404040, false);
+        }
+        if (drawInventory) {
+            drawString(pGuiGraphics, localize("container.inventory"), 8, imageHeight - 96 + 3, 0x404040, false);
+        }
+        drawPanels(pGuiGraphics, true);
+        drawElements(pGuiGraphics, true);
+    }
+
+    @Override
+    protected void extractTooltip(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
+
+        super.extractTooltip(pGuiGraphics, mouseX, mouseY);
 
         if (showTooltips && this.menu.getCarried().isEmpty()) {
             drawTooltip(pGuiGraphics);
         }
     }
 
-    @Override
-    protected void renderBg(GuiGraphics pGuiGraphics, float pPartialTick, int pMouseX, int pMouseY) {
-
-        RenderHelper.setPosTexShader();
-        RenderHelper.resetShaderColor();
-        RenderHelper.setShaderTexture0(texture);
-
-        drawTexturedModalRect(pGuiGraphics, leftPos, topPos, 0, 0, imageWidth, imageHeight);
-
-        pGuiGraphics.pose().pushPose();
-        pGuiGraphics.pose().translate(leftPos, topPos, 0.0F);
-
-        drawPanels(pGuiGraphics, false);
-        drawElements(pGuiGraphics, false);
-
-        pGuiGraphics.pose().popPose();
-    }
-
-    @Override
-    protected void renderLabels(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
-
-        if (drawTitle & title != null) {
-            pGuiGraphics.drawString(font, localize(title.getString()), getCenteredOffset(localize(title.getString())), 6, 0x404040, false);
-        }
-        if (drawInventory) {
-            pGuiGraphics.drawString(font, localize("container.inventory"), 8, imageHeight - 96 + 3, 0x404040, false);
-        }
-        drawPanels(pGuiGraphics, true);
-        drawElements(pGuiGraphics, true);
-    }
-
-    protected void renderSlotGradient(GuiGraphics pGuiGraphics, Slot slot, int color1, int color2) {
+    protected void renderSlotGradient(GuiGraphicsExtractor pGuiGraphics, Slot slot, int color1, int color2) {
 
         int x = guiLeft() + slot.x;
         int y = guiTop() + slot.y;
@@ -114,7 +117,7 @@ public class ContainerScreenCoFH<T extends AbstractContainerMenu> extends Abstra
     }
 
     // region ELEMENTS
-    public void drawTooltip(GuiGraphics pGuiGraphics) {
+    public void drawTooltip(GuiGraphicsExtractor pGuiGraphics) {
 
         PanelBase panel = getPanelAtPosition(mX, mY);
 
@@ -126,14 +129,14 @@ public class ContainerScreenCoFH<T extends AbstractContainerMenu> extends Abstra
         if (element != null && element.visible()) {
             element.addTooltip(tooltip, mX, mY);
         }
-        pGuiGraphics.renderTooltip(font, tooltip, Optional.empty(), mX + leftPos, mY + topPos);
+        pGuiGraphics.setTooltipForNextFrame(font, tooltip, Optional.empty(), mX + leftPos, mY + topPos);
         tooltip.clear();
     }
 
     /**
      * Draws the Elements for this GUI.
      */
-    protected void drawElements(GuiGraphics pGuiGraphics, boolean foreground) {
+    protected void drawElements(GuiGraphicsExtractor pGuiGraphics, boolean foreground) {
 
         if (foreground) {
             for (ElementBase c : elements) {
@@ -153,7 +156,7 @@ public class ContainerScreenCoFH<T extends AbstractContainerMenu> extends Abstra
     /**
      * Draws the Panels for this GUI. Open / close animation is part of this.
      */
-    protected void drawPanels(GuiGraphics pGuiGraphics, boolean foreground) {
+    protected void drawPanels(GuiGraphicsExtractor pGuiGraphics, boolean foreground) {
 
         int yPosRight = 4;
         int yPosLeft = 4;
@@ -300,16 +303,17 @@ public class ContainerScreenCoFH<T extends AbstractContainerMenu> extends Abstra
 
     // region CALLBACKS
     @Override
-    protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeftIn, int guiTopIn, int mouseButton) {
+    protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeftIn, int guiTopIn) {
 
-        return super.hasClickedOutside(mouseX, mouseY, guiLeftIn, guiTopIn, mouseButton) && getPanelAtPosition(mouseX - guiLeftIn, mouseY - guiTopIn) == null;
+        return super.hasClickedOutside(mouseX, mouseY, guiLeftIn, guiTopIn) && getPanelAtPosition(mouseX - guiLeftIn, mouseY - guiTopIn) == null;
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 
-        mouseX -= leftPos;
-        mouseY -= topPos;
+        double mouseX = event.x() - leftPos;
+        double mouseY = event.y() - topPos;
+        int mouseButton = event.button();
 
         for (int i = elements.size(); i-- > 0; ) {
             ElementBase c = elements.get(i);
@@ -333,42 +337,15 @@ public class ContainerScreenCoFH<T extends AbstractContainerMenu> extends Abstra
                 return true;
             }
         }
-
-        // If a panel is open, expand GUI size to support slot actions.
-        if (panel != null) {
-            switch (panel.side) {
-                case PanelBase.LEFT:
-                    leftPos -= panel.width();
-                    break;
-                case PanelBase.RIGHT:
-                    imageWidth += panel.width();
-                    break;
-            }
-        }
-        mouseX += leftPos;
-        mouseY += topPos;
-
-        boolean ret = super.mouseClicked(mouseX, mouseY, mouseButton);
-
-        // Re-adjust GUI size after click has happened.
-        if (panel != null) {
-            switch (panel.side) {
-                case PanelBase.LEFT:
-                    leftPos += panel.width();
-                    break;
-                case PanelBase.RIGHT:
-                    imageWidth -= panel.width();
-                    break;
-            }
-        }
-        return ret;
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int mouseButton) {
+    public boolean mouseReleased(MouseButtonEvent event) {
 
-        mouseX -= leftPos;
-        mouseY -= topPos;
+        double mouseX = event.x() - leftPos;
+        double mouseY = event.y() - topPos;
+        int mouseButton = event.button();
 
         if (mouseButton >= 0 && mouseButton <= 2) { // 0:left, 1:right, 2: middle
             for (int i = elements.size(); i-- > 0; ) {
@@ -379,10 +356,7 @@ public class ContainerScreenCoFH<T extends AbstractContainerMenu> extends Abstra
                 c.mouseReleased(mouseX, mouseY);
             }
         }
-        mouseX += leftPos;
-        mouseY += topPos;
-
-        return super.mouseReleased(mouseX, mouseY, mouseButton);
+        return super.mouseReleased(event);
     }
 
     @Override
@@ -408,18 +382,18 @@ public class ContainerScreenCoFH<T extends AbstractContainerMenu> extends Abstra
     }
 
     @Override
-    public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
+    public boolean keyPressed(KeyEvent event) {
 
         for (int i = elements.size(); i-- > 0; ) {
             ElementBase c = elements.get(i);
             if (!c.visible() || !c.enabled()) {
                 continue;
             }
-            if (c.keyTyped(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_)) {
+            if (c.keyTyped(event.key(), event.scancode(), event.modifiers())) {
                 return true;
             }
         }
-        return super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
+        return super.keyPressed(event);
     }
     // endregion
 
@@ -463,12 +437,6 @@ public class ContainerScreenCoFH<T extends AbstractContainerMenu> extends Abstra
     public final Player player() {
 
         return player;
-    }
-
-    @Override
-    public int blitOffset() {
-
-        return 0;
     }
     // endregion
 }

@@ -2,18 +2,18 @@ package cofh.core.client.particle.impl;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.SimpleParticleType;
 
 import javax.annotation.Nonnull;
 
-public class FrostParticle extends TextureSheetParticle {
+public class FrostParticle extends SingleQuadParticle {
 
-    private FrostParticle(ClientLevel level, double x, double y, double z, double dx, double dy, double dz) {
+    private FrostParticle(ClientLevel level, double x, double y, double z, double dx, double dy, double dz, SpriteSet spriteSet) {
 
-        super(level, x, y, z, dx, dy, dz);
+        super(level, x, y, z, dx, dy, dz, spriteSet.first());
+        setSprite(spriteSet.get(random));
         lifetime = 40 + random.nextInt(20);
 
         xd = dx;
@@ -33,18 +33,17 @@ public class FrostParticle extends TextureSheetParticle {
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
+    protected Layer getLayer() {
 
-        return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        return Layer.TRANSLUCENT;
         //return RenderTypes.PARTICLE_SHEET_OVER;
     }
 
     @Nonnull
     public static ParticleProvider<SimpleParticleType> factory(SpriteSet spriteSet) {
 
-        return (data, level, x, y, z, dx, dy, dz) -> {
-            FrostParticle particle = new FrostParticle(level, x, y, z, dx, dy, dz);
-            particle.pickSprite(spriteSet);
+        return (data, level, x, y, z, dx, dy, dz, random) -> {
+            FrostParticle particle = new FrostParticle(level, x, y, z, dx, dy, dz, spriteSet);
             particle.setAlpha(level.getRandom().nextFloat() * 0.2F + 0.7F);
             return particle;
         };

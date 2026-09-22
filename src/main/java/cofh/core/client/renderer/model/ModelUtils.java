@@ -1,16 +1,16 @@
 package cofh.core.client.renderer.model;
 
 import cofh.core.util.helpers.FluidHelper;
-import cofh.lib.util.helpers.MathHelper;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.SimpleBakedModel;
+import net.minecraft.client.resources.model.SimpleModelWrapper;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.geometry.QuadCollection;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.client.model.quad.MutableQuad;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.model.data.ModelProperty;
 
@@ -31,32 +31,40 @@ public class ModelUtils {
     public static final ModelProperty<byte[]> SIDES = new ModelProperty<>();
     public static final ModelProperty<Identifier> UNDERLAY = new ModelProperty<>();
 
+    // region QUADS
+    public static BakedQuad retexture(BakedQuad quad, TextureAtlasSprite sprite) {
+
+        return new MutableQuad().setFrom(quad).setSpriteAndMoveUv(new Material.Baked(sprite, false)).toBakedQuad();
+    }
+
+    public static List<BakedQuad> getAllQuads(BlockStateModelPart model) {
+
+        List<BakedQuad> quads = new ArrayList<>(model.getQuads(null));
+        for (Direction dir : DIRECTIONS) {
+            quads.addAll(model.getQuads(dir));
+        }
+        return quads;
+    }
+    // endregion
+
     public static class WrappedBakedModelBuilder {
 
         private final List<BakedQuad> builderGeneralQuads = new ArrayList<>();
         private final Map<Direction, List<BakedQuad>> builderUnderlayQuads = new EnumMap<>(Direction.class);
         private final Map<Direction, List<BakedQuad>> builderFaceQuads = new EnumMap<>(Direction.class);
-        private final ItemOverrides builderItemOverrideList;
         private final boolean builderAmbientOcclusion;
-        private TextureAtlasSprite builderTexture;
-        private final boolean builderSideLit;
-        private final boolean builderGui3d;
-        private final ItemTransforms builderCameraTransforms;
+        private Material.Baked builderTexture;
 
-        public WrappedBakedModelBuilder(BakedModel model) {
+        public WrappedBakedModelBuilder(BlockStateModelPart model) {
 
             for (Direction dir : DIRECTIONS) {
                 this.builderUnderlayQuads.put(dir, new ArrayList<>());
-                this.builderFaceQuads.put(dir, new LinkedList<>(model.getQuads(null, dir, MathHelper.RANDOM)));
+                this.builderFaceQuads.put(dir, new LinkedList<>(model.getQuads(dir)));
             }
-            this.builderGeneralQuads.addAll(model.getQuads(null, null, MathHelper.RANDOM));
+            this.builderGeneralQuads.addAll(model.getQuads(null));
 
-            builderItemOverrideList = model.getOverrides();
             builderAmbientOcclusion = model.useAmbientOcclusion();
-            builderTexture = model.getParticleIcon();
-            builderSideLit = model.usesBlockLight();
-            builderGui3d = model.isGui3d();
-            builderCameraTransforms = model.getTransforms();
+            builderTexture = model.particleMaterial();
         }
 
         public WrappedBakedModelBuilder addUnderlayQuad(Direction facing, BakedQuad quad) {
@@ -82,21 +90,30 @@ public class ModelUtils {
             return facing == null ? builderGeneralQuads : builderFaceQuads.get(facing);
         }
 
-        public WrappedBakedModelBuilder setTexture(TextureAtlasSprite texture) {
+        public WrappedBakedModelBuilder setTexture(Material.Baked texture) {
 
             this.builderTexture = texture;
             return this;
         }
 
-        public BakedModel build() {
+        public BlockStateModelPart build() {
 
             if (this.builderTexture == null) {
                 throw new RuntimeException("Missing particle!");
             } else {
-                for (Direction dir : DIRECTIONS) {
-                    builderUnderlayQuads.get(dir).addAll(builderFaceQuads.get(dir));
+                QuadCollection.Builder builder = new QuadCollection.Builder();
+                for (BakedQuad quad : builderGeneralQuads) {
+                    builder.addUnculledFace(quad);
                 }
-                return new SimpleBakedModel(this.builderGeneralQuads, this.builderUnderlayQuads, this.builderAmbientOcclusion, this.builderSideLit, this.builderGui3d, this.builderTexture, this.builderCameraTransforms, this.builderItemOverrideList);
+                for (Direction dir : DIRECTIONS) {
+                    for (BakedQuad quad : builderUnderlayQuads.get(dir)) {
+                        builder.addCulledFace(dir, quad);
+                    }
+                    for (BakedQuad quad : builderFaceQuads.get(dir)) {
+                        builder.addCulledFace(dir, quad);
+                    }
+                }
+                return new SimpleModelWrapper(builder.build(), this.builderAmbientOcclusion, this.builderTexture);
             }
         }
 

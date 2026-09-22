@@ -2,9 +2,7 @@ package cofh.core.client.gui.element;
 
 import cofh.core.client.gui.GuiColor;
 import cofh.core.client.gui.IGuiAccess;
-import cofh.core.util.helpers.RenderHelper;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 
 import static cofh.lib.util.Constants.PATH_ELEMENTS;
@@ -71,44 +69,40 @@ public abstract class ElementSlider extends ElementBase {
     }
 
     @Override
-    public void drawBackground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawBackground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
-        PoseStack poseStack = pGuiGraphics.pose();
-        drawColoredModalRect(poseStack, posX() - 1, posY() - 1, posX() + width + 1, posY() + height + 1, borderColor);
-        drawColoredModalRect(poseStack, posX(), posY(), posX() + width, posY() + height, backgroundColor);
-        RenderHelper.resetShaderColor();
+        drawColoredModalRect(pGuiGraphics, posX() - 1, posY() - 1, posX() + width + 1, posY() + height + 1, borderColor);
+        drawColoredModalRect(pGuiGraphics, posX(), posY(), posX() + width, posY() + height, backgroundColor);
     }
 
-    protected void drawSlider(PoseStack poseStack, int mouseX, int mouseY, int sliderX, int sliderY) {
+    protected void drawSlider(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY, int sliderX, int sliderY) {
 
         int sliderMidX = sliderWidth / 2;
         int sliderMidY = sliderHeight / 2;
         int sliderEndX = sliderWidth - sliderMidX;
         int sliderEndY = sliderHeight - sliderMidY;
 
+        Identifier sliderTexture;
         if (!enabled()) {
-            RenderHelper.setShaderTexture0(DISABLED);
+            sliderTexture = DISABLED;
         } else if (isHovering(mouseX, mouseY)) {
-            RenderHelper.setShaderTexture0(HOVER);
+            sliderTexture = HOVER;
         } else {
-            RenderHelper.setShaderTexture0(ENABLED);
+            sliderTexture = ENABLED;
         }
-        RenderHelper.setPosTexShader();
-        RenderHelper.resetShaderColor();
-        drawTexturedModalRect(poseStack, sliderX, sliderY, 0, 0, sliderMidX, sliderMidY);
-        drawTexturedModalRect(poseStack, sliderX, sliderY + sliderMidY, 0, 256 - sliderEndY, sliderMidX, sliderEndY);
-        drawTexturedModalRect(poseStack, sliderX + sliderMidX, sliderY, 256 - sliderEndX, 0, sliderEndX, sliderMidY);
-        drawTexturedModalRect(poseStack, sliderX + sliderMidX, sliderY + sliderMidY, 256 - sliderEndX, 256 - sliderEndY, sliderEndX, sliderEndY);
+        drawTexturedModalRect(pGuiGraphics, sliderTexture, sliderX, sliderY, 0, 0, sliderMidX, sliderMidY);
+        drawTexturedModalRect(pGuiGraphics, sliderTexture, sliderX, sliderY + sliderMidY, 0, 256 - sliderEndY, sliderMidX, sliderEndY);
+        drawTexturedModalRect(pGuiGraphics, sliderTexture, sliderX + sliderMidX, sliderY, 256 - sliderEndX, 0, sliderEndX, sliderMidY);
+        drawTexturedModalRect(pGuiGraphics, sliderTexture, sliderX + sliderMidX, sliderY + sliderMidY, 256 - sliderEndX, 256 - sliderEndY, sliderEndX, sliderEndY);
     }
 
     @Override
-    public void drawForeground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawForeground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
         int sliderX = posX() + getSliderX();
         int sliderY = posY() + getSliderY();
 
-        drawSlider(pGuiGraphics.pose(), mouseX, mouseY, sliderX, sliderY);
-        RenderHelper.resetShaderColor();
+        drawSlider(pGuiGraphics, mouseX, mouseY, sliderX, sliderY);
     }
 
     protected boolean isHovering(int x, int y) {

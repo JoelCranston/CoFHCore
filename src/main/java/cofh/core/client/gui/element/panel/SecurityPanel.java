@@ -3,12 +3,11 @@ package cofh.core.client.gui.element.panel;
 import cofh.core.client.gui.IGuiAccess;
 import cofh.core.client.gui.element.ElementButton;
 import cofh.core.client.gui.element.SimpleTooltip;
-import cofh.core.util.helpers.RenderHelper;
 import cofh.lib.api.control.ISecurable;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -142,7 +141,7 @@ public class SecurityPanel extends PanelBase {
     }
 
     @Override
-    protected void drawBackground(GuiGraphics pGuiGraphics) {
+    protected void drawBackground(GuiGraphicsExtractor pGuiGraphics) {
 
         switch (mySecurable.getAccess()) {
             case PUBLIC:
@@ -163,17 +162,12 @@ public class SecurityPanel extends PanelBase {
         if (!fullyOpen) {
             return;
         }
-        float colorR = (backgroundColor >> 16 & 255) / 255.0F * 0.6F;
-        float colorG = (backgroundColor >> 8 & 255) / 255.0F * 0.6F;
-        float colorB = (backgroundColor & 255) / 255.0F * 0.6F;
-        RenderHelper.setPosTexShader();
-        RenderSystem.setShaderColor(colorR, colorG, colorB, 1.0F);
-        gui.drawTexturedModalRect(pGuiGraphics, 34, 18, 16, 20, 44, 44);
-        RenderHelper.resetShaderColor();
+        int color = ARGB.scaleRGB(backgroundColor, 0.6F);
+        gui.drawTexturedModalRect(pGuiGraphics, texture, 34, 18, 16, 20, 44, 44, color);
     }
 
     @Override
-    protected void drawForeground(GuiGraphics pGuiGraphics) {
+    protected void drawForeground(GuiGraphicsExtractor pGuiGraphics) {
 
         switch (mySecurable.getAccess()) {
             case PUBLIC:
@@ -192,30 +186,29 @@ public class SecurityPanel extends PanelBase {
         if (!fullyOpen) {
             return;
         }
-        pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.security"), sideOffset() + 18, 6, headerColor, true);
-        pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.access") + ":", sideOffset() + 6, 66, subheaderColor, true);
+        drawString(pGuiGraphics, localize("info.cofh.security"), sideOffset() + 18, 6, headerColor, true);
+        drawString(pGuiGraphics, localize("info.cofh.access") + ":", sideOffset() + 6, 66, subheaderColor, true);
 
         switch (mySecurable.getAccess()) {
             case PUBLIC:
-                pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.access_public"), sideOffset() + 14, 78, textColor, false);
+                drawString(pGuiGraphics, localize("info.cofh.access_public"), sideOffset() + 14, 78, textColor, false);
                 break;
             case PRIVATE:
-                pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.access_private"), sideOffset() + 14, 78, textColor, false);
+                drawString(pGuiGraphics, localize("info.cofh.access_private"), sideOffset() + 14, 78, textColor, false);
                 break;
             case FRIENDS:
-                pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.access_friends"), sideOffset() + 14, 78, textColor, false);
+                drawString(pGuiGraphics, localize("info.cofh.access_friends"), sideOffset() + 14, 78, textColor, false);
                 break;
             case TEAM:
-                pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.access_team"), sideOffset() + 14, 78, textColor, false);
+                drawString(pGuiGraphics, localize("info.cofh.access_team"), sideOffset() + 14, 78, textColor, false);
                 break;
         }
-        RenderHelper.resetShaderColor();
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
 
-        if (!myPlayer.equals(mySecurable.getOwner().getId())) {
+        if (!myPlayer.equals(mySecurable.getOwner().id())) {
             return true;
         }
         if (!fullyOpen) {
@@ -233,7 +226,7 @@ public class SecurityPanel extends PanelBase {
     @Override
     public void setFullyOpen() {
 
-        if (!myPlayer.equals(mySecurable.getOwner().getId())) {
+        if (!myPlayer.equals(mySecurable.getOwner().id())) {
             return;
         }
         super.setFullyOpen();

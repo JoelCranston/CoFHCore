@@ -6,7 +6,6 @@ import cofh.core.util.helpers.RenderHelper;
 import cofh.core.util.helpers.vfx.VFXHelper;
 import cofh.lib.util.helpers.MathHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
@@ -35,7 +34,7 @@ public class BeamParticle extends PointToPointParticle {
     }
 
     @Override
-    public void render(PoseStack stack, MultiBufferSource buffer, VertexConsumer consumer, int packedLight, float time, float pTicks) {
+    public void render(PoseStack stack, MultiBufferSource buffer, int packedLight, float time, float pTicks) {
 
         float progress = time / duration;
         float rad = progress * MathHelper.F_PI;
@@ -49,13 +48,13 @@ public class BeamParticle extends PointToPointParticle {
     }
 
     @Override
-    public int getLightColor(float pTicks) {
+    public int getLightCoords(float pTicks) {
 
         return RenderHelper.FULL_BRIGHT;
     }
 
     @Override
-    public int getLightColor(float pTicks, double x, double y, double z) {
+    public int getLightCoords(float pTicks, double x, double y, double z) {
 
         return RenderHelper.FULL_BRIGHT;
     }
@@ -63,7 +62,7 @@ public class BeamParticle extends PointToPointParticle {
     @Nonnull
     public static ParticleProvider<BiColorParticleOptions> factory(SpriteSet spriteSet) {
 
-        return BeamParticle::new;
+        return (data, level, sx, sy, sz, ex, ey, ez, random) -> new BeamParticle(data, level, sx, sy, sz, ex, ey, ez);
     }
 
 }

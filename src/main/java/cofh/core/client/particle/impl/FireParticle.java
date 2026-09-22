@@ -6,13 +6,9 @@ import cofh.core.common.config.CoreClientConfig;
 import cofh.core.util.helpers.RenderHelper;
 import cofh.core.util.helpers.vfx.RenderTypes;
 import cofh.lib.util.helpers.MathHelper;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 
 import javax.annotation.Nonnull;
@@ -45,7 +41,7 @@ public class FireParticle extends GasParticle {
     }
 
     @Override
-    public void render(PoseStack stack, MultiBufferSource buffer, VertexConsumer consumer, int packedLight, float time, float pTicks) {
+    protected void animate(float time, float pTicks) {
 
         float progress = time / duration;
         float easeCub = 1.0F - MathHelper.easeInCubic(progress);
@@ -58,17 +54,17 @@ public class FireParticle extends GasParticle {
 
         //Only set render size based off BB size
         this.size = this.bbWidth * MathHelper.sin(0.25F * MathHelper.F_PI * (progress + 1));
-        super.render(stack, buffer, consumer, packedLight, time, pTicks);
+        super.animate(time, pTicks);
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
+    protected Layer getLayer() {
 
         return RenderTypes.PARTICLE_SHEET_ADDITIVE_MULTIPLY;
     }
 
     @Override
-    public int getLightColor(float partialTicks) {
+    public int getLightCoords(float partialTicks) {
 
         return RenderHelper.FULL_BRIGHT;
     }
@@ -76,7 +72,7 @@ public class FireParticle extends GasParticle {
     @Nonnull
     public static ParticleProvider<ColorParticleOptions> factory(SpriteSet spriteSet) {
 
-        return (data, level, x, y, z, dx, dy, dz) -> new FireParticle(data, level, spriteSet, x, y, z, dx, dy, dz);
+        return (data, level, x, y, z, dx, dy, dz, random) -> new FireParticle(data, level, spriteSet, x, y, z, dx, dy, dz);
     }
 
 }

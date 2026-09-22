@@ -1,8 +1,7 @@
 package cofh.core.client.gui.element.panel;
 
 import cofh.core.client.gui.IGuiAccess;
-import cofh.core.util.helpers.RenderHelper;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
@@ -86,27 +85,26 @@ public class ResourcePanel extends PanelBase {
     }
 
     @Override
-    protected void drawForeground(GuiGraphics pGuiGraphics) {
+    protected void drawForeground(GuiGraphicsExtractor pGuiGraphics) {
 
         drawPanelIcon(pGuiGraphics, icon);
         if (!fullyOpen) {
             return;
         }
-        pGuiGraphics.drawString(fontRenderer(), localize(resource), sideOffset() + 20, 6, headerColor, true);
+        drawString(pGuiGraphics, localize(resource), sideOffset() + 20, 6, headerColor, true);
 
         if (curAmt.getAsInt() >= 0) {
-            pGuiGraphics.drawString(fontRenderer(), localize(curDesc) + ":", sideOffset() + 6, 18, subheaderColor, true);
-            pGuiGraphics.drawString(fontRenderer(), curAmt.getAsInt() + " " + localize(curUnit), sideOffset() + 14, 30, textColor, false);
+            drawString(pGuiGraphics, localize(curDesc) + ":", sideOffset() + 6, 18, subheaderColor, true);
+            drawString(pGuiGraphics, curAmt.getAsInt() + " " + localize(curUnit), sideOffset() + 14, 30, textColor, false);
         }
         if (maxAmt.getAsInt() >= 0) {
-            pGuiGraphics.drawString(fontRenderer(), localize(maxDesc) + ":", sideOffset() + 6, 42, subheaderColor, true);
-            pGuiGraphics.drawString(fontRenderer(), maxAmt.getAsInt() + " " + localize(maxUnit), sideOffset() + 14, 54, textColor, false);
+            drawString(pGuiGraphics, localize(maxDesc) + ":", sideOffset() + 6, 42, subheaderColor, true);
+            drawString(pGuiGraphics, maxAmt.getAsInt() + " " + localize(maxUnit), sideOffset() + 14, 54, textColor, false);
         }
         if (efficiency.getAsDouble() >= 0) {
-            pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.efficiency") + ":", sideOffset() + 6, 66, subheaderColor, true);
-            pGuiGraphics.drawString(fontRenderer(), DF0.format(efficiency.getAsDouble() * 100) + "%", sideOffset() + 14, 78, textColor, false);
+            drawString(pGuiGraphics, localize("info.cofh.efficiency") + ":", sideOffset() + 6, 66, subheaderColor, true);
+            drawString(pGuiGraphics, DF0.format(efficiency.getAsDouble() * 100) + "%", sideOffset() + 14, 78, textColor, false);
         }
-        RenderHelper.resetShaderColor();
     }
 
     @Override

@@ -1,12 +1,11 @@
 package cofh.core.client.gui.element;
 
 import cofh.core.client.gui.IGuiAccess;
-import cofh.core.util.helpers.RenderHelper;
 import cofh.lib.api.IResourceStorage;
 import cofh.lib.util.helpers.MathHelper;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
@@ -17,8 +16,6 @@ import static cofh.core.CoFHCore.LOG;
 import static cofh.lib.util.Constants.FALSE;
 import static cofh.lib.util.Constants.TRUE;
 import static cofh.lib.util.helpers.StringHelper.format;
-import static net.minecraft.client.gui.screens.Screen.hasAltDown;
-import static net.minecraft.client.gui.screens.Screen.hasShiftDown;
 
 public abstract class ElementResourceStorage extends ElementBase {
 
@@ -107,13 +104,12 @@ public abstract class ElementResourceStorage extends ElementBase {
     }
 
     @Override
-    public void drawBackground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawBackground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
-        PoseStack poseStack = pGuiGraphics.pose();
-        drawStorage(poseStack);
-        drawUnderlayTexture(poseStack);
-        drawResource(poseStack);
-        drawOverlayTexture(poseStack);
+        drawStorage(pGuiGraphics);
+        drawUnderlayTexture(pGuiGraphics);
+        drawResource(pGuiGraphics);
+        drawOverlayTexture(pGuiGraphics);
     }
 
     @Override
@@ -124,7 +120,8 @@ public abstract class ElementResourceStorage extends ElementBase {
         } else {
             tooltipList.add(Component.literal(format(storage.getStored()) + " / " + format(storage.getCapacity()) + " " + storage.getUnit()));
         }
-        if (clearable.get() && clearStorage != FALSE && (hasAltDown() || hasShiftDown())) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (clearable.get() && clearStorage != FALSE && (minecraft.hasAltDown() || minecraft.hasShiftDown())) {
             tooltipList.add(Component.translatable("info.cofh.click_to_clear").withStyle(ChatFormatting.GRAY));
         } else if (claimable.get()) {
             tooltipList.add(Component.translatable("info.cofh.click_to_claim").withStyle(ChatFormatting.GRAY));
@@ -134,7 +131,8 @@ public abstract class ElementResourceStorage extends ElementBase {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
 
-        if (clearable.get() && hasShiftDown() && hasAltDown()) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (clearable.get() && minecraft.hasShiftDown() && minecraft.hasAltDown()) {
             return clearStorage.get();
         }
         if (claimable.get()) {
@@ -153,32 +151,26 @@ public abstract class ElementResourceStorage extends ElementBase {
         return fraction > 0 ? Math.max(minDisplay, amount) : amount;
     }
 
-    protected void drawStorage(PoseStack poseStack) {
+    protected void drawStorage(GuiGraphicsExtractor pGuiGraphics) {
 
         if (drawStorage.get() && texture != null) {
-            RenderHelper.setPosTexShader();
-            RenderHelper.setShaderTexture0(texture);
-            drawTexturedModalRect(poseStack, posX(), posY(), 0, 0, width, height);
+            drawTexturedModalRect(pGuiGraphics, texture, posX(), posY(), 0, 0, width, height);
         }
     }
 
-    protected void drawUnderlayTexture(PoseStack poseStack) {
+    protected void drawUnderlayTexture(GuiGraphicsExtractor pGuiGraphics) {
 
         if (drawUnderlay.get() && underlayTexture != null) {
-            RenderHelper.setPosTexShader();
-            RenderHelper.setShaderTexture0(underlayTexture);
-            drawTexturedModalRect(poseStack, posX(), posY(), 0, 0, width, height);
+            drawTexturedModalRect(pGuiGraphics, underlayTexture, posX(), posY(), 0, 0, width, height);
         }
     }
 
-    protected abstract void drawResource(PoseStack poseStack);
+    protected abstract void drawResource(GuiGraphicsExtractor pGuiGraphics);
 
-    protected void drawOverlayTexture(PoseStack poseStack) {
+    protected void drawOverlayTexture(GuiGraphicsExtractor pGuiGraphics) {
 
         if (drawOverlay.get() && overlayTexture != null) {
-            RenderHelper.setPosTexShader();
-            RenderHelper.setShaderTexture0(overlayTexture);
-            drawTexturedModalRect(poseStack, posX(), posY(), 0, 0, width, height);
+            drawTexturedModalRect(pGuiGraphics, overlayTexture, posX(), posY(), 0, 0, width, height);
         }
     }
 

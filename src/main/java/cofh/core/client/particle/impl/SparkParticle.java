@@ -3,24 +3,23 @@ package cofh.core.client.particle.impl;
 import cofh.core.util.helpers.RenderHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.SimpleParticleType;
 
 import javax.annotation.Nonnull;
 
-public class SparkParticle extends TextureSheetParticle {
+public class SparkParticle extends SingleQuadParticle {
 
     private final SpriteSet spriteSet;
 
     private SparkParticle(ClientLevel levelIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, SpriteSet spriteSet) {
 
-        super(levelIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
+        super(levelIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn, spriteSet.first());
         lifetime = 8;
 
         this.spriteSet = spriteSet;
-        pickSprite(spriteSet);
+        setSprite(spriteSet.get(random));
         xd = xSpeedIn;
         yd = ySpeedIn;
         zd = zSpeedIn;
@@ -33,18 +32,18 @@ public class SparkParticle extends TextureSheetParticle {
 
         super.tick();
         if ((age & 1) == 0) {
-            pickSprite(spriteSet);
+            setSprite(spriteSet.get(random));
         }
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
+    protected Layer getLayer() {
 
-        return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        return Layer.TRANSLUCENT;
     }
 
     @Override
-    public int getLightColor(float pTicks) {
+    public int getLightCoords(float pTicks) {
 
         return RenderHelper.FULL_BRIGHT;
     }
@@ -52,7 +51,7 @@ public class SparkParticle extends TextureSheetParticle {
     @Nonnull
     public static ParticleProvider<SimpleParticleType> factory(SpriteSet spriteSet) {
 
-        return (data, level, x, y, z, dx, dy, dz) -> new SparkParticle(level, x, y, z, dx, dy, dz, spriteSet);
+        return (data, level, x, y, z, dx, dy, dz, random) -> new SparkParticle(level, x, y, z, dx, dy, dz, spriteSet);
     }
 
 }

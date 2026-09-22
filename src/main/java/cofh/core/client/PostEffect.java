@@ -1,14 +1,11 @@
 package cofh.core.client;
 
-import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.platform.Window;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,7 +20,7 @@ public class PostEffect implements ResourceManagerReloadListener {
 
     public PostEffect(Identifier shader) {
 
-        this.shader = Identifier.fromNamespaceAndPath(shader.getNamespace(), "shaders/post/" + shader.getPath() + ".json");
+        this.shader = shader;
         EFFECTS.add(this);
     }
 
@@ -43,9 +40,6 @@ public class PostEffect implements ResourceManagerReloadListener {
 
     public void end(float partialTick) {
 
-        if (isEnabled()) {
-            chain.process(partialTick);
-        }
     }
 
     public void apply(Window window) {
@@ -54,9 +48,6 @@ public class PostEffect implements ResourceManagerReloadListener {
 
     public void resize(int width, int height) {
 
-        if (chain != null) {
-            chain.resize(width, height);
-        }
     }
 
     protected void onChainLoad() {
@@ -66,21 +57,9 @@ public class PostEffect implements ResourceManagerReloadListener {
     @Override
     public void onResourceManagerReload(ResourceManager manager) {
 
-        if (chain != null) {
-            chain.close();
-        }
+        // TODO Post chains now run inside the frame graph; effects stay disabled until ported.
+        chain = null;
         loaded = false;
-        try {
-            Minecraft mc = Minecraft.getInstance();
-            chain = new PostChain(mc.getTextureManager(), mc.getResourceManager(), mc.getMainRenderTarget(), shader);
-            chain.resize(mc.getWindow().getWidth(), mc.getWindow().getHeight());
-            loaded = true;
-            onChainLoad();
-        } catch (IOException e) {
-            throw new RuntimeException(e); //CoFHCore.LOG.warn("Failed to load shader: {}", shader, e);
-        } catch (JsonSyntaxException e) {
-            throw new RuntimeException(e); //CoFHCore.LOG.warn("Failed to parse shader: {}", shader, e);
-        }
     }
 
     public static Collection<PostEffect> getAllEffects() {

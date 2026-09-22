@@ -2,7 +2,7 @@ package cofh.core.client.gui.element;
 
 import cofh.core.client.gui.IGuiAccess;
 import cofh.core.util.helpers.RenderHelper;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.Identifier;
 
@@ -61,7 +61,7 @@ public class ElementConditionalLayered extends ElementBase {
     }
 
     @Override
-    public void drawBackground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawBackground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
         for (IconWrapper icon : conditionalTextures) {
             if (icon.display.get()) {

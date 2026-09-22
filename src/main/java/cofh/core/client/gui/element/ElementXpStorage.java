@@ -1,9 +1,8 @@
 package cofh.core.client.gui.element;
 
 import cofh.core.client.gui.IGuiAccess;
-import cofh.core.util.helpers.RenderHelper;
 import cofh.lib.common.xp.XpStorage;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import static cofh.lib.util.Constants.FALSE;
 
@@ -19,12 +18,10 @@ public class ElementXpStorage extends ElementResourceStorage {
     }
 
     @Override
-    protected void drawResource(PoseStack poseStack) {
+    protected void drawResource(GuiGraphicsExtractor pGuiGraphics) {
 
-        RenderHelper.setPosTexShader();
-        RenderHelper.setShaderTexture0(texture);
         int amount = storage.getStored() <= 0 ? 0 : Math.min(getScaled(4) + 1, 4);
-        drawTexturedModalRect(poseStack, posX(), posY(), 0, amount * height, width, height);
+        drawTexturedModalRect(pGuiGraphics, texture, posX(), posY(), 0, amount * height, width, height);
     }
 
 }

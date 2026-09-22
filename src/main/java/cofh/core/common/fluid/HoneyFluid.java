@@ -1,15 +1,12 @@
 package cofh.core.common.fluid;
 
 import cofh.lib.common.fluid.FluidCoFH;
-import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.common.SoundActions;
 import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static cofh.core.CoFHCore.FLUIDS;
@@ -49,31 +46,6 @@ public class HoneyFluid extends FluidCoFH {
             .density(1500)
             .viscosity(1000000)
             .sound(SoundActions.BUCKET_FILL, SoundEvents.BOTTLE_FILL)
-            .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BOTTLE_EMPTY)) {
-
-        @Override
-        public void initializeClient(Consumer<IClientFluidTypeExtensions> consumer) {
-
-            consumer.accept(new IClientFluidTypeExtensions() {
-
-                private static final Identifier
-                        STILL = Identifier.parse("cofh_core:block/fluids/honey_still"),
-                        FLOW = Identifier.parse("cofh_core:block/fluids/honey_flow");
-
-                @Override
-                public Identifier getStillTexture() {
-
-                    return STILL;
-                }
-
-                @Override
-                public Identifier getFlowingTexture() {
-
-                    return FLOW;
-                }
-
-            });
-        }
-    });
+            .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BOTTLE_EMPTY)));
 
 }

@@ -7,7 +7,6 @@ import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Item;
@@ -18,7 +17,6 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.common.MutableDataComponentHolder;
 import net.neoforged.neoforge.common.SoundActions;
 import net.neoforged.neoforge.fluids.BaseFlowingFluid;
@@ -29,7 +27,6 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static cofh.core.CoFHCore.FLUIDS;
@@ -88,35 +85,6 @@ public class PotionFluid extends FluidCoFH {
         public Rarity getRarity(FluidStack stack) {
 
             return FluidHelper.getPotionContents(stack).hasEffects() ? Rarity.UNCOMMON : Rarity.COMMON;
-        }
-
-        @Override
-        public void initializeClient(Consumer<IClientFluidTypeExtensions> consumer) {
-
-            consumer.accept(new IClientFluidTypeExtensions() {
-
-                private static final Identifier
-                        STILL = Identifier.parse("cofh_core:block/fluids/potion_still"),
-                        FLOW = Identifier.parse("cofh_core:block/fluids/potion_flow");
-
-                @Override
-                public int getTintColor(FluidStack stack) {
-
-                    return 0xFF000000 | getPotionColor(stack);
-                }
-
-                @Override
-                public Identifier getStillTexture() {
-
-                    return STILL;
-                }
-
-                @Override
-                public Identifier getFlowingTexture() {
-
-                    return FLOW;
-                }
-            });
         }
     });
 

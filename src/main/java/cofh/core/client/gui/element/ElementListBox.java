@@ -3,11 +3,9 @@ package cofh.core.client.gui.element;
 import cofh.core.client.gui.GuiColor;
 import cofh.core.client.gui.IGuiAccess;
 import cofh.core.client.gui.element.listbox.IListBoxElement;
-import cofh.core.util.helpers.RenderHelper;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import org.joml.Matrix3x2fStack;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -151,36 +149,35 @@ public class ElementListBox extends ElementBase {
     }
 
     @Override
-    public void drawBackground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawBackground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
-        drawColoredModalRect(pGuiGraphics.pose(), posX() - 1, posY() - 1, posX() + width + 1, posY() + height + 1, borderColor);
-        drawColoredModalRect(pGuiGraphics.pose(), posX(), posY(), posX() + width, posY() + height, backgroundColor);
+        drawColoredModalRect(pGuiGraphics, posX() - 1, posY() - 1, posX() + width + 1, posY() + height + 1, borderColor);
+        drawColoredModalRect(pGuiGraphics, posX(), posY(), posX() + width, posY() + height, backgroundColor);
     }
 
     @Override
-    public void drawForeground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawForeground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
-        PoseStack poseStack = pGuiGraphics.pose();
+        Matrix3x2fStack poseStack = pGuiGraphics.pose();
 
         int heightDrawn = 0;
         int nextElement = firstIndexDisplayed;
 
-        GL11.glEnable(GL11.GL_STENCIL_TEST);
-        RenderHelper.drawStencil(poseStack, getContentLeft(), getContentTop(), getContentRight(), getContentBottom(), 1);
+        pGuiGraphics.enableScissor(getContentLeft(), getContentTop(), getContentRight(), getContentBottom());
 
-        poseStack.pushPose();
-        poseStack.translate(-scrollHoriz, 0, 0);
+        poseStack.pushMatrix();
+        poseStack.translate(-scrollHoriz, 0);
 
         int e = elements.size();
         while (nextElement < e && heightDrawn <= getContentHeight()) {
             heightDrawn += drawElement(pGuiGraphics, nextElement, getContentLeft(), getContentTop() + heightDrawn);
             ++nextElement;
         }
-        poseStack.popPose();
-        GL11.glDisable(GL11.GL_STENCIL_TEST);
+        poseStack.popMatrix();
+        pGuiGraphics.disableScissor();
     }
 
-    protected int drawElement(GuiGraphics pGuiGraphics, int elementIndex, int x, int y) {
+    protected int drawElement(GuiGraphicsExtractor pGuiGraphics, int elementIndex, int x, int y) {
 
         IListBoxElement element = elements.get(elementIndex);
         if (elementIndex == selectedIndex) {
@@ -214,7 +211,7 @@ public class ElementListBox extends ElementBase {
     @Override
     public boolean mouseWheel(double mouseX, double mouseY, double movement) {
 
-        if (Screen.hasControlDown()) {
+        if (Minecraft.getInstance().hasControlDown()) {
             if (movement > 0) {
                 scrollLeft();
             } else if (movement < 0) {

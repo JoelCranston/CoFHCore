@@ -11,6 +11,7 @@ import cofh.lib.common.energy.EnergyStorageCoFH;
 import cofh.lib.common.fluid.FluidStorageCoFH;
 import cofh.lib.common.inventory.ItemStorageCoFH;
 import cofh.lib.common.xp.XpStorage;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -23,8 +24,6 @@ import java.util.function.Supplier;
 import static cofh.core.common.network.packet.server.StorageClearPacket.StorageType.*;
 import static cofh.lib.util.Constants.*;
 import static cofh.lib.util.helpers.StringHelper.*;
-import static net.minecraft.client.gui.screens.Screen.hasControlDown;
-import static net.minecraft.client.gui.screens.Screen.hasShiftDown;
 
 public final class GuiHelper {
 
@@ -275,10 +274,10 @@ public final class GuiHelper {
         if (element.enabled()) {
             int change = 1000;
 
-            if (hasShiftDown()) {
+            if (Minecraft.getInstance().hasShiftDown()) {
                 change *= 10;
             }
-            if (hasControlDown()) {
+            if (Minecraft.getInstance().hasControlDown()) {
                 change /= 100;
             }
             return Collections.singletonList(Component.literal(
@@ -294,10 +293,10 @@ public final class GuiHelper {
         if (element.enabled()) {
             int change = 1000;
 
-            if (hasShiftDown()) {
+            if (Minecraft.getInstance().hasShiftDown()) {
                 change *= 10;
             }
-            if (hasControlDown()) {
+            if (Minecraft.getInstance().hasControlDown()) {
                 change /= 100;
             }
             return Collections.singletonList(Component.literal(
@@ -312,10 +311,10 @@ public final class GuiHelper {
 
         int change = 1000;
 
-        if (hasShiftDown()) {
+        if (Minecraft.getInstance().hasShiftDown()) {
             change *= 10;
         }
-        if (hasControlDown()) {
+        if (Minecraft.getInstance().hasControlDown()) {
             change /= 100;
         }
         if (mouseButton == 1) {
@@ -328,10 +327,10 @@ public final class GuiHelper {
 
         float pitch = 0.7F;
 
-        if (hasShiftDown()) {
+        if (Minecraft.getInstance().hasShiftDown()) {
             pitch += 0.1F;
         }
-        if (hasControlDown()) {
+        if (Minecraft.getInstance().hasControlDown()) {
             pitch -= 0.2F;
         }
         if (mouseButton == 1) {

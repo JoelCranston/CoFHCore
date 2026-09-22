@@ -1,15 +1,15 @@
 package cofh.lib.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.Identifier;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.inventory.InventoryMenu;
 
-public class NothingRenderer extends EntityRenderer<Entity> {
+public class NothingRenderer extends EntityRenderer<Entity, EntityRenderState> {
 
     public NothingRenderer(EntityRendererProvider.Context ctx) {
 
@@ -17,7 +17,7 @@ public class NothingRenderer extends EntityRenderer<Entity> {
     }
 
     @Override
-    public void render(Entity entity, float entityYaw, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int packedLight) {
+    public void submit(EntityRenderState state, PoseStack matrixStack, SubmitNodeCollector collector, CameraRenderState camera) {
 
     }
 
@@ -28,9 +28,9 @@ public class NothingRenderer extends EntityRenderer<Entity> {
     }
 
     @Override
-    public Identifier getTextureLocation(Entity entity) {
+    public EntityRenderState createRenderState() {
 
-        return InventoryMenu.BLOCK_ATLAS;
+        return new EntityRenderState();
     }
 
 }

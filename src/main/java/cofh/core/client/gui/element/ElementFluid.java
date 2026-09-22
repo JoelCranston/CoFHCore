@@ -4,7 +4,7 @@ import cofh.core.client.gui.IGuiAccess;
 import cofh.core.util.helpers.FluidHelper;
 import cofh.core.util.helpers.RenderHelper;
 import cofh.lib.util.helpers.StringHelper;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.fluids.FluidStack;
 
@@ -27,9 +27,9 @@ public class ElementFluid extends ElementBase {
     }
 
     @Override
-    public void drawBackground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawBackground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
-        RenderHelper.drawFluid(guiLeft() + posX(), guiTop() + posY(), fluidSup.get(), width, height);
+        RenderHelper.drawFluid(pGuiGraphics, posX(), posY(), fluidSup.get(), width, height);
     }
 
     @Override

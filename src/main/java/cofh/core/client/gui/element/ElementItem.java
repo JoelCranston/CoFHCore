@@ -1,7 +1,7 @@
 package cofh.core.client.gui.element;
 
 import cofh.core.client.gui.IGuiAccess;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Supplier;
@@ -29,10 +29,10 @@ public class ElementItem extends ElementBase {
     }
 
     @Override
-    public void drawForeground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawForeground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
         if (!renderStack.get().isEmpty()) {
-            pGuiGraphics.renderItem(renderStack.get(), posX(), posY());
+            pGuiGraphics.item(renderStack.get(), posX(), posY());
         }
     }
 

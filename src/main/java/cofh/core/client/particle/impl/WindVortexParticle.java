@@ -21,14 +21,16 @@ import static cofh.core.util.helpers.vfx.RenderTypes.BLANK_TEXTURE;
 
 public class WindVortexParticle extends CylindricalParticle {
 
+    protected float roll;
+
     private WindVortexParticle(CylindricalParticleOptions data, ClientLevel level, double x, double y, double z, double xDir, double yDir, double zDir) {
 
         super(data, level, x, y, z, xDir, yDir, zDir);
-        oRoll = roll = random.nextFloat() * MathHelper.F_TAU;
+        roll = random.nextFloat() * MathHelper.F_TAU;
     }
 
     @Override
-    public void render(PoseStack stack, MultiBufferSource buffer, VertexConsumer consumer, int packedLight, float time, float pTicks) {
+    public void render(PoseStack stack, MultiBufferSource buffer, int packedLight, float time, float pTicks) {
 
         SplittableRandom rand = new SplittableRandom(this.seed);
         if (!rotation.equals(new Quaternionf())) {
@@ -55,7 +57,7 @@ public class WindVortexParticle extends CylindricalParticle {
             rot += roll;
             posns[i] = new Vector4f(r * MathHelper.cos(rot), 0.25F, r * MathHelper.sin(rot), 1.0F);
         }
-        consumer = CoreShaders.PIXELATE.getBuffer(BLANK_TEXTURE);
+        VertexConsumer consumer = CoreShaders.PIXELATE.getBuffer(BLANK_TEXTURE);
         VFXHelper.renderStreamLine(stack, consumer, packedLight, posns, c0, VFXHelper.getWidthFunc(rand.nextFloat(0.07F, 0.09F)));
         if (rand.nextInt(3) == 0) {
             VFXHelper.renderCyclone(stack, consumer, packedLight, c0, rand.nextFloat(0.5F, 0.8F), rand.nextFloat(0.07F, 0.09F), 1.0F, rand, progress * 0.5F);
@@ -65,7 +67,7 @@ public class WindVortexParticle extends CylindricalParticle {
     @Nonnull
     public static ParticleProvider<CylindricalParticleOptions> factory(SpriteSet spriteSet) {
 
-        return WindVortexParticle::new;
+        return (data, level, x, y, z, xDir, yDir, zDir, random) -> new WindVortexParticle(data, level, x, y, z, xDir, yDir, zDir);
     }
 
 }

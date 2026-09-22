@@ -41,7 +41,7 @@ public class ShardParticle extends PointToPointParticle {
     }
 
     @Override
-    public void render(PoseStack stack, MultiBufferSource buffer, VertexConsumer consumer, int packedLight, float time, float pTicks) {
+    public void render(PoseStack stack, MultiBufferSource buffer, int packedLight, float time, float pTicks) {
 
         float progress = 1.0F - MathHelper.cos(time / duration * MathHelper.F_PI * 0.5F);
         float dx = disp.x() * progress;
@@ -65,26 +65,19 @@ public class ShardParticle extends PointToPointParticle {
         float w = 0.12F * size;
         float xs = perp.x * w;
         float ys = perp.y * w;
-        consumer = buffer.getBuffer(RenderTypes.FLAT_TRANSLUCENT);
+        VertexConsumer consumer = buffer.getBuffer(RenderTypes.FLAT_TRANSLUCENT);
         new VFXHelper.VFXNode(start.x() + xs, start.x() - xs, start.y() + ys, start.y() - ys, start.z(), w).renderStart(norm, consumer, packedLight, c1);
         new VFXHelper.VFXNode(end.x(), end.x(), end.y(), end.y(), end.z(), w * 0.1F).renderEnd(norm, consumer, packedLight, c1);
 
-        // If different colors, end batch so the body always renders on top of the trail.
-        if (!c0.sameRGB(c1)) {
-            buffer.getBuffer(RenderTypes.LINEAR_GLOW);
-            buffer.getBuffer(RenderTypes.FLAT_TRANSLUCENT);
-        }
         // Body
         RenderHelper.renderBipyramid(stack, consumer, packedLight, c0, 4, 0.6F, 0.1F);
-        buffer.getBuffer(RenderTypes.LINEAR_GLOW);
-        buffer.getBuffer(RenderTypes.FLAT_TRANSLUCENT);
         RenderHelper.renderBipyramid(stack, consumer, packedLight, c0.mix(Color.WHITE, 0.5F), 4, 0.4F, 0.066F);
     }
 
     @Nonnull
     public static ParticleProvider<BiColorParticleOptions> factory(SpriteSet spriteSet) {
 
-        return ShardParticle::new;
+        return (data, level, sx, sy, sz, ex, ey, ez, random) -> new ShardParticle(data, level, sx, sy, sz, ex, ey, ez);
     }
 
 }

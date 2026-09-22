@@ -5,23 +5,28 @@ import cofh.lib.api.IProxyItemPropertyGetter;
 import cofh.lib.api.block.entity.IAreaEffectTile;
 import cofh.lib.util.helpers.SoundHelper;
 import cofh.lib.util.helpers.StringHelper;
+import com.mojang.serialization.MapCodec;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.client.renderer.item.ItemPropertyFunction;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.item.properties.numeric.RangeSelectItemModelProperty;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.client.event.RegisterRangeSelectItemModelPropertyEvent;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 public class ProxyClient extends Proxy {
 
     protected static final Map<Identifier, Object> MODEL_MAP = new Object2ObjectOpenHashMap<>();
-    protected static final Set<ModelPropertyWrapper> ITEM_PROPERTY_GETTERS = new HashSet<>();
+    protected static final Map<Identifier, Map<Item, IProxyItemPropertyGetter>> ITEM_PROPERTY_GETTERS = new Object2ObjectOpenHashMap<>();
     protected static final Set<IAreaEffectTile> AREA_EFFECT_TILES = Collections.newSetFromMap(new WeakHashMap<>());
 
     // region HELPERS
@@ -82,7 +87,7 @@ public class ProxyClient extends Proxy {
     @Override
     public void registerItemModelProperty(Item item, Identifier resourceLoc, IProxyItemPropertyGetter propertyGetter) {
 
-        ITEM_PROPERTY_GETTERS.add(new ModelPropertyWrapper(item, resourceLoc, propertyGetter));
+        ITEM_PROPERTY_GETTERS.computeIfAbsent(resourceLoc, k -> new Object2ObjectOpenHashMap<>()).put(item, propertyGetter);
     }
 
     @Override
@@ -103,25 +108,35 @@ public class ProxyClient extends Proxy {
         return AREA_EFFECT_TILES;
     }
 
-    public static void registerItemModelProperties() {
+    public static void registerItemModelProperties(RegisterRangeSelectItemModelPropertyEvent event) {
 
-        for (ModelPropertyWrapper wrapper : ITEM_PROPERTY_GETTERS) {
-            ItemProperties.register(wrapper.item, wrapper.resourceLoc, wrapper.propertyGetter);
+        for (Identifier resourceLoc : ITEM_PROPERTY_GETTERS.keySet()) {
+            event.register(resourceLoc, new ModelPropertyWrapper(resourceLoc).codec);
         }
-        ITEM_PROPERTY_GETTERS.clear();
     }
 
-    protected static class ModelPropertyWrapper {
+    protected static class ModelPropertyWrapper implements RangeSelectItemModelProperty {
 
-        Item item;
         Identifier resourceLoc;
-        ItemPropertyFunction propertyGetter;
+        MapCodec<ModelPropertyWrapper> codec;
 
-        ModelPropertyWrapper(Item item, Identifier resourceLoc, IProxyItemPropertyGetter propertyGetter) {
+        ModelPropertyWrapper(Identifier resourceLoc) {
 
-            this.item = item;
             this.resourceLoc = resourceLoc;
-            this.propertyGetter = propertyGetter::call;
+            this.codec = MapCodec.unit(this);
+        }
+
+        @Override
+        public float get(ItemStack stack, @Nullable ClientLevel level, @Nullable ItemOwner owner, int seed) {
+
+            IProxyItemPropertyGetter propertyGetter = ITEM_PROPERTY_GETTERS.get(resourceLoc).get(stack.getItem());
+            return propertyGetter == null ? 0.0F : propertyGetter.call(stack, level, owner == null ? null : owner.asLivingEntity(), seed);
+        }
+
+        @Override
+        public MapCodec<ModelPropertyWrapper> type() {
+
+            return codec;
         }
 
     }

@@ -8,8 +8,12 @@ import com.mojang.math.Axis;
 import it.unimi.dsi.fastutil.floats.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockQuadOutput;
+import net.minecraft.client.renderer.block.BlockStateModelSet;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,7 +21,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.model.data.ModelData;
 import org.joml.*;
 
 import java.lang.Math;
@@ -310,7 +313,7 @@ public final class VFXHelper {
 
     private static void renderSkeleton(VFXNode[] nodes) {
 
-        renderSkeleton(Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.LINES), nodes);
+        renderSkeleton(Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(net.minecraft.client.renderer.rendertype.RenderTypes.LINES), nodes);
     }
     // endregion
 
@@ -329,7 +332,18 @@ public final class VFXHelper {
      */
     public static void renderShockwave(PoseStack stack, MultiBufferSource buffer, Level level, BlockPos origin, float time, float radius, float heightScale, BiPredicate<BlockPos, BlockState> canRender) {
 
-        BlockRenderDispatcher renderer = RenderHelper.renderBlock();
+        if (!(level instanceof BlockAndTintGetter getter)) {
+            return;
+        }
+        Minecraft minecraft = Minecraft.getInstance();
+        ModelBlockRenderer renderer = new ModelBlockRenderer(minecraft.options.ambientOcclusion().get(), false, minecraft.getBlockColors());
+        BlockStateModelSet models = minecraft.getModelManager().getBlockStateModelSet();
+        BlockQuadOutput output = (x, y, z, quad, instance) -> {
+            stack.pushPose();
+            stack.translate(x, y, z);
+            buffer.getBuffer(movingBlock(quad.materialInfo().layer())).putBakedQuad(stack.last(), quad, instance);
+            stack.popPose();
+        };
         float invRadius = 1 / radius;
         for (Float2ReferenceMap.Entry<Vector2i[]> entry : SHOCKWAVE_OFFSETS.subMap(Math.min(time - 5, radius), Math.min(time, radius)).float2ReferenceEntrySet()) {
             float dist = entry.getFloatKey();
@@ -345,9 +359,7 @@ public final class VFXHelper {
                             stack.translate(offset.x, height + y, offset.y);
                             stack.scale(1.01F, 1.01F, 1.01F);
                             // ModelData modelData = renderer.getBlockModel(state).getModelData(level, pos, state, ModelData.EMPTY);
-                            for (RenderType type : renderer.getBlockModel(state).getRenderTypes(state, level.getRandom(), ModelData.EMPTY)) {
-                                renderer.renderBatched(state, pos.relative(Direction.UP), level, stack, buffer.getBuffer(type), false, level.getRandom(), ModelData.EMPTY, type);
-                            }
+                            renderer.tesselateBlock(output, 0.0F, 0.0F, 0.0F, getter, pos.relative(Direction.UP), state, models.get(state), state.getSeed(pos));
                             stack.popPose();
                         }
                         break;
@@ -363,6 +375,15 @@ public final class VFXHelper {
                 !state.isAir() && state.isRedstoneConductor(world, pos) &&
                         state.isCollisionShapeFullBlock(world, pos) && !state.hasBlockEntity() &&
                         !world.getBlockState(pos.above()).isCollisionShapeFullBlock(world, pos.above()));
+    }
+
+    private static RenderType movingBlock(ChunkSectionLayer layer) {
+
+        return switch (layer) {
+            case SOLID -> net.minecraft.client.renderer.rendertype.RenderTypes.solidMovingBlock();
+            case CUTOUT -> net.minecraft.client.renderer.rendertype.RenderTypes.cutoutMovingBlock();
+            case TRANSLUCENT -> net.minecraft.client.renderer.rendertype.RenderTypes.translucentMovingBlock();
+        };
     }
 
     private static Float2ReferenceSortedMap<Vector2i[]> getOffsets(int maxRadius) {

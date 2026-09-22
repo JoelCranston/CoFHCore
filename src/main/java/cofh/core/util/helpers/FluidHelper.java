@@ -6,6 +6,7 @@ import cofh.lib.common.fluid.FluidStorageCoFH;
 import cofh.lib.init.tags.FluidTagsCoFH;
 import cofh.lib.util.helpers.BlockHelper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -32,7 +33,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.client.fluid.FluidTintSource;
 import net.neoforged.neoforge.fluids.FluidActionResult;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
@@ -518,7 +519,11 @@ public final class FluidHelper {
     // region PROPERTY HELPERS
     public static int color(FluidStack stack) {
 
-        return !stack.isEmpty() && stack.getFluid() != null ? IClientFluidTypeExtensions.of(stack.getFluid()).getTintColor(stack) : 0;
+        if (stack.isEmpty() || stack.getFluid() == null) {
+            return 0;
+        }
+        FluidTintSource tint = Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(stack.getFluid().defaultFluidState()).fluidTintSource();
+        return tint == null ? 0xFFFFFFFF : tint.colorAsStack(stack);
     }
 
     public static int luminosity(FluidStack stack) {

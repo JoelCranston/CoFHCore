@@ -3,12 +3,9 @@ package cofh.core.client.particle.impl;
 import cofh.core.client.particle.options.ColorParticleOptions;
 import cofh.core.util.helpers.vfx.Color;
 import cofh.lib.util.helpers.MathHelper;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.renderer.MultiBufferSource;
 
 import javax.annotation.Nonnull;
 
@@ -23,7 +20,7 @@ public class MistParticle extends GasParticle {
     }
 
     @Override
-    public void render(PoseStack stack, MultiBufferSource buffer, VertexConsumer consumer, int packedLight, float time, float pTicks) {
+    protected void animate(float time, float pTicks) {
 
         float progress = time / duration;
         float q = 2 * progress - 1;
@@ -32,13 +29,13 @@ public class MistParticle extends GasParticle {
 
         //Only set render size based off BB size
         this.size = this.bbWidth * MathHelper.sin(0.25F * MathHelper.F_PI * (progress + 1));
-        super.render(stack, buffer, consumer, packedLight, time, pTicks);
+        super.animate(time, pTicks);
     }
 
     @Nonnull
     public static ParticleProvider<ColorParticleOptions> factory(SpriteSet spriteSet) {
 
-        return (data, level, x, y, z, dx, dy, dz) -> new MistParticle(data, level, spriteSet, x, y, z, dx, dy, dz);
+        return (data, level, x, y, z, dx, dy, dz, random) -> new MistParticle(data, level, spriteSet, x, y, z, dx, dy, dz);
     }
 
 }

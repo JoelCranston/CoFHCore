@@ -1,24 +1,23 @@
 package cofh.core.client.particle;
 
-import cofh.core.client.event.CoreClientEvents;
 import cofh.core.client.particle.options.CoFHParticleOptions;
 import cofh.lib.util.helpers.MathHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.BlockPos;
-
-import java.util.ArrayDeque;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * The base class for CoFH particles.
  */
 public abstract class CoFHParticle extends Particle {
+
+    public static final ParticleRenderType GROUP = new ParticleRenderType("cofh_core:custom");
 
     //The total time a particle is rendered, in ticks.
     protected float duration = 1.0F;
@@ -42,13 +41,7 @@ public abstract class CoFHParticle extends Particle {
         setSize(data.size);
     }
 
-    @Override
-    public void render(VertexConsumer consumer, Camera cam, float partialTicks) {
-
-        CoreClientEvents.delayedRenderParticles.computeIfAbsent(getRenderType(), type -> new ArrayDeque<>()).offer(this);
-    }
-
-    public void render(PoseStack stack, MultiBufferSource buffer, VertexConsumer consumer, float pTicks) {
+    public void render(PoseStack stack, MultiBufferSource buffer, Vec3 cameraPos, float pTicks) {
 
         float time = this.age + pTicks - this.delay;
         if (time < 0 || this.duration <= time) {
@@ -59,9 +52,9 @@ public abstract class CoFHParticle extends Particle {
         double x = MathHelper.interpolate(this.xo, this.x, pTicks);
         double y = MathHelper.interpolate(this.yo, this.y, pTicks);
         double z = MathHelper.interpolate(this.zo, this.z, pTicks);
-        stack.translate(x, y, z);
+        stack.translate(x - cameraPos.x, y - cameraPos.y, z - cameraPos.z);
 
-        render(stack, buffer, consumer, getLightColor(pTicks, x, y, z), time, pTicks);
+        render(stack, buffer, getLightCoords(pTicks, x, y, z), time, pTicks);
 
         stack.popPose();
     }
@@ -69,32 +62,31 @@ public abstract class CoFHParticle extends Particle {
     /**
      * Method for rendering impl.
      *
-     * @param buffer   Minecraft's main buffer source.
-     * @param consumer {@link VertexConsumer} from the {@link ParticleRenderType} given by {@link #getRenderType()}. Useless for most particles with custom rendering.
-     * @param time     Number of ticks since the particle started rendering.
-     * @param pTicks   Partial ticks. The {@code time} parameter should usually be used instead.
+     * @param buffer Buffer source for this particle; each {@link RenderType} requested is submitted separately.
+     * @param time   Number of ticks since the particle started rendering.
+     * @param pTicks Partial ticks. The {@code time} parameter should usually be used instead.
      */
-    public abstract void render(PoseStack stack, MultiBufferSource buffer, VertexConsumer consumer, int packedLight, float time, float pTicks);
+    public abstract void render(PoseStack stack, MultiBufferSource buffer, int packedLight, float time, float pTicks);
 
     @Override
-    public ParticleRenderType getRenderType() {
+    public ParticleRenderType getGroup() {
 
-        return ParticleRenderType.CUSTOM;
+        return GROUP;
     }
 
     @Override
-    public int getLightColor(float pTicks) {
+    public int getLightCoords(float pTicks) {
 
         double x = MathHelper.interpolate(this.xo, this.x, pTicks);
         double y = MathHelper.interpolate(this.yo, this.y, pTicks);
         double z = MathHelper.interpolate(this.zo, this.z, pTicks);
-        return getLightColor(pTicks, x, y, z);
+        return getLightCoords(pTicks, x, y, z);
     }
 
-    protected int getLightColor(float pTicks, double x, double y, double z) {
+    protected int getLightCoords(float pTicks, double x, double y, double z) {
 
         BlockPos blockpos = BlockPos.containing(x, y, z);
-        return this.level.hasChunkAt(blockpos) ? LevelRenderer.getLightColor(this.level, blockpos) : 0;
+        return this.level.hasChunkAt(blockpos) ? LevelRenderer.getLightCoords(this.level, blockpos) : 0;
     }
 
     protected void setLifetime(float duration, float delay) {

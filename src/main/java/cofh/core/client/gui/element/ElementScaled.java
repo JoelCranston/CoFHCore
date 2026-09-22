@@ -1,9 +1,7 @@
 package cofh.core.client.gui.element;
 
 import cofh.core.client.gui.IGuiAccess;
-import cofh.core.util.helpers.RenderHelper;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.function.IntSupplier;
 
@@ -37,32 +35,29 @@ public class ElementScaled extends ElementBase {
     }
 
     @Override
-    public void drawBackground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawBackground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
-        PoseStack poseStack = pGuiGraphics.pose();
-        RenderHelper.setPosTexShader();
-        RenderHelper.setShaderTexture0(texture);
         int quantity = quantitySup.getAsInt();
 
         if (drawBackground) {
-            drawTexturedModalRect(poseStack, posX(), posY(), 0, 0, width, height);
+            drawTexturedModalRect(pGuiGraphics, texture, posX(), posY(), 0, 0, width, height);
         }
         switch (direction) {
             case TOP:
                 // vertical top -> bottom
-                drawTexturedModalRect(poseStack, posX(), posY(), width, 0, width, quantity);
+                drawTexturedModalRect(pGuiGraphics, texture, posX(), posY(), width, 0, width, quantity);
                 return;
             case BOTTOM:
                 // vertical bottom -> top
-                drawTexturedModalRect(poseStack, posX(), posY() + height - quantity, width, height - quantity, width, quantity);
+                drawTexturedModalRect(pGuiGraphics, texture, posX(), posY() + height - quantity, width, height - quantity, width, quantity);
                 return;
             case LEFT:
                 // horizontal left -> right
-                drawTexturedModalRect(poseStack, posX(), posY(), width, 0, quantity, height);
+                drawTexturedModalRect(pGuiGraphics, texture, posX(), posY(), width, 0, quantity, height);
                 return;
             case RIGHT:
                 // horizontal right -> left
-                drawTexturedModalRect(poseStack, posX() + width - quantity, posY(), width + width - quantity, 0, quantity, height);
+                drawTexturedModalRect(pGuiGraphics, texture, posX() + width - quantity, posY(), width + width - quantity, 0, quantity, height);
         }
     }
 

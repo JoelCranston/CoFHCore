@@ -1,7 +1,7 @@
 package cofh.core.client.gui.element.listbox;
 
 import cofh.core.client.gui.element.ElementListBox;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public interface IListBoxElement {
 
@@ -11,6 +11,6 @@ public interface IListBoxElement {
 
     Object getValue();
 
-    void draw(GuiGraphics pGuiGraphics, ElementListBox listBox, int x, int y, int backColor, int textColor);
+    void draw(GuiGraphicsExtractor pGuiGraphics, ElementListBox listBox, int x, int y, int backColor, int textColor);
 
 }

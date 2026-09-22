@@ -2,11 +2,10 @@ package cofh.core.client.gui.element.panel;
 
 import cofh.core.client.gui.IGuiAccess;
 import cofh.core.client.gui.element.ElementAugmentSlots;
-import cofh.core.util.helpers.RenderHelper;
 import cofh.lib.common.inventory.SlotCoFH;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -49,32 +48,26 @@ public class AugmentPanel extends PanelBase {
     }
 
     @Override
-    protected void drawForeground(GuiGraphics pGuiGraphics) {
+    protected void drawForeground(GuiGraphicsExtractor pGuiGraphics) {
 
         drawPanelIcon(pGuiGraphics, ICON_AUGMENT);
         if (!fullyOpen) {
             return;
         }
-        pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.augmentation"), sideOffset() + 18, 6, headerColor, true);
+        drawString(pGuiGraphics, localize("info.cofh.augmentation"), sideOffset() + 18, 6, headerColor, true);
 
-        RenderHelper.resetShaderColor();
     }
 
     @Override
-    protected void drawBackground(GuiGraphics pGuiGraphics) {
+    protected void drawBackground(GuiGraphicsExtractor pGuiGraphics) {
 
         super.drawBackground(pGuiGraphics);
 
         if (!fullyOpen) {
             return;
         }
-        float colorR = (backgroundColor >> 16 & 255) / 255.0F * 0.6F;
-        float colorG = (backgroundColor >> 8 & 255) / 255.0F * 0.6F;
-        float colorB = (backgroundColor & 255) / 255.0F * 0.6F;
-        RenderHelper.setPosTexShader();
-        RenderSystem.setShaderColor(colorR, colorG, colorB, 1.0F);
-        gui.drawTexturedModalRect(pGuiGraphics, sideOffset() + slotsBorderX1, slotsBorderY1, 16, 20, slotsBorderX2 - slotsBorderX1, slotsBorderY2 - slotsBorderY1);
-        RenderHelper.resetShaderColor();
+        int color = ARGB.scaleRGB(backgroundColor, 0.6F);
+        gui.drawTexturedModalRect(pGuiGraphics, texture, sideOffset() + slotsBorderX1, slotsBorderY1, 16, 20, slotsBorderX2 - slotsBorderX1, slotsBorderY2 - slotsBorderY1, color);
     }
 
     @Override

@@ -4,7 +4,7 @@ import cofh.core.client.gui.IGuiAccess;
 import cofh.core.util.helpers.GuiHelper;
 import cofh.lib.common.inventory.SlotCoFH;
 import cofh.lib.util.helpers.MathHelper;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class ElementAugmentSlots extends ElementBase {
     }
 
     @Override
-    public void drawBackground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawBackground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
         for (ElementBase slot : slots) {
             if (slot.visible()) {
@@ -60,7 +60,7 @@ public class ElementAugmentSlots extends ElementBase {
     }
 
     @Override
-    public void drawForeground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawForeground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
         for (ElementBase slot : slots) {
             if (slot.visible()) {

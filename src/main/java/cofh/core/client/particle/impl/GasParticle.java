@@ -6,7 +6,6 @@ import cofh.core.util.helpers.vfx.Color;
 import cofh.core.util.helpers.vfx.RenderTypes;
 import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.ClipContext;
@@ -62,7 +61,7 @@ public abstract class GasParticle extends SpriteParticle {
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
+    protected Layer getLayer() {
 
         return RenderTypes.PARTICLE_SHEET_OVER;
     }

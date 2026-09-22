@@ -2,8 +2,7 @@ package cofh.core.client.gui.element;
 
 import cofh.core.client.gui.IGuiAccess;
 import cofh.core.util.helpers.RenderHelper;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.function.Supplier;
@@ -24,41 +23,34 @@ public class ElementScaledFluid extends ElementScaled {
     }
 
     @Override
-    public void drawBackground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawBackground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
-        PoseStack poseStack = pGuiGraphics.pose();
-        RenderHelper.setPosTexShader();
-        RenderHelper.setShaderTexture0(texture);
         int quantity = quantitySup.getAsInt();
         FluidStack fluid = fluidSup.get();
 
         if (drawBackground) {
-            drawTexturedModalRect(poseStack, posX(), posY(), 0, 0, width, height);
+            drawTexturedModalRect(pGuiGraphics, texture, posX(), posY(), 0, 0, width, height);
         }
         switch (direction) {
             case TOP:
                 // vertical top -> bottom
-                RenderHelper.drawFluid(guiLeft() + posX(), guiTop() + posY(), fluid, width, quantity);
-                RenderHelper.setShaderTexture0(texture);
-                drawTexturedModalRect(poseStack, posX(), posY(), width, 0, width, quantity);
+                RenderHelper.drawFluid(pGuiGraphics, posX(), posY(), fluid, width, quantity);
+                drawTexturedModalRect(pGuiGraphics, texture, posX(), posY(), width, 0, width, quantity);
                 return;
             case BOTTOM:
                 // vertical bottom -> top
-                RenderHelper.drawFluid(guiLeft() + posX(), guiTop() + posY() + height - quantity, fluid, width, quantity);
-                RenderHelper.setShaderTexture0(texture);
-                drawTexturedModalRect(poseStack, posX(), posY() + height - quantity, width, height - quantity, width, quantity);
+                RenderHelper.drawFluid(pGuiGraphics, posX(), posY() + height - quantity, fluid, width, quantity);
+                drawTexturedModalRect(pGuiGraphics, texture, posX(), posY() + height - quantity, width, height - quantity, width, quantity);
                 return;
             case LEFT:
                 // horizontal left -> right
-                RenderHelper.drawFluid(guiLeft() + posX(), guiTop() + posY(), fluid, quantity, height);
-                RenderHelper.setShaderTexture0(texture);
-                drawTexturedModalRect(poseStack, posX(), posY(), width, 0, quantity, height);
+                RenderHelper.drawFluid(pGuiGraphics, posX(), posY(), fluid, quantity, height);
+                drawTexturedModalRect(pGuiGraphics, texture, posX(), posY(), width, 0, quantity, height);
                 return;
             case RIGHT:
                 // horizontal right -> left
-                RenderHelper.drawFluid(guiLeft() + posX() + width - quantity, guiTop() + posY(), fluid, quantity, height);
-                RenderHelper.setShaderTexture0(texture);
-                drawTexturedModalRect(poseStack, posX() + width - quantity, posY(), width + width - quantity, 0, quantity, height);
+                RenderHelper.drawFluid(pGuiGraphics, posX() + width - quantity, posY(), fluid, quantity, height);
+                drawTexturedModalRect(pGuiGraphics, texture, posX() + width - quantity, posY(), width + width - quantity, 0, quantity, height);
         }
     }
 

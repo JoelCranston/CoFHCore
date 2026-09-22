@@ -2,7 +2,7 @@ package cofh.core.client.gui.element.listbox;
 
 import cofh.core.client.gui.element.ElementListBox;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public class ListBoxElementText implements IListBoxElement {
 
@@ -32,9 +32,9 @@ public class ListBoxElementText implements IListBoxElement {
     }
 
     @Override
-    public void draw(GuiGraphics pGuiGraphics, ElementListBox listBox, int x, int y, int backColor, int textColor) {
+    public void draw(GuiGraphicsExtractor pGuiGraphics, ElementListBox listBox, int x, int y, int backColor, int textColor) {
 
-        pGuiGraphics.drawString(listBox.fontRenderer(), text, x, y, textColor, true);
+        listBox.drawString(pGuiGraphics, text, x, y, textColor, true);
     }
 
 }

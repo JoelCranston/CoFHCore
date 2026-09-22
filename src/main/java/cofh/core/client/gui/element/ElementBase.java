@@ -1,11 +1,11 @@
 package cofh.core.client.gui.element;
 
 import cofh.core.client.gui.IGuiAccess;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.FormattedCharSequence;
 
 import java.util.List;
 import java.util.function.IntSupplier;
@@ -57,11 +57,11 @@ public abstract class ElementBase {
         this.height = height;
     }
 
-    public void drawBackground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawBackground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
     }
 
-    public void drawForeground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawForeground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
     }
 
@@ -204,19 +204,29 @@ public abstract class ElementBase {
     // endregion
 
     // region HELPERS
-    public void drawSizedRect(PoseStack poseStack, int x, int y, int width, int height, int color) {
+    public void drawSizedRect(GuiGraphicsExtractor pGuiGraphics, int x, int y, int width, int height, int color) {
 
-        gui.drawSizedRect(poseStack, x, y, width, height, color);
+        gui.drawSizedRect(pGuiGraphics, x, y, width, height, color);
     }
 
-    public void drawColoredModalRect(PoseStack poseStack, int x, int y, int width, int height, int color) {
+    public void drawColoredModalRect(GuiGraphicsExtractor pGuiGraphics, int x, int y, int width, int height, int color) {
 
-        gui.drawColoredModalRect(poseStack, x, y, width, height, color);
+        gui.drawColoredModalRect(pGuiGraphics, x, y, width, height, color);
     }
 
-    public void drawTexturedModalRect(PoseStack poseStack, int x, int y, int u, int v, int width, int height) {
+    public void drawTexturedModalRect(GuiGraphicsExtractor pGuiGraphics, Identifier texture, int x, int y, int u, int v, int width, int height) {
 
-        gui.drawTexturedModalRect(poseStack, x, y, u, v, width, height, texW, texH);
+        gui.drawTexturedModalRect(pGuiGraphics, texture, x, y, u, v, width, height, texW, texH);
+    }
+
+    public void drawString(GuiGraphicsExtractor pGuiGraphics, String text, int x, int y, int color, boolean dropShadow) {
+
+        gui.drawString(pGuiGraphics, text, x, y, color, dropShadow);
+    }
+
+    public void drawString(GuiGraphicsExtractor pGuiGraphics, FormattedCharSequence text, int x, int y, int color, boolean dropShadow) {
+
+        gui.drawString(pGuiGraphics, text, x, y, color, dropShadow);
     }
 
     public Font fontRenderer() {

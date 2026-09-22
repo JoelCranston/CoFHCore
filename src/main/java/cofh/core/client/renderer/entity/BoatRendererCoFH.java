@@ -1,33 +1,44 @@
 package cofh.core.client.renderer.entity;
 
-import com.mojang.datafixers.util.Pair;
-import net.minecraft.client.model.ChestBoatModel;
-import net.minecraft.client.model.ListModel;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.object.boat.BoatModel;
-import net.minecraft.client.renderer.entity.BoatRenderer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.AbstractBoatRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.state.BoatRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.vehicle.boat.Boat;
+import net.minecraft.util.Unit;
 
-public class BoatRendererCoFH extends BoatRenderer {
+public class BoatRendererCoFH extends AbstractBoatRenderer {
 
-    Pair<Identifier, ListModel<Boat>> modelPair;
+    private final Model.Simple waterPatchModel;
+    private final EntityModel<BoatRenderState> model;
 
     public BoatRendererCoFH(EntityRendererProvider.Context context, boolean chestBoat, String modId, String name, ModelLayerLocation modelLayerLoc) {
 
-        super(context, chestBoat);
-        if (chestBoat) {
-            modelPair = Pair.of(Identifier.fromNamespaceAndPath(modId, "textures/entity/chest_boat/" + name + ".png"), new ChestBoatModel(context.bakeLayer(modelLayerLoc)));
-        } else {
-            modelPair = Pair.of(Identifier.fromNamespaceAndPath(modId, "textures/entity/boat/" + name + ".png"), new BoatModel(context.bakeLayer(modelLayerLoc)));
-        }
+        super(context, Identifier.fromNamespaceAndPath(modId, chestBoat ? "textures/entity/chest_boat/" + name + ".png" : "textures/entity/boat/" + name + ".png"));
+        this.waterPatchModel = new Model.Simple(context.bakeLayer(ModelLayers.BOAT_WATER_PATCH), t -> RenderTypes.waterMask());
+        this.model = new BoatModel(context.bakeLayer(modelLayerLoc));
     }
 
     @Override
-    public Pair<Identifier, ListModel<Boat>> getModelWithLocation(Boat boat) {
+    protected EntityModel<BoatRenderState> model() {
 
-        return modelPair;
+        return model;
+    }
+
+    @Override
+    protected void submitTypeAdditions(BoatRenderState state, PoseStack poseStack, SubmitNodeCollector collector, int lightCoords) {
+
+        if (!state.isUnderWater) {
+            collector.submitModel(waterPatchModel, Unit.INSTANCE, poseStack, texture, lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor, null);
+        }
     }
 
 }

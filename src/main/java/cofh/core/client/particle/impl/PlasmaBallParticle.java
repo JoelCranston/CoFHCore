@@ -6,21 +6,20 @@ import cofh.core.util.helpers.RenderHelper;
 import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.SimpleParticleType;
 
 import javax.annotation.Nonnull;
 
-public class PlasmaBallParticle extends TextureSheetParticle {
+public class PlasmaBallParticle extends SingleQuadParticle {
 
     private final SpriteSet spriteSet;
 
     private PlasmaBallParticle(ClientLevel levelIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, SpriteSet spriteSet) {
 
-        super(levelIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
+        super(levelIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn, spriteSet.first());
         this.spriteSet = spriteSet;
         setSpriteFromAge(spriteSet);
         lifetime = 10;
@@ -45,13 +44,13 @@ public class PlasmaBallParticle extends TextureSheetParticle {
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
+    protected Layer getLayer() {
 
-        return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        return Layer.TRANSLUCENT;
     }
 
     @Override
-    public int getLightColor(float pTicks) {
+    public int getLightCoords(float pTicks) {
 
         return RenderHelper.FULL_BRIGHT;
     }
@@ -69,7 +68,7 @@ public class PlasmaBallParticle extends TextureSheetParticle {
     @Nonnull
     public static ParticleProvider<SimpleParticleType> factory(SpriteSet spriteSet) {
 
-        return (data, level, x, y, z, dx, dy, dz) -> new PlasmaBallParticle(level, x, y, z, dx, dy, dz, spriteSet);
+        return (data, level, x, y, z, dx, dy, dz, random) -> new PlasmaBallParticle(level, x, y, z, dx, dy, dz, spriteSet);
     }
 
 }

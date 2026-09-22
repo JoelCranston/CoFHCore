@@ -2,15 +2,14 @@ package cofh.core.client.gui.element.panel;
 
 import cofh.core.client.gui.IGuiAccess;
 import cofh.core.client.gui.element.ElementConditionalLayered;
-import cofh.core.util.helpers.RenderHelper;
 import cofh.lib.api.control.IReconfigurable;
 import cofh.lib.api.control.ITransferControllable;
 import cofh.lib.util.helpers.BlockHelper;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -89,13 +88,13 @@ public class ConfigPanel extends PanelBase {
     }
 
     @Override
-    protected void drawForeground(GuiGraphics pGuiGraphics) {
+    protected void drawForeground(GuiGraphicsExtractor pGuiGraphics) {
 
         drawPanelIcon(pGuiGraphics, ICON_CONFIG);
         if (!fullyOpen) {
             return;
         }
-        pGuiGraphics.drawString(fontRenderer(), localize("info.cofh.configuration"), sideOffset() + 18, 6, headerColor, true);
+        drawString(pGuiGraphics, localize("info.cofh.configuration"), sideOffset() + 18, 6, headerColor, true);
 
         if (myTransfer != null) {
             if (myTransfer.hasTransferIn()) {
@@ -114,26 +113,21 @@ public class ConfigPanel extends PanelBase {
     }
 
     @Override
-    protected void drawBackground(GuiGraphics pGuiGraphics) {
+    protected void drawBackground(GuiGraphicsExtractor pGuiGraphics) {
 
         super.drawBackground(pGuiGraphics);
 
         if (!fullyOpen) {
             return;
         }
-        float colorR = (backgroundColor >> 16 & 255) / 255.0F * 0.6F;
-        float colorG = (backgroundColor >> 8 & 255) / 255.0F * 0.6F;
-        float colorB = (backgroundColor & 255) / 255.0F * 0.6F;
-        RenderHelper.setPosTexShader();
-        RenderSystem.setShaderColor(colorR, colorG, colorB, 1.0F);
+        int color = ARGB.scaleRGB(backgroundColor, 0.6F);
 
         if (myTransfer == null) {
-            gui.drawTexturedModalRect(pGuiGraphics, 16, 20, 16, 20, 64, 64);
+            gui.drawTexturedModalRect(pGuiGraphics, texture, 16, 20, 16, 20, 64, 64, color);
         } else {
-            gui.drawTexturedModalRect(pGuiGraphics, 28, 20, 16, 20, 64, 64);
-            gui.drawTexturedModalRect(pGuiGraphics, 6, 32, 16, 20, 20, 40);
+            gui.drawTexturedModalRect(pGuiGraphics, texture, 28, 20, 16, 20, 64, 64, color);
+            gui.drawTexturedModalRect(pGuiGraphics, texture, 6, 32, 16, 20, 20, 40, color);
         }
-        RenderHelper.resetShaderColor();
     }
 
     @Override
@@ -248,7 +242,7 @@ public class ConfigPanel extends PanelBase {
 
         Direction facing = myFacing.get();
 
-        if (Screen.hasShiftDown()) {
+        if (Minecraft.getInstance().hasShiftDown()) {
             if (side == facing) {
                 if (myReconfig.clearAllSides()) {
                     playClickSound(0.2F);

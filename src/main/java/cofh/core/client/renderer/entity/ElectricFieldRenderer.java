@@ -2,16 +2,16 @@ package cofh.core.client.renderer.entity;
 
 import cofh.core.common.entity.ElectricField;
 import cofh.core.util.helpers.RenderHelper;
-import cofh.lib.client.renderer.entity.ITranslucentRenderer;
 import cofh.lib.util.constants.ModIds;
 import cofh.lib.util.helpers.MathHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import org.joml.Vector3f;
@@ -20,7 +20,7 @@ import org.joml.Vector4f;
 import java.util.SplittableRandom;
 import java.util.stream.IntStream;
 
-public class ElectricFieldRenderer extends EntityRenderer<ElectricField> implements ITranslucentRenderer {
+public class ElectricFieldRenderer extends EntityRenderer<ElectricField, ElectricFieldRenderer.ElectricFieldRenderState> {
 
     public static final Identifier[] TEXTURES = IntStream.range(0, 5).mapToObj(i -> Identifier.fromNamespaceAndPath(ModIds.ID_COFH_CORE, "textures/particle/plasma_ball_" + i + ".png")).toArray(Identifier[]::new);
 
@@ -30,42 +30,44 @@ public class ElectricFieldRenderer extends EntityRenderer<ElectricField> impleme
     }
 
     @Override
-    public void render(ElectricField entity, float entityYaw, float partialTicks, PoseStack stack, MultiBufferSource buffer, int packedLight) {
+    public void submit(ElectricFieldRenderState state, PoseStack stack, SubmitNodeCollector collector, CameraRenderState camera) {
 
         stack.pushPose();
 
-        int time = MathHelper.floor((entity.tickCount + partialTicks) * 0.75F);
+        int time = MathHelper.floor(state.ageInTicks * 0.75F);
         SplittableRandom rand = new SplittableRandom(time * 69420L);
         float rot = rand.nextFloat(MathHelper.F_TAU);
 
-        packedLight = RenderHelper.FULL_BRIGHT;
+        int packedLight = RenderHelper.FULL_BRIGHT;
+        float eyeHeight = state.eyeHeight;
 
-        Vector4f center = new Vector4f(0, entity.getEyeHeight(), 0, 1).mul(stack.last().pose());
-        VertexConsumer consumer = buffer.getBuffer(RenderType.entityTranslucent(getTextureLocation(entity)));
+        collector.submitCustomGeometry(stack, RenderTypes.entityTranslucent(state.texture), (pose, consumer) -> {
+            Vector4f center = new Vector4f(0, eyeHeight, 0, 1).mul(pose.pose());
 
-        float x = center.x();
-        float y = center.y();
-        float z = center.z() + 0.1F;
+            float x = center.x();
+            float y = center.y();
+            float z = center.z() + 0.1F;
 
-        float sin = MathHelper.sin(rot);
-        float cos = MathHelper.cos(rot);
-        float w = 0.5F;
-        float a = w * (cos - sin);
-        float b = w * (sin + cos);
+            float sin = MathHelper.sin(rot);
+            float cos = MathHelper.cos(rot);
+            float w = 0.5F;
+            float a = w * (cos - sin);
+            float b = w * (sin + cos);
 
-        Vector3f normal = new Vector3f(0, 1, 0).mul(stack.last().normal());
-        float nx = normal.x();
-        float ny = normal.y();
-        float nz = normal.z();
+            Vector3f normal = new Vector3f(0, 1, 0).mul(pose.normal());
+            float nx = normal.x();
+            float ny = normal.y();
+            float nz = normal.z();
 
-        consumer.addVertex(x + a, y + b, z).setColor(0xFF, 0xFF, 0xFF, 0xFF).setUv(1, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(nx, ny, nz);
-        consumer.addVertex(x - b, y + a, z).setColor(0xFF, 0xFF, 0xFF, 0xFF).setUv(0, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(nx, ny, nz);
-        consumer.addVertex(x - a, y - b, z).setColor(0xFF, 0xFF, 0xFF, 0xFF).setUv(0, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(nx, ny, nz);
-        consumer.addVertex(x + b, y - a, z).setColor(0xFF, 0xFF, 0xFF, 0xFF).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(nx, ny, nz);
+            consumer.addVertex(x + a, y + b, z).setColor(0xFF, 0xFF, 0xFF, 0xFF).setUv(1, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(nx, ny, nz);
+            consumer.addVertex(x - b, y + a, z).setColor(0xFF, 0xFF, 0xFF, 0xFF).setUv(0, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(nx, ny, nz);
+            consumer.addVertex(x - a, y - b, z).setColor(0xFF, 0xFF, 0xFF, 0xFF).setUv(0, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(nx, ny, nz);
+            consumer.addVertex(x + b, y - a, z).setColor(0xFF, 0xFF, 0xFF, 0xFF).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(nx, ny, nz);
+        });
 
         stack.popPose();
 
-        super.render(entity, entityYaw, partialTicks, stack, buffer, packedLight);
+        super.submit(state, stack, collector, camera);
     }
 
     @Override
@@ -75,9 +77,27 @@ public class ElectricFieldRenderer extends EntityRenderer<ElectricField> impleme
     }
 
     @Override
+    public ElectricFieldRenderState createRenderState() {
+
+        return new ElectricFieldRenderState();
+    }
+
+    @Override
+    public void extractRenderState(ElectricField entity, ElectricFieldRenderState state, float partialTicks) {
+
+        super.extractRenderState(entity, state, partialTicks);
+        state.texture = getTextureLocation(entity);
+    }
+
     public Identifier getTextureLocation(ElectricField entity) {
 
         return TEXTURES[entity.getTextureIndex(TEXTURES.length)];
+    }
+
+    public static class ElectricFieldRenderState extends EntityRenderState {
+
+        public Identifier texture = TEXTURES[0];
+
     }
 
 }

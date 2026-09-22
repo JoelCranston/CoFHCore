@@ -2,12 +2,9 @@ package cofh.core.client.gui.element.panel;
 
 import cofh.core.client.gui.IGuiAccess;
 import cofh.core.client.gui.element.ElementBase;
-import cofh.core.util.helpers.RenderHelper;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.Rect2i;
+import org.joml.Matrix3x2fStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
@@ -78,42 +75,32 @@ public abstract class PanelBase extends ElementBase {
         }
     }
 
-    protected void drawPanelIcon(GuiGraphics pGuiGraphics, Identifier texture) {
+    protected void drawPanelIcon(GuiGraphicsExtractor pGuiGraphics, Identifier texture) {
 
         gui.drawIcon(pGuiGraphics, texture, sideOffset(), 3);
     }
 
-    protected void drawForeground(GuiGraphics pGuiGraphics) {
+    protected void drawForeground(GuiGraphicsExtractor pGuiGraphics) {
 
     }
 
-    protected void drawBackground(GuiGraphics pGuiGraphics) {
+    protected void drawBackground(GuiGraphicsExtractor pGuiGraphics) {
 
-        float colorR = (backgroundColor >> 16 & 255) / 255.0F;
-        float colorG = (backgroundColor >> 8 & 255) / 255.0F;
-        float colorB = (backgroundColor & 255) / 255.0F;
-
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(colorR, colorG, colorB, 1.0F);
-        RenderHelper.setShaderTexture0(texture);
-
-        gui.drawTexturedModalRect(pGuiGraphics, 0, 4, 0, 256 - height + 4, 4, height - 4);
-        gui.drawTexturedModalRect(pGuiGraphics, 4, 0, 256 - width + 4, 0, width - 4, 4);
-        gui.drawTexturedModalRect(pGuiGraphics, 0, 0, 0, 0, 4, 4);
-        gui.drawTexturedModalRect(pGuiGraphics, 4, 4, 256 - width + 4, 256 - height + 4, width - 4, height - 4);
-
-        RenderHelper.resetShaderColor();
+        gui.drawTexturedModalRect(pGuiGraphics, texture, 0, 4, 0, 256 - height + 4, 4, height - 4, backgroundColor);
+        gui.drawTexturedModalRect(pGuiGraphics, texture, 4, 0, 256 - width + 4, 0, width - 4, 4, backgroundColor);
+        gui.drawTexturedModalRect(pGuiGraphics, texture, 0, 0, 0, 0, 4, 4, backgroundColor);
+        gui.drawTexturedModalRect(pGuiGraphics, texture, 4, 4, 256 - width + 4, 256 - height + 4, width - 4, height - 4, backgroundColor);
     }
 
     @Override
-    public void drawBackground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawBackground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
         mouseX -= this.posX();
         mouseY -= this.posY();
 
-        PoseStack poseStack = pGuiGraphics.pose();
-        poseStack.pushPose();
-        poseStack.translate(this.posX(), this.posY(), 0.0F);
+        Matrix3x2fStack poseStack = pGuiGraphics.pose();
+        poseStack.pushMatrix();
+        poseStack.translate(this.posX(), this.posY());
 
         drawBackground(pGuiGraphics);
 
@@ -124,18 +111,18 @@ public abstract class PanelBase extends ElementBase {
                 }
             }
         }
-        poseStack.popPose();
+        poseStack.popMatrix();
     }
 
     @Override
-    public void drawForeground(GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
+    public void drawForeground(GuiGraphicsExtractor pGuiGraphics, int mouseX, int mouseY) {
 
         mouseX -= this.posX();
         mouseY -= this.posY();
 
-        PoseStack poseStack = pGuiGraphics.pose();
-        poseStack.pushPose();
-        poseStack.translate(this.posX(), this.posY(), 0.0F);
+        Matrix3x2fStack poseStack = pGuiGraphics.pose();
+        poseStack.pushMatrix();
+        poseStack.translate(this.posX(), this.posY());
 
         drawForeground(pGuiGraphics);
 
@@ -146,7 +133,7 @@ public abstract class PanelBase extends ElementBase {
                 }
             }
         }
-        poseStack.popPose();
+        poseStack.popMatrix();
     }
 
     @Override

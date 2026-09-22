@@ -8,7 +8,6 @@ import cofh.core.util.helpers.RenderHelper;
 import cofh.core.util.helpers.vfx.VFXHelper;
 import cofh.lib.util.helpers.MathHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -108,7 +107,7 @@ public class ArcParticle extends PointToPointParticle {
     }
 
     @Override
-    public void render(PoseStack stack, MultiBufferSource buffer, VertexConsumer consumer, int packedLight, float time, float pTicks) {
+    public void render(PoseStack stack, MultiBufferSource buffer, int packedLight, float time, float pTicks) {
 
         float progress = time / duration;
         float easeCos = MathHelper.cos(progress * MathHelper.F_PI * 0.5F);
@@ -119,13 +118,13 @@ public class ArcParticle extends PointToPointParticle {
     }
 
     @Override
-    public int getLightColor(float pTicks) {
+    public int getLightCoords(float pTicks) {
 
         return RenderHelper.FULL_BRIGHT;
     }
 
     @Override
-    public int getLightColor(float pTicks, double x, double y, double z) {
+    public int getLightCoords(float pTicks, double x, double y, double z) {
 
         return RenderHelper.FULL_BRIGHT;
     }
@@ -133,7 +132,7 @@ public class ArcParticle extends PointToPointParticle {
     @Nonnull
     public static ParticleProvider<BiColorParticleOptions> factory(SpriteSet spriteSet) {
 
-        return ArcParticle::new;
+        return (data, level, sx, sy, sz, ex, ey, ez, random) -> new ArcParticle(data, level, sx, sy, sz, ex, ey, ez);
     }
 
 }

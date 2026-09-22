@@ -3,37 +3,30 @@ package cofh.core.util.helpers;
 import cofh.core.client.event.CoreClientEvents;
 import cofh.core.util.helpers.vfx.Color;
 import cofh.lib.util.helpers.MathHelper;
-import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
-import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.block.FluidModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.*;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.data.AtlasIds;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.client.model.quad.MutableQuad;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import org.lwjgl.opengl.GL11;
-
-import java.util.List;
 
 /**
  * Contains various helper functions to assist with rendering.
@@ -67,22 +60,12 @@ public final class RenderHelper {
 
     public static TextureAtlas textureMap() {
 
-        return Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS);
+        return Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.BLOCKS);
     }
 
     public static Tesselator tesselator() {
 
         return Tesselator.getInstance();
-    }
-
-    public static ItemRenderer renderItem() {
-
-        return Minecraft.getInstance().getItemRenderer();
-    }
-
-    public static BlockRenderDispatcher renderBlock() {
-
-        return Minecraft.getInstance().getBlockRenderer();
     }
 
     public static EntityRenderDispatcher renderEntity() {
@@ -102,111 +85,21 @@ public final class RenderHelper {
 
     public static float partialTick() {
 
-        return Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+        return Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
     }
 
     public static float frameDelta() {
 
-        return Minecraft.getInstance().getTimer().getGameTimeDeltaTicks();
+        return Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaTicks();
     }
 
     public static boolean isFabulousGraphics() {
 
-        return Minecraft.getInstance().options.graphicsMode().get().getId() >= GraphicsStatus.FABULOUS.getId();
-    }
-    // endregion
-
-    // region SHEETS
-    public static void setBlockTextureSheet() {
-
-        setShaderTexture0(MC_BLOCK_SHEET);
-    }
-
-    public static void setDefaultFontTextureSheet() {
-
-        setShaderTexture0(MC_FONT_DEFAULT);
-    }
-
-    public static void setSGAFontTextureSheet() {
-
-        setShaderTexture0(MC_FONT_SGA);
+        return Minecraft.getInstance().options.improvedTransparency().get();
     }
     // endregion
 
     // region DRAW METHODS
-    public static void drawFluid(int x, int y, FluidStack fluid, int width, int height) {
-
-        if (fluid.isEmpty()) {
-            return;
-        }
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
-
-        int color = FluidHelper.color(fluid);
-        setPosTexShader();
-        setBlockTextureSheet();
-        setShaderColorFromInt(color);
-        drawTiledTexture(x, y, getTexture(IClientFluidTypeExtensions.of(fluid.getFluid()).getStillTexture(fluid)), width, height);
-    }
-
-    public static void drawIcon(TextureAtlasSprite icon, double z) {
-
-        BufferBuilder buffer = tesselator().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buffer.addVertex(0, 16, (float) z).setUv(icon.getU0(), icon.getV1());
-        buffer.addVertex(16, 16, (float) z).setUv(icon.getU1(), icon.getV1());
-        buffer.addVertex(16, 0, (float) z).setUv(icon.getU1(), icon.getV0());
-        buffer.addVertex(0, 0, (float) z).setUv(icon.getU0(), icon.getV0());
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
-
-    }
-
-    public static void drawIcon(double x, double y, double z, TextureAtlasSprite icon, int width, int height) {
-
-        BufferBuilder buffer = tesselator().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buffer.addVertex((float) x, (float) (y + height), (float) z).setUv(icon.getU0(), icon.getV1());
-        buffer.addVertex((float) (x + width), (float) (y + height), (float) z).setUv(icon.getU1(), icon.getV1());
-        buffer.addVertex((float) (x + width), (float) y, (float) z).setUv(icon.getU1(), icon.getV0());
-        buffer.addVertex((float) x, (float) y, (float) z).setUv(icon.getU0(), icon.getV0());
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
-    }
-
-    public static void drawTiledTexture(int x, int y, TextureAtlasSprite icon, int width, int height) {
-
-        int drawHeight;
-        int drawWidth;
-
-        for (int i = 0; i < width; i += 16) {
-            for (int j = 0; j < height; j += 16) {
-                drawWidth = Math.min(width - i, 16);
-                drawHeight = Math.min(height - j, 16);
-                drawScaledTexturedModalRectFromSprite(x + i, y + j, icon, drawWidth, drawHeight);
-            }
-        }
-        resetShaderColor();
-    }
-
-    public static void drawScaledTexturedModalRectFromSprite(int x, int y, TextureAtlasSprite icon, int width, int height) {
-
-        if (icon == null) {
-            return;
-        }
-        float minU = icon.getU0();
-        float maxU = icon.getU1();
-        float minV = icon.getV0();
-        float maxV = icon.getV1();
-
-        float u = minU + (maxU - minU) * width / 16F;
-        float v = minV + (maxV - minV) * height / 16F;
-
-        BufferBuilder buffer = tesselator().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buffer.addVertex(x, y + height, 0).setUv(minU, v);
-        buffer.addVertex(x + width, y + height, 0).setUv(u, v);
-        buffer.addVertex(x + width, y, 0).setUv(u, minV);
-        buffer.addVertex(x, y, 0).setUv(minU, minV);
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
-    }
-
-
     // TODO This is unused, needs PoseStack argument and Shaders set
 /*    public static void drawStencil(int xStart, int yStart, int xEnd, int yEnd, int flag) {
 
@@ -236,63 +129,40 @@ public final class RenderHelper {
     // endregion
 
     // region MATRIX DRAW METHODS
-    public static void drawFluid(GuiGraphics pGuiGraphics, int x, int y, FluidStack fluid, int width, int height) {
+    public static void drawFluid(GuiGraphicsExtractor pGuiGraphics, int x, int y, FluidStack fluid, int width, int height) {
 
         if (fluid.isEmpty()) {
             return;
         }
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-        int color = FluidHelper.color(fluid);
-        setPosTexShader();
-        setBlockTextureSheet();
-        setShaderColorFromInt(color);
-
-        drawTiledTexture(pGuiGraphics, x, y, getTexture(IClientFluidTypeExtensions.of(fluid.getFluid()).getStillTexture(fluid)), width, height);
+        drawTiledTexture(pGuiGraphics, x, y, getFluidTexture(fluid), width, height, getFluidColor(fluid));
     }
 
-    public static void drawIcon(GuiGraphics pGuiGraphics, TextureAtlasSprite icon, float z) {
+    public static void drawIcon(GuiGraphicsExtractor pGuiGraphics, int x, int y, TextureAtlasSprite icon, int width, int height) {
 
-        Matrix4f matrix = pGuiGraphics.pose().last().pose();
-
-        BufferBuilder buffer = tesselator().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buffer.addVertex(matrix, 0, 16, z).setUv(icon.getU0(), icon.getV1());
-        buffer.addVertex(matrix, 16, 16, z).setUv(icon.getU1(), icon.getV1());
-        buffer.addVertex(matrix, 16, 0, z).setUv(icon.getU1(), icon.getV0());
-        buffer.addVertex(matrix, 0, 0, z).setUv(icon.getU0(), icon.getV0());
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
-
+        pGuiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon, x, y, width, height);
     }
 
-    public static void drawIcon(GuiGraphics pGuiGraphics, float x, float y, float z, TextureAtlasSprite icon, int width, int height) {
+    public static void drawTiledTexture(GuiGraphicsExtractor pGuiGraphics, int x, int y, TextureAtlasSprite icon, int width, int height) {
 
-        Matrix4f matrix = pGuiGraphics.pose().last().pose();
-
-        BufferBuilder buffer = tesselator().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buffer.addVertex(matrix, x, y + height, z).setUv(icon.getU0(), icon.getV1());
-        buffer.addVertex(matrix, x + width, y + height, z).setUv(icon.getU1(), icon.getV1());
-        buffer.addVertex(matrix, x + width, y, z).setUv(icon.getU1(), icon.getV0());
-        buffer.addVertex(matrix, x, y, z).setUv(icon.getU0(), icon.getV0());
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
+        drawTiledTexture(pGuiGraphics, x, y, icon, width, height, -1);
     }
 
-    public static void drawTiledTexture(GuiGraphics pGuiGraphics, int x, int y, TextureAtlasSprite icon, int width, int height) {
+    public static void drawTiledTexture(GuiGraphicsExtractor pGuiGraphics, int x, int y, TextureAtlasSprite icon, int width, int height, int color) {
 
-        int drawHeight;
-        int drawWidth;
-
+        if (icon == null || width <= 0 || height <= 0) {
+            return;
+        }
+        // Whole 16x16 tiles, clipped at the edge; the sprite sub-rectangle blit is private.
+        pGuiGraphics.enableScissor(x, y, x + width, y + height);
         for (int i = 0; i < width; i += 16) {
             for (int j = 0; j < height; j += 16) {
-                drawWidth = Math.min(width - i, 16);
-                drawHeight = Math.min(height - j, 16);
-                drawScaledTexturedModalRectFromSprite(pGuiGraphics, x + i, y + j, icon, drawWidth, drawHeight);
+                pGuiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon, x + i, y + j, 16, 16, color);
             }
         }
-        resetShaderColor();
+        pGuiGraphics.disableScissor();
     }
 
-    public static void drawScaledTexturedModalRectFromSprite(GuiGraphics pGuiGraphics, int x, int y, TextureAtlasSprite icon, int width, int height) {
+    public static void drawScaledTexturedModalRectFromSprite(GuiGraphicsExtractor pGuiGraphics, int x, int y, TextureAtlasSprite icon, int width, int height) {
 
         if (icon == null) {
             return;
@@ -305,40 +175,7 @@ public final class RenderHelper {
         float u = minU + (maxU - minU) * width / 16F;
         float v = minV + (maxV - minV) * height / 16F;
 
-        Matrix4f matrix = pGuiGraphics.pose().last().pose();
-
-        BufferBuilder buffer = tesselator().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        buffer.addVertex(matrix, x, y + height, 0).setUv(minU, v);
-        buffer.addVertex(matrix, x + width, y + height, 0).setUv(u, v);
-        buffer.addVertex(matrix, x + width, y, 0).setUv(u, minV);
-        buffer.addVertex(matrix, x, y, 0).setUv(minU, minV);
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
-    }
-
-    public static void drawStencil(PoseStack matrixStack, int xStart, int yStart, int xEnd, int yEnd, int flag) {
-
-        RenderSystem.setShader(GameRenderer::getPositionShader);
-        GL11.glStencilFunc(GL11.GL_ALWAYS, flag, flag);
-        GL11.glStencilOp(GL11.GL_ZERO, GL11.GL_ZERO, GL11.GL_REPLACE);
-        GL11.glStencilMask(flag);
-        RenderSystem.colorMask(false, false, false, false);
-        RenderSystem.depthMask(false);
-        GL11.glClearStencil(0);
-        RenderSystem.clear(GL11.GL_STENCIL_BUFFER_BIT, false);
-
-        Matrix4f matrix = matrixStack.last().pose();
-
-        BufferBuilder buffer = tesselator().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        buffer.addVertex(matrix, xStart, yEnd, 0);
-        buffer.addVertex(matrix, xEnd, yEnd, 0);
-        buffer.addVertex(matrix, xEnd, yStart, 0);
-        buffer.addVertex(matrix, xStart, yStart, 0);
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
-
-        GL11.glStencilFunc(GL11.GL_EQUAL, flag, flag);
-        GL11.glStencilMask(0);
-        RenderSystem.colorMask(true, true, true, true);
-        RenderSystem.depthMask(true);
+        pGuiGraphics.blit(icon.atlasLocation(), x, y, x + width, y + height, minU, u, minV, v);
     }
     // endregion
 
@@ -376,14 +213,24 @@ public final class RenderHelper {
         return textureMap().getSprite(location);
     }
 
+    public static FluidModel getFluidModel(Fluid fluid) {
+
+        return Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(fluid.defaultFluidState());
+    }
+
     public static TextureAtlasSprite getFluidTexture(Fluid fluid) {
 
-        return getTexture(IClientFluidTypeExtensions.of(fluid).getStillTexture());
+        return getFluidModel(fluid).stillMaterial().sprite();
     }
 
     public static TextureAtlasSprite getFluidTexture(FluidStack fluid) {
 
-        return getTexture(IClientFluidTypeExtensions.of(fluid.getFluid()).getStillTexture(fluid));
+        return getFluidTexture(fluid.getFluid());
+    }
+
+    public static int getFluidColor(FluidStack fluid) {
+
+        return ARGB.opaque(FluidHelper.color(fluid));
     }
 
     public static boolean textureExists(String location) {
@@ -397,123 +244,13 @@ public final class RenderHelper {
     }
     // endregion
 
-    private static int vertexColorIndex;
-
-    static {
-        VertexFormat from = DefaultVertexFormat.BLOCK; // Always BLOCK as of 1.15
-
-        vertexColorIndex = -1;
-        List<VertexFormatElement> elements = from.getElements();
-        for (int i = 0; i < from.getElements().size(); ++i) {
-            VertexFormatElement element = elements.get(i);
-            if (element.usage() == VertexFormatElement.Usage.COLOR) {
-                vertexColorIndex = i;
-                break;
-            }
-        }
-    }
-
     public static BakedQuad mulColor(BakedQuad quad, int color) {
 
-        VertexFormat from = DefaultVertexFormat.BLOCK; // Always BLOCK as of 1.15
-
-        float r = ((color >> 16) & 0xFF) / 255f; // red
-        float g = ((color >> 8) & 0xFF) / 255f; // green
-        float b = ((color) & 0xFF) / 255f; // blue
-
-        int[] packedData = quad.getVertices().clone();
-        float[] data = new float[4];
+        MutableQuad mutable = new MutableQuad().setFrom(quad);
         for (int v = 0; v < 4; v++) {
-            unpackLight(packedData, data, from, v, vertexColorIndex);
-            data[0] = MathHelper.clamp(data[0] * r, 0, 1);
-            data[1] = MathHelper.clamp(data[1] * g, 0, 1);
-            data[2] = MathHelper.clamp(data[2] * b, 0, 1);
-            packLight(data, packedData, from, v, vertexColorIndex);
+            mutable.setColor(v, ARGB.multiply(quad.bakedColors().color(v), ARGB.opaque(color)));
         }
-        return new BakedQuad(packedData, quad.getTintIndex(), quad.getDirection(), quad.getSprite(), quad.isShade());
-    }
-
-    // region LIGHT UTIL
-    public static void unpackLight(int[] from, float[] to, VertexFormat formatFrom, int v, int e) {
-
-        int length = Math.min(4, to.length);
-        VertexFormatElement element = formatFrom.getElements().get(e);
-        int vertexStart = v * formatFrom.getVertexSize() + formatFrom.getOffset(element);
-        int count = element.count();
-        VertexFormatElement.Type type = element.type();
-        VertexFormatElement.Usage usage = element.usage();
-        int size = type.size();
-        int mask = (256 << (8 * (size - 1))) - 1;
-        for (int i = 0; i < length; i++) {
-            if (i < count) {
-                int pos = vertexStart + size * i;
-                int index = pos >> 2;
-                int offset = pos & 3;
-                int bits = from[index];
-                bits = bits >>> (offset * 8);
-                if ((pos + size - 1) / 4 != index) {
-                    bits |= from[index + 1] << ((4 - offset) * 8);
-                }
-                bits &= mask;
-                if (type == VertexFormatElement.Type.FLOAT) {
-                    to[i] = Float.intBitsToFloat(bits);
-                } else if (type == VertexFormatElement.Type.UBYTE || type == VertexFormatElement.Type.USHORT) {
-                    to[i] = (float) bits / mask;
-                } else if (type == VertexFormatElement.Type.UINT) {
-                    to[i] = (float) ((double) (bits & 0xFFFFFFFFL) / 0xFFFFFFFFL);
-                } else if (type == VertexFormatElement.Type.BYTE) {
-                    to[i] = ((float) (byte) bits) / (mask >> 1);
-                } else if (type == VertexFormatElement.Type.SHORT) {
-                    to[i] = ((float) (short) bits) / (mask >> 1);
-                } else if (type == VertexFormatElement.Type.INT) {
-                    to[i] = (float) ((double) (bits & 0xFFFFFFFFL) / (0xFFFFFFFFL >> 1));
-                }
-            } else {
-                to[i] = (i == 3 && usage == VertexFormatElement.Usage.POSITION) ? 1 : 0;
-            }
-        }
-    }
-
-    public static void packLight(float[] from, int[] to, VertexFormat formatTo, int v, int e) {
-
-        VertexFormatElement element = formatTo.getElements().get(e);
-        int vertexStart = v * formatTo.getVertexSize() + formatTo.getOffset(element);
-        int count = element.count();
-        VertexFormatElement.Type type = element.type();
-        int size = type.size();
-        int mask = (256 << (8 * (size - 1))) - 1;
-        for (int i = 0; i < 4; i++) {
-            if (i < count) {
-                int pos = vertexStart + size * i;
-                int index = pos >> 2;
-                int offset = pos & 3;
-                int bits = 0;
-                float f = i < from.length ? from[i] : 0;
-                if (type == VertexFormatElement.Type.FLOAT) {
-                    bits = Float.floatToRawIntBits(f);
-                } else if (
-                        type == VertexFormatElement.Type.UBYTE ||
-                                type == VertexFormatElement.Type.USHORT ||
-                                type == VertexFormatElement.Type.UINT
-                ) {
-                    bits = Math.round(f * mask);
-                } else {
-                    bits = Math.round(f * (mask >> 1));
-                }
-                to[index] &= ~(mask << (offset * 8));
-                to[index] |= (((bits & mask) << (offset * 8)));
-                // TODO handle overflow into to[index + 1]
-            }
-        }
-    }
-    // endregion
-
-    public static void setShaderColorFromInt(int color) {
-
-        float red = (float) (color >> 16 & 255) / 255.0F;
-        float green = (float) (color >> 8 & 255) / 255.0F;
-        float blue = (float) (color & 255) / 255.0F;
-        RenderSystem.setShaderColor(red, green, blue, 1.0F);
+        return mutable.toBakedQuad();
     }
 
     public static float red(int color) {
@@ -529,21 +266,6 @@ public final class RenderHelper {
     public static float blue(int color) {
 
         return (float) (color & 255) / 255.0F;
-    }
-
-    public static void setPosTexShader() {
-
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-    }
-
-    public static void resetShaderColor() {
-
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-    }
-
-    public static void setShaderTexture0(Identifier texture) {
-
-        RenderSystem.setShaderTexture(0, texture);
     }
 
     public static void renderItemOnBlockSide(PoseStack poseStackIn, ItemStack stack, Direction side, BlockPos pos) {

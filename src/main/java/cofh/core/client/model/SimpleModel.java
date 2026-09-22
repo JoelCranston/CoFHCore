@@ -1,63 +1,62 @@
 package cofh.core.client.model;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.Material;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.SingleVariant;
 import net.minecraft.client.resources.model.ModelBaker;
-import net.minecraft.client.resources.model.ModelState;
-import net.neoforged.neoforge.client.model.IModelBuilder;
-import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
-import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
-import net.neoforged.neoforge.client.model.geometry.SimpleUnbakedGeometry;
+import net.minecraft.client.resources.model.ResolvableModel;
+import net.neoforged.neoforge.client.model.block.CustomUnbakedBlockStateModel;
 
-import java.util.function.Function;
+public class SimpleModel implements CustomUnbakedBlockStateModel {
 
-public class SimpleModel extends SimpleUnbakedGeometry<SimpleModel> {
+    private final SingleVariant.Unbaked model;
+    private final SimpleModel.Loader loader;
 
-    private final ElementsModelWrapped model;
-    private final SimpleModel.IFactory<BakedModel> factory;
-
-    public SimpleModel(ElementsModelWrapped model, SimpleModel.IFactory<BakedModel> factory) {
+    public SimpleModel(SingleVariant.Unbaked model, SimpleModel.Loader loader) {
 
         this.model = model;
-        this.factory = factory;
+        this.loader = loader;
     }
 
     @Override
-    public BakedModel bake(IGeometryBakingContext owner, ModelBaker bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides) {
+    public BlockStateModel bake(ModelBaker baker) {
 
-        return factory.create(model.bake(owner, bakery, spriteGetter, modelTransform, overrides));
+        return loader.factory.create(model.bake(baker));
     }
 
     @Override
-    protected void addQuads(IGeometryBakingContext owner, IModelBuilder<?> modelBuilder, ModelBaker bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform) {
+    public void resolveDependencies(ResolvableModel.Resolver resolver) {
 
-        model.addQuads(owner, modelBuilder, bakery, spriteGetter, modelTransform);
+        model.resolveDependencies(resolver);
     }
 
-    public interface IFactory<T extends BakedModel> {
+    @Override
+    public MapCodec<? extends CustomUnbakedBlockStateModel> codec() {
 
-        T create(BakedModel originalModel);
+        return loader.codec;
+    }
+
+    public interface IFactory<T extends BlockStateModel> {
+
+        T create(BlockStateModel originalModel);
 
     }
 
     // region LOADER
-    public static class Loader implements IGeometryLoader<SimpleModel> {
+    public static class Loader {
 
-        private final SimpleModel.IFactory<BakedModel> factory;
+        private final SimpleModel.IFactory<? extends BlockStateModel> factory;
+        private final MapCodec<SimpleModel> codec;
 
-        public Loader(SimpleModel.IFactory<BakedModel> factory) {
+        public Loader(SimpleModel.IFactory<? extends BlockStateModel> factory) {
 
             this.factory = factory;
+            this.codec = SingleVariant.Unbaked.MAP_CODEC.xmap(model -> new SimpleModel(model, this), model -> model.model);
         }
 
-        @Override
-        public SimpleModel read(JsonObject jsonObject, JsonDeserializationContext deserializationContext) {
+        public MapCodec<SimpleModel> codec() {
 
-            return new SimpleModel(ElementsModelWrapped.Loader.INSTANCE.read(jsonObject, deserializationContext), factory);
+            return codec;
         }
 
     }

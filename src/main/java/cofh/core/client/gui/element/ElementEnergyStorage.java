@@ -1,9 +1,9 @@
 package cofh.core.client.gui.element;
 
 import cofh.core.client.gui.IGuiAccess;
-import cofh.core.util.helpers.RenderHelper;
 import cofh.lib.common.energy.EnergyStorageCoFH;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.resources.Identifier;
 
 public class ElementEnergyStorage extends ElementResourceStorage {
 
@@ -14,16 +14,12 @@ public class ElementEnergyStorage extends ElementResourceStorage {
     }
 
     @Override
-    protected void drawResource(PoseStack poseStack) {
+    protected void drawResource(GuiGraphicsExtractor pGuiGraphics) {
 
-        if (storage.isCreative() && creativeTexture != null) {
-            RenderHelper.setShaderTexture0(creativeTexture);
-        } else {
-            RenderHelper.setShaderTexture0(texture);
-        }
+        Identifier resourceTexture = storage.isCreative() && creativeTexture != null ? creativeTexture : texture;
         int resourceHeight = height - 2;
         int amount = getScaled(resourceHeight);
-        drawTexturedModalRect(poseStack, posX(), posY() + 1 + resourceHeight - amount, width, 1 + resourceHeight - amount, width, amount);
+        drawTexturedModalRect(pGuiGraphics, resourceTexture, posX(), posY() + 1 + resourceHeight - amount, width, 1 + resourceHeight - amount, width, amount);
     }
 
 }

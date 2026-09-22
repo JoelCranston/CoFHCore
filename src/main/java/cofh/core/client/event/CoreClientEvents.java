@@ -1,30 +1,18 @@
 package cofh.core.client.event;
 
 import cofh.core.client.PostEffect;
-import cofh.core.client.particle.CoFHParticle;
 import cofh.core.common.config.CoreClientConfig;
-import cofh.lib.client.renderer.entity.ITranslucentRenderer;
 import cofh.lib.util.Utils;
 import cofh.lib.util.constants.ModIds;
 import cofh.lib.util.raytracer.VoxelShapeBlockHitResult;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.particle.ParticleRenderType;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -34,6 +22,8 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Util;
+import net.minecraft.util.context.ContextKey;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -56,6 +46,7 @@ import org.joml.Matrix4f;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static cofh.core.init.CoreMobEffects.CHILLED;
 import static cofh.core.init.CoreMobEffects.TRUE_INVISIBILITY;
 import static cofh.lib.util.Constants.INVIS_STYLE;
 import static cofh.lib.util.helpers.StringHelper.*;
@@ -67,7 +58,7 @@ public class CoreClientEvents {
 
     public static int renderTime;
     public static float renderFrame;
-    public static final Map<ParticleRenderType, Queue<CoFHParticle>> delayedRenderParticles = new Object2ObjectOpenHashMap<>();
+    public static final ContextKey<Boolean> TRUE_INVISIBLE = new ContextKey<>(Identifier.fromNamespaceAndPath(ModIds.ID_COFH_CORE, "true_invisible"));
 
     private static final Set<String> NAMESPACES = new ObjectOpenHashSet<>();
 
@@ -90,7 +81,7 @@ public class CoreClientEvents {
         ItemStack stack = event.getItemStack();
 
         if (CoreClientConfig.enableKeywords.get() && NAMESPACES.contains(Utils.getModId(stack.getItem()))) {
-            String keywordKey = stack.getDescriptionId() + ".keyword";
+            String keywordKey = stack.getItem().getDescriptionId() + ".keyword";
             if (canLocalize(keywordKey)) {
                 if (tooltip.get(0) instanceof MutableComponent mutable) {
                     mutable.append(getKeywordTextComponent(keywordKey));
@@ -98,7 +89,7 @@ public class CoreClientEvents {
             }
         }
         if (CoreClientConfig.enableItemDescriptions.get() && NAMESPACES.contains(Utils.getModId(stack.getItem()))) {
-            String infoKey = stack.getDescriptionId() + ".desc";
+            String infoKey = stack.getItem().getDescriptionId() + ".desc";
             if (canLocalize(infoKey)) {
                 tooltip.add(1, getInfoTextComponent(infoKey));
             }
@@ -129,7 +120,7 @@ public class CoreClientEvents {
             Set<Identifier> itemTags = item.builtInRegistryHolder().tags().map(TagKey::location).collect(Collectors.toSet());
 
             if (!blockTags.isEmpty() || !itemTags.isEmpty()) {
-                if (Screen.hasControlDown()) {
+                if (Minecraft.getInstance().hasControlDown()) {
                     if (!blockTags.isEmpty()) {
                         tooltip.add(getTextComponent("info.cofh.block_tags").withStyle(GRAY));
                         blockTags.stream()
@@ -180,81 +171,62 @@ public class CoreClientEvents {
     }
 
     @SubscribeEvent //(priority = EventPriority.LOWEST)
-    public static void renderTranslucent(RenderLevelStageEvent event) {
+    public static void beginPostEffects(RenderLevelStageEvent.AfterSky event) {
 
-        // POST SHADERS
-        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SKY) {
-            for (PostEffect effect : PostEffect.getAllEffects()) {
-                if (effect.isEnabled()) {
-                    effect.begin(event.getPartialTick().getGameTimeDeltaPartialTick(false));
-                }
+        for (PostEffect effect : PostEffect.getAllEffects()) {
+            if (effect.isEnabled()) {
+                effect.begin(renderFrame);
             }
-            Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
-        }
-        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL) {
-            RenderSystem.enableBlend();
-            Minecraft minecraft = Minecraft.getInstance();
-            for (PostEffect effect : PostEffect.getAllEffects()) {
-                if (effect.isEnabled()) {
-                    effect.end(event.getPartialTick().getGameTimeDeltaPartialTick(false));
-                    minecraft.getMainRenderTarget().bindWrite(false);
-                    effect.apply(minecraft.getWindow());
-                }
-            }
-            RenderSystem.disableBlend();
-            RenderSystem.defaultBlendFunc();
-            //RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
-            //for (PostEffect effect : PostEffect.getAllEffects()) {
-            //    if (effect.isEnabled()) {
-            //    }
-            //}
-        }
-
-        // PARTICLES
-        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
-            PoseStack stack = event.getPoseStack();
-            float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
-            Minecraft minecraft = Minecraft.getInstance();
-            MultiBufferSource buffer = minecraft.renderBuffers().bufferSource();
-            TextureManager manager = minecraft.getTextureManager();
-            Tesselator tesselator = Tesselator.getInstance();
-            LightTexture light = minecraft.gameRenderer.lightTexture();
-
-            light.turnOnLightLayer();
-
-            stack.pushPose();
-            Vec3 pos = event.getCamera().getPosition();
-            stack.translate(-pos.x, -pos.y, -pos.z);
-            for (ParticleRenderType renderType : delayedRenderParticles.keySet()) {
-                RenderSystem.setShader(GameRenderer::getParticleShader);
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                Queue<CoFHParticle> particles = delayedRenderParticles.get(renderType);
-
-                BufferBuilder particleBuffer = renderType.begin(tesselator, manager);
-                while (!particles.isEmpty()) {
-                    particles.poll().render(stack, buffer, particleBuffer, partialTick);
-                }
-                if (particleBuffer != null) {
-                    BufferUploader.drawWithShader(particleBuffer.buildOrThrow());
-                }
-            }
-            stack.popPose();
-            light.turnOffLightLayer();
-            ITranslucentRenderer.renderTranslucent(stack, partialTick, event.getLevelRenderer(), event.getProjectionMatrix());
         }
     }
 
-    @SubscribeEvent (priority = EventPriority.HIGH)
-    public static <T extends LivingEntity, M extends EntityModel<T>> void handleTrueInvisibility(RenderLivingEvent.Pre<T, M> event) {
+    @SubscribeEvent //(priority = EventPriority.LOWEST)
+    public static void endPostEffects(RenderLevelStageEvent.AfterLevel event) {
 
-        LivingEntity entity = event.getEntity();
-        if (entity.hasEffect(TRUE_INVISIBILITY) && entity.isInvisible()) {
+        Minecraft minecraft = Minecraft.getInstance();
+        for (PostEffect effect : PostEffect.getAllEffects()) {
+            if (effect.isEnabled()) {
+                effect.end(renderFrame);
+                effect.apply(minecraft.getWindow());
+            }
+        }
+        //RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+        //for (PostEffect effect : PostEffect.getAllEffects()) {
+        //    if (effect.isEnabled()) {
+        //    }
+        //}
+    }
+
+    @SubscribeEvent (priority = EventPriority.HIGH)
+    public static <T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>> void handleTrueInvisibility(RenderLivingEvent.Pre<T, S, M> event) {
+
+        if (Boolean.TRUE.equals(event.getRenderState().getRenderData(TRUE_INVISIBLE))) {
             event.setCanceled(true);
         }
     }
 
+    // Chilled scaled the cubed sensitivity; undo the cube so the option value scales the same.
+    @SubscribeEvent
+    public static void handleChilledTurn(CalculatePlayerTurnEvent event) {
+
+        Player player = Minecraft.getInstance().player;
+        if (player == null) {
+            return;
+        }
+        MobEffectInstance effect = player.getEffect(CHILLED);
+        if (effect == null || effect.getAmplifier() < 0) {
+            return;
+        }
+        float reduction = 15F / (16F + effect.getAmplifier());
+        reduction *= reduction;
+        reduction *= reduction;
+        double scale = Math.cbrt(Math.max(reduction * reduction, 0.1F));
+        double base = event.getMouseSensitivity() * 0.6D + 0.2D;
+        event.setMouseSensitivity((base * scale - 0.2D) / 0.6D);
+    }
+
     @SubscribeEvent (priority = EventPriority.HIGH)
-    public static <T extends LivingEntity, M extends EntityModel<T>> void handleTrueInvisibility(RenderHandEvent event) {
+    public static void handleTrueInvisibility(RenderHandEvent event) {
 
         Player player = Minecraft.getInstance().player;
         if (player != null && player.hasEffect(TRUE_INVISIBILITY) && player.isInvisible()) {
@@ -263,33 +235,37 @@ public class CoreClientEvents {
     }
 
     @SubscribeEvent (priority = EventPriority.LOW)
-    public static void renderSubHitboxes(RenderHighlightEvent.Block event) {
+    public static void renderSubHitboxes(ExtractBlockOutlineRenderStateEvent event) {
 
-        BlockHitResult hit = event.getTarget();
+        BlockHitResult hit = event.getHitResult();
         if (hit instanceof VoxelShapeBlockHitResult voxelHit) {
-            PoseStack stack = event.getPoseStack();
             BlockPos pos = voxelHit.getBlockPos();
-            event.setCanceled(true);
+            VoxelShape shape = voxelHit.shape;
 
-            stack.pushPose();
-            stack.translate(pos.getX(), pos.getY(), pos.getZ());
+            event.addCustomRenderer((state, buffer, stack, translucentPass, levelRenderState) -> {
+                if (translucentPass == state.isTranslucent()) {
+                    stack.pushPose();
+                    stack.translate(pos.getX(), pos.getY(), pos.getZ());
 
-            bufferShapeHitBox(stack, event.getMultiBufferSource(), event.getCamera(), voxelHit.shape);
+                    bufferShapeHitBox(stack, buffer, levelRenderState.cameraRenderState.pos, shape);
 
-            stack.popPose();
+                    stack.popPose();
+                }
+                return true;
+            });
         }
     }
 
     // region HELPERS
-    private static void bufferShapeHitBox(PoseStack pStack, MultiBufferSource buffers, Camera renderInfo, VoxelShape shape) {
+    private static void bufferShapeHitBox(PoseStack pStack, MultiBufferSource buffers, Vec3 eye, VoxelShape shape) {
 
-        Vec3 eye = renderInfo.getPosition();
         pStack.translate((float) -eye.x, (float) -eye.y, (float) -eye.z);
-        bufferShapeOutline(buffers.getBuffer(RenderType.lines()), pStack.last().pose(), shape, 0.0F, 0.0F, 0.0F, 0.4F);
+        bufferShapeOutline(buffers.getBuffer(RenderTypes.lines()), pStack.last().pose(), shape, 0.0F, 0.0F, 0.0F, 0.4F);
     }
 
     private static void bufferShapeOutline(VertexConsumer builder, Matrix4f mat, VoxelShape shape, float r, float g, float b, float a) {
 
+        float width = Minecraft.getInstance().gameRenderer.getGameRenderState().windowRenderState.appropriateLineWidth;
         shape.forAllEdges((x1, y1, z1, x2, y2, z2) -> {
             double xn = x1 - x2;
             double yn = y1 - y2;
@@ -299,8 +275,8 @@ public class CoreClientEvents {
             yn /= d;
             zn /= d;
 
-            builder.addVertex(mat, (float) x1, (float) y1, (float) z1).setColor(r, g, b, a).setNormal((float) xn, (float) yn, (float) zn);
-            builder.addVertex(mat, (float) x2, (float) y2, (float) z2).setColor(r, g, b, a).setNormal((float) xn, (float) yn, (float) zn);
+            builder.addVertex(mat, (float) x1, (float) y1, (float) z1).setColor(r, g, b, a).setNormal((float) xn, (float) yn, (float) zn).setLineWidth(width);
+            builder.addVertex(mat, (float) x2, (float) y2, (float) z2).setColor(r, g, b, a).setNormal((float) xn, (float) yn, (float) zn).setLineWidth(width);
         });
     }
     // endregion
