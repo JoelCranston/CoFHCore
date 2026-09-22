@@ -66,23 +66,26 @@ It is a *reference* here, never a dependency.
   `1.20.6` is a dead end kept for history; `1.21.1` was branched from it.
 - **Verify every API shape against the real jar**, never against summarized docs or
   recollection of older versions. With ModDevGradle that is the patched *sources* jar:
-  `unzip -p build/moddev/artifacts/minecraft-patched-<neo_version>-sources.jar net/minecraft/.../X.java`
+  `unzip -p build/moddev/artifacts/neoforge-<neo_version>-sources.jar net/minecraft/.../X.java` (1.21.1 naming; 26.1's is `minecraft-patched-<neo_version>-sources.jar`)
   (NeoForge's own: `~/.gradle/caches/modules-2/files-2.1/net.neoforged/neoforge/<ver>/*/neoforge-<ver>-sources.jar`),
   or `javap -p` on `minecraft-patched-<ver>.jar`. This has been the single most reliable
   practice of the port so far — see progress-log.md's "working method" section.
 
 ## Current state
 
-Branch **`1.21.1`** (created 2026-09-21 from `1.20.6` at `a33bd27`, keeping the twelve
-1.20.6 commits — all still valid on 1.21.1). The last fresh compile on the old target was
-**396 errors / 104 files**; that count is meaningless until the version bump to
-`neo_version=21.1.251` (Phase A.0) produces a new baseline.
+Branch **`1.21.1`**, building with **ModDevGradle 2.0.147 against NeoForge 21.1.251**
+(Phase 0.3/0.4 and A.0 done here on 2026-09-21; `neoforge.mods.toml`; the 15 dead access
+transformer lines that `validateAccessTransformers` rejected are gone). The twelve 1.20.6
+commits are kept and still valid. **Baseline: 849 errors / 175 files** — see docs/TODO.md for
+the breakdown; it maps onto the sixteen Phase A categories in docs/port-plan.md §5 A.1.
 
-**Phase 0 progress** (docs/port-plan.md §4): 0.1 references vendored, SPLIGAN
-ThermalDynamics fork cloned; 0.2 `1.21.1` branches created in all four repos; 0.5 docs
-updated. **Not yet done: 0.3 (switch all four repos to ModDevGradle 2.0.147) and 0.4
-(`mods.toml` → `neoforge.mods.toml`).**
+Shape oracle on this target: `build/moddev/artifacts/neoforge-21.1.251-sources.jar`
+(`unzip -p … net/minecraft/…/X.java`); the MDG artifact names differ from 26.1's
+`minecraft-patched-<ver>` layout.
 
-**Next step**: docs/port-plan.md §4.3 (build switch) and §4.4, then Phase A.0/A.1 in
-this repo — the sixteen CoFHCore categories in the order listed there. The other three
-repos wait until CoFHCore builds clean on 1.21.1 and boots headless.
+The other three repos are still on their NeoGradle 1.20.6-bumped (uncommitted) build files —
+their Phase 0.3/0.4 happens when their Phase A starts, after this repo builds clean.
+
+**Next step**: Phase A.1 category 1 (mod metadata & bus), then 2 (`ResourceLocation`
+factories — the largest single bucket), in the order in docs/port-plan.md §5 A.1, one commit
+and one error count per category.

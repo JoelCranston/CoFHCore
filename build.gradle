@@ -1,16 +1,18 @@
 plugins {
-    id 'java'
+    id 'java-library'
     id 'maven-publish'
+    id 'idea'
 
     id 'com.matthewprenger.cursegradle' version '1.4.0'
     id 'com.modrinth.minotaur' version "2.+"
 
-    id 'net.neoforged.gradle.userdev' version '7.1.38'
+    // ModDevGradle (replaced NeoGradle userdev 7.1.38 on 2026-09-21 - see docs/port-plan.md §1.4/§4.3)
+    id 'net.neoforged.moddev' version '2.0.147'
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(java_version as int)
     }
     withSourcesJar()
     // withJavadocJar()
@@ -24,6 +26,7 @@ sourceSets.main.resources.srcDirs += "src/main/generated"
 // `compileJava` always shows the true error count/file list.
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs << "-Xmaxerrs" << "100000"
+    options.encoding = 'UTF-8'
 }
 
 group = 'com.teamcofh'
@@ -36,8 +39,50 @@ version = "${mc_version}-${buildVersion}"
 println "Starting build of ${base.archivesName.get()}, Version: ${mod_version}"
 println "Using NeoForge: ${neo_version}, for Minecraft: ${mc_version}"
 
-minecraft {
-    accessTransformers.file file("src/main/resources/META-INF/accesstransformer.cfg")
+neoForge {
+    version = project.neo_version
+
+    // Fail the build on access transformer lines whose targets no longer exist - exactly what a
+    // version hop needs to surface. The file at the default path is picked up automatically.
+    validateAccessTransformers = true
+
+    runs {
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+        server {
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+        gameTestServer {
+            type = 'gameTestServer'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+        data {
+            // 1.21.4+ has no plain 'data' run type; clientData generates assets and data together.
+            clientData()
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output',
+                    file('src/main/generated/').getAbsolutePath(), '--existing',
+                    file('src/main/resources/').getAbsolutePath()
+        }
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+// Runtime-only optional mods (the full JEI jar) go here so they are never published as a dependency.
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
 }
 
 if (System.getenv('CURSEFORGE_KEY') || project.hasProperty('curseforgeKey')) {
@@ -75,7 +120,7 @@ if (System.getenv('MODRINTH_TOKEN') || project.hasProperty('modrinthToken')) {
 }
 
 processResources {
-    filesMatching('META-INF/mods.toml') {
+    filesMatching('META-INF/neoforge.mods.toml') {
         expand 'file': ['jarVersion': mod_version],
                 'mc_version': mc_version,
                 'neo_version': neo_version,
@@ -91,42 +136,12 @@ repositories {
 }
 
 dependencies {
-    implementation("net.neoforged:neoforge:${neo_version}")
-
-    implementation("mezz.jei:jei-${mc_version}-neoforge:${jei_version}") {
-        transitive false
-    }
+    compileOnly("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
+    compileOnly("mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}")
+    localRuntime("mezz.jei:jei-${mc_version}-neoforge:${jei_version}")
 
     implementation("top.theillusivec4.curios:curios-neoforge:${curios_version}") {
         transitive false
-    }
-}
-
-runs {
-    configureEach {
-        systemProperty 'forge.logging.markers', 'REGISTRIES'
-        systemProperty 'forge.logging.console.level', 'debug'
-        workingDirectory project.layout.projectDirectory.dir('run').dir(name)
-        modSource project.sourceSets.main
-    }
-
-    client {
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-    }
-
-    server {
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        programArgument '--nogui'
-    }
-
-    gameTestServer {
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-    }
-
-    data {
-        programArguments '--mod', project.mod_id, '--all', '--output',
-                file('src/main/generated/').getAbsolutePath(), '--existing',
-                file('src/main/resources/').getAbsolutePath()
     }
 }
 
@@ -141,6 +156,12 @@ def commonManifest = {
             'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
             'MixinConfigs'            : 'mixins.cofhcore.json'
     ])
+}
+
+// Was defined but never applied before 2026-09-21; the MixinConfigs attribute is what makes the
+// production jar's mixins load, so it has to be on the real manifest.
+tasks.named('jar', Jar) {
+    manifest commonManifest
 }
 
 tasks.register("signJar") {

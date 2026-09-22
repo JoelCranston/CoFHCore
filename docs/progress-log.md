@@ -139,3 +139,20 @@ on this machine) produced [port-plan.md](port-plan.md). What it changed:
 Phase 0 done today: reference material vendored to `docs/reference/` (gitignored,
 `scripts/fetch_reference.sh`), `1.21.1` branches in all four repos, docs updated. Still to do
 before Phase A: the ModDevGradle switch and the `neoforge.mods.toml` rename (TODO.md).
+
+### 1.21.1 hop — Phase 0.3/0.4 and A.0 (2026-09-21)
+
+Switched this repo to ModDevGradle 2.0.147 (`build.gradle` rewritten around `neoForge {}`,
+`settings.gradle` with the foojay toolchain resolver, `gradle.properties` at the Phase A values:
+`neo_version=21.1.251`, JEI 19.57.0.446 as `compileOnly` API + `localRuntime` full jar, Curios
+9.5.1+1.21.1), renamed `mods.toml` → `neoforge.mods.toml` (and its stale `versionRange = "1.20.4"`
+→ `[${mc_version}]`), and applied the `commonManifest` (with `MixinConfigs`) to the jar task —
+it had been defined but never used, so production jars would have shipped without their mixins.
+
+`validateAccessTransformers = true` immediately rejected 15 AT lines whose targets no longer
+exist (`Material$Builder`, `BlockLoot`, `PotionBrewing#POTION_MIXES`, SRG-named `Ingredient`/
+`FishingHook` members, `RecipeManager#byType`, …) — all dead since 1.20.x, never noticed because
+NeoGradle didn't validate. Deleted; `byType` noted for ThermalCore (TODO Inbox).
+
+First compile on 1.21.1: **849 errors / 175 files**. (The old 396/104 was against 20.6.141 and
+is not comparable.) Breakdown in TODO.md; it lines up with port-plan.md §5 A.1's categories.
