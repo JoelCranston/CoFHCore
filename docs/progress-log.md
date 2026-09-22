@@ -156,3 +156,62 @@ NeoGradle didn't validate. Deleted; `byType` noted for ThermalCore (TODO Inbox).
 
 First compile on 1.21.1: **849 errors / 175 files**. (The old 396/104 was against 20.6.141 and
 is not comparable.) Breakdown in TODO.md; it lines up with port-plan.md §5 A.1's categories.
+
+### 1.21.1 hop — Phase A.1 categories 1-12 (2026-09-22)
+
+**849 errors / 175 files → 25 / 5.** One commit per root cause; the error count after each is in
+its message. Categories, in the order docs/port-plan.md §5 A.1 lists them: mod metadata and bus;
+`ResourceLocation` factories (343 sites, swept across all four repos at once); ItemStack NBT →
+data components; the vertex/rendering rewrite; `MobEffect` holders and `PotionContents`;
+enchantments → datapack objects; attribute modifier ids; crossbow ammo and projectiles; the
+damage-event pipeline; blocks (plantable system, crop hooks, food, block hooks); recipes (custom
+ingredients, conditions, `CraftingInput`, codecs); then a long tail of entity, item, persistence,
+datagen and networking signature changes.
+
+Decisions worth remembering, all also commented at the call site:
+
+- **Three things could not be preserved.** CoFH's hand-rolled eager config load (`ILoadedConfig`
+  is sealed to FML), `PotionColorCalculationEvent` (deleted in NeoForge 21.0 — replaced per effect
+  by `createParticleOptions` returning null), and Holding's runtime "valid items" IMC hook (what
+  an enchantment applies to is datapack data now; the hook logs a pointer at the
+  `cofh_core:enchantable/holding` tag instead).
+- **`ProxyUtils.registryAccess()`** is the stand-in for a `HolderLookup.Provider` in the
+  `ItemStack`-only APIs (augments, container items) that have no registry context to thread.
+- **Enchantment "enable" survives** as a disabled-id set consulted by `Utils`' level lookups;
+  "treasure" does not — it is a datapack tag now.
+- **CoFH's crops keep their own `CropType`**, since NeoForge deleted the shared plant-category
+  vocabulary along with `PlantType`/`IPlantable`.
+
+### The other three repos — Phase 0 done in parallel (2026-09-22)
+
+Three subagents took ThermalCore, ThermalExpansion and ThermalDynamics through Phase 0.3/0.4, A.0
+and the resources sweep while CoFHCore's categories continued here. All three now build with
+ModDevGradle 2.0.147 against 21.1.251, ship `neoforge.mods.toml`, and configure cleanly
+(`./gradlew projects` succeeds; compilation still blocks on CoFHCore, as expected).
+
+The sweep turned up more than the plan anticipated, and the findings crossed between repos:
+
+- **`forge:` → `c:` is not a pure namespace swap.** Several convention tags were also *renamed*,
+  mostly pluralised: `glass`→`glass_blocks`, `sand`→`sands`, `cobblestone`→`cobblestones`,
+  `gravel`→`gravels`, `stone`→`stones`, `obsidian`→`obsidians`, `string`→`strings`,
+  `leather`→`leathers`, `gunpowder`→`gunpowders`. A blind swap leaves a tag that exists nowhere
+  and silently matches nothing. Caught in ThermalDynamics first, propagated to the other two.
+- **`forge:` ids that are not tags** go to the `neoforge` namespace, not `c:` —
+  `neoforge:not`, `neoforge:mod_loaded`.
+- **A recipe's condition list is keyed `neoforge:conditions`**, not `conditions`; unprefixed, the
+  conditions are ignored and the recipe always loads.
+- **`required = true` on a dependency is a Forge-ism** NeoForge does not read; it is
+  `type = "required"`. Found in ThermalExpansion, ThermalCore and ThermalDynamics.
+- **`commonManifest` was defined but never applied to the jar** in CoFHCore, ThermalCore and
+  ThermalExpansion (ThermalDynamics applies it to its shadow jar) — production jars would have
+  shipped without their `MixinConfigs` attribute.
+- **SPLIGAN's forks are not a guide for resources**: `ThermalExpansionForNeoForge` depluralised
+  only `src/main/generated`, so its ~470 hand-written machine recipes silently never load, and it
+  left every `forge:` tag in place. Its Java diff is still the Phase A worklist; its `data/` tree
+  is not.
+- Checking a tag against `Tags.java` alone gives false negatives: `c:dyes/<colour>` and
+  `c:dyed/<colour>` come from NeoForge's `DyeColor` patch, not from literal `tag(...)` calls.
+
+Also of note: MDG's `validateAccessTransformers` rejected 13 stale lines in ThermalCore's AT
+(all dead since 1.20.x), which is why its AT is now byte-identical to CoFHCore's, as the plan
+prescribes.

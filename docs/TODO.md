@@ -6,10 +6,9 @@ this file tracks where we are in it and what has been noticed along the way. See
 [api-notes-1.20.6.md](api-notes-1.20.6.md) for API shapes already confirmed (all still valid
 on 1.21.1).
 
-**Snapshot**: branch `1.21.1`, ModDevGradle 2.0.147, `neo_version=21.1.251`. **124 errors / 48
-files** after Phase A.1 categories 1-11 (2026-09-22; baseline was `849 / 175`). What is left is a
-long tail: 49 "cannot find symbol" and 27 "does not override" spread over 48 files, no bucket
-bigger than 7. Re-run `./gradlew compileJava` before trusting these - they shift every session.
+**Snapshot**: branch `1.21.1`, ModDevGradle 2.0.147, `neo_version=21.1.251`. **25 errors / 5
+files** (2026-09-22; baseline was `849 / 175`). Everything outside client rendering compiles.
+Re-run `./gradlew compileJava` before trusting these.
 
 ## Phase 0 — preparation (port-plan.md §4)
 
@@ -54,14 +53,25 @@ bigger than 7. Re-run `./gradlew compileJava` before trusting these - they shift
 
 Not started. Branch `26.1.2` is created from `1.21.1` only after Phase A's exit criteria.
 
-## Remaining tail (no single root cause dominates; work file-by-file)
+## Remaining: the client model/render cluster (25 errors, 5 files)
 
-`ThrownKnife`/`ProjectileCoFH` (AbstractArrow ctor + `ItemStack#getUseDuration`), `AreaUtils`
-(`MobType` gone), `ElementsModelWrapped`/`ModelUtils` (`BlockElementFace` fields are private,
-`IModelBuilder`), `RenderTypes`/`CoreShaders` (render pipeline), `CoreEntityDataSerializers`
-(`EntityDataSerializer#codec`), `GrenadeItem`/`ItemCoFH` (item hook signatures), the network
-payload `StreamCodec.composite` arity limit, `Reference<SoundEvent>` vs `SoundEvent`, and
-`Constants`/`StringHelper` odds and ends.
+All five need the same two root causes read properly before touching them — see
+`docs/reference/primers/1.21.md` ("Oh Rendering, why must you change so?") and NeoForge's
+`ModelEvent`/`IGeometryLoader` in `docs/reference/neoforge-src/files-1.21.1.txt`:
+
+1. **`ElementsModelWrapped`, `SimpleModel`, `FluidContainerItemModel`** — NeoForge's unbaked
+   geometry contract changed: `SimpleUnbakedGeometry#addQuads` takes an `IModelBuilder<?>` (not a
+   `List<BlockElement>`), `bake` has a new parameter list, `BlockModel#bakeFace` changed, and
+   `BlockElementFace`'s `texture`/`cullForDirection` are private (they are record components now —
+   use the accessors). `FluidContainerItemModel` also still reads `stack.getTag()` and
+   `Item#getDescriptionId()`.
+2. **`RenderTypes` (vfx) and `CoreClientEvents`** — `BufferUploader`, `Tesselator#begin`/`end` and
+   `RenderType.CompositeState` leftovers, plus two `Registries.ENCHANTMENT`-shaped lookups in the
+   enchantment-description tooltip that still assume a static registry.
+
+None of this is deep design work — it is the tail of the 1.21 vertex/model rewrite — but it is the
+part where a wrong guess compiles and then renders nothing, so confirm each shape in
+`build/moddev/artifacts/neoforge-21.1.251-sources.jar` first.
 
 ## Inbox
 
