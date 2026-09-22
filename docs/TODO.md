@@ -6,11 +6,10 @@ this file tracks where we are in it and what has been noticed along the way. See
 [api-notes-1.20.6.md](api-notes-1.20.6.md) for API shapes already confirmed (all still valid
 on 1.21.1).
 
-**Snapshot**: branch `1.21.1`, ModDevGradle 2.0.147, `neo_version=21.1.251`. **312 errors / 78
-files** after categories 1-5 and 7 (2026-09-22). The baseline was `849 errors / 175 files` (fresh `./gradlew compileJava`, 2026-09-21, log at
-`/tmp/cofh-A0.log` for that session). Top kinds: `cannot find symbol` 467, `ResourceLocation`
-constructor 164, "does not override" 51, `MobEffect`→`Holder<MobEffect>` 34, enchantment
-key/holder mismatches 16. Re-run before trusting these — they shift every session.
+**Snapshot**: branch `1.21.1`, ModDevGradle 2.0.147, `neo_version=21.1.251`. **124 errors / 48
+files** after Phase A.1 categories 1-11 (2026-09-22; baseline was `849 / 175`). What is left is a
+long tail: 49 "cannot find symbol" and 27 "does not override" spread over 48 files, no bucket
+bigger than 7. Re-run `./gradlew compileJava` before trusting these - they shift every session.
 
 ## Phase 0 — preparation (port-plan.md §4)
 
@@ -34,13 +33,15 @@ key/holder mismatches 16. Re-run before trusting these — they shift every sess
   3. [x] ItemStack NBT → data components (remaining ~140 sites family-wide)
   4. [x] vertex/rendering API (`Matrix3f`→`Pose`, `addVertex`/`setColor`/…, `buildOrThrow`)
   5. [x] `MobEffect`→`Holder<MobEffect>`, `PotionUtils`→`PotionContents`, `PotionColorCalculationEvent` gone (849→829→664→608→434→312 across 1-5+7)
-  6. [ ] enchantments → datapack (`HoldingEnchantment` JSON + key, `EnchantmentHelperCoFH.getLevel`)
+  6. [x] enchantments → datapack (312→261) (`HoldingEnchantment` JSON + key, `EnchantmentHelperCoFH.getLevel`)
   7. [x] attribute modifier ids
-  8. [ ] tools/armor/crossbow (`CHARGED_PROJECTILES`, `hurtAndBreak`, `getUseDuration`)
-  9. [ ] events (damage pipeline, item pickup, spawn placements, `Event.Result` leftovers)
-  10. [ ] blocks (crop hooks `canCropGrow`/`fireCropGrowPost`, `SpecialPlantable`, `FoodProperties` record)
-  11. [ ] recipes (`RecipeInput`, stream codecs, `IShapedRecipe` gone)
-  12. [ ] loot/datagen, `ItemAbilities`, `DamageSource#isDirect`
+  8. [x] tools/armor/crossbow (261→228) (`CHARGED_PROJECTILES`, `hurtAndBreak`, `getUseDuration`)
+  9. [x] events (228→208) (damage pipeline, item pickup, spawn placements, `Event.Result` leftovers)
+  10. [x] blocks (208→153) (crop hooks `canCropGrow`/`fireCropGrowPost`, `SpecialPlantable`, `FoodProperties` record)
+  11. [x] recipes (153→124) (`RecipeInput`, stream codecs, `IShapedRecipe` gone)
+  12. [ ] loot/datagen, `ItemAbilities`, `DamageSource#isDirect` — partly done in 6/10 (loot
+      providers, `CopyCustomDataFunction`, `ItemAbilities`); `RecipeProviderCoFH` and the
+      datagen entrypoints remain
   13. [ ] mixins re-targeted (10 classes; 2 not in `mixins.cofhcore.json` — dead?)
   14. [~] access transformers — the 15 lines `validateAccessTransformers` rejected were deleted in A.0 (all dead since 1.20.x); re-check after A.1 for members the code still needs
   15. [ ] resources: singular tag/data folders, `forge:`→`c:` (392 files family-wide)
@@ -52,6 +53,15 @@ key/holder mismatches 16. Re-run before trusting these — they shift every sess
 ## Phase B — 26.1.2 (port-plan.md §6)
 
 Not started. Branch `26.1.2` is created from `1.21.1` only after Phase A's exit criteria.
+
+## Remaining tail (no single root cause dominates; work file-by-file)
+
+`ThrownKnife`/`ProjectileCoFH` (AbstractArrow ctor + `ItemStack#getUseDuration`), `AreaUtils`
+(`MobType` gone), `ElementsModelWrapped`/`ModelUtils` (`BlockElementFace` fields are private,
+`IModelBuilder`), `RenderTypes`/`CoreShaders` (render pipeline), `CoreEntityDataSerializers`
+(`EntityDataSerializer#codec`), `GrenadeItem`/`ItemCoFH` (item hook signatures), the network
+payload `StreamCodec.composite` arity limit, `Reference<SoundEvent>` vs `SoundEvent`, and
+`Constants`/`StringHelper` odds and ends.
 
 ## Inbox
 

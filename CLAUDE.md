@@ -76,7 +76,7 @@ It is a *reference* here, never a dependency.
 Branch **`1.21.1`**, building with **ModDevGradle 2.0.147 against NeoForge 21.1.251**
 (Phase 0.3/0.4 and A.0 done here on 2026-09-21; `neoforge.mods.toml`; the 15 dead access
 transformer lines that `validateAccessTransformers` rejected are gone). The twelve 1.20.6
-commits are kept and still valid. Baseline was 849 errors / 175 files; **312 / 78** after Phase A.1 categories 1-5 and 7
+commits are kept and still valid. Baseline was 849 errors / 175 files; **124 / 48** after Phase A.1 categories 1-11
 (2026-09-22). See docs/TODO.md for what each category covered and what remains.
 
 Shape oracle on this target: `build/moddev/artifacts/neoforge-21.1.251-sources.jar`
@@ -86,9 +86,7 @@ Shape oracle on this target: `build/moddev/artifacts/neoforge-21.1.251-sources.j
 The other three repos are still on their NeoGradle 1.20.6-bumped (uncommitted) build files —
 their Phase 0.3/0.4 happens when their Phase A starts, after this repo builds clean.
 
-**Next step**: Phase A.1 **category 6 (enchantments → datapack objects)** — the biggest
-remaining piece: `EnchantmentCoFH`/`EnchantmentOverride`/`DamageEnchantmentCoFH` cannot exist
-(no subclassing for behaviour), `HoldingEnchantment` becomes a JSON + `ResourceKey`, and
-`Utils.getEnchantment`/`getItemEnchantmentLevel` need a holder-based helper. Then 8 (tools and
-`CrossbowItemCoFH`'s ammo), 9 (events), 10 (blocks), 11 (recipes), 12 (loot/datagen), 13-16.
-One commit and one error count per category, per docs/port-plan.md §5 A.1.
+**Next step**: the remaining tail (docs/TODO.md lists it by file). Categories 1-11 of
+docs/port-plan.md §5 A.1 are done; 12-16 (datagen entrypoints, mixins, the AT sweep, resources,
+Curios) plus ~48 files of assorted signature changes are what stands between here and a clean
+compile. One commit and one error count per root cause, as before.
