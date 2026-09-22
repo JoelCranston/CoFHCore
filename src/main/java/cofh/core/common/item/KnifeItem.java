@@ -5,6 +5,7 @@ import cofh.lib.common.item.SwordItemCoFH;
 import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Position;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -18,8 +19,8 @@ import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileItem;
-import net.minecraft.world.item.Tier;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ToolMaterial;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
@@ -30,16 +31,16 @@ public class KnifeItem extends SwordItemCoFH implements ProjectileItem {
     private static final int DEFAULT_ATTACK_DAMAGE = 1;
     private static final float DEFAULT_ATTACK_SPEED = -2.0F;
 
-    public KnifeItem(Tier tier, int attackDamageIn, float attackSpeedIn, Properties builder) {
+    public KnifeItem(ToolMaterial material, int attackDamageIn, float attackSpeedIn, Properties builder) {
 
-        super(tier, attackDamageIn, attackSpeedIn, builder);
+        super(material, attackDamageIn, attackSpeedIn, builder);
 
         DispenserBlock.registerProjectileBehavior(this);
     }
 
-    public KnifeItem(Tier tier, Properties builder) {
+    public KnifeItem(ToolMaterial material, Properties builder) {
 
-        this(tier, DEFAULT_ATTACK_DAMAGE, DEFAULT_ATTACK_SPEED, builder);
+        this(material, DEFAULT_ATTACK_DAMAGE, DEFAULT_ATTACK_SPEED, builder);
     }
 
     @Override
@@ -62,18 +63,18 @@ public class KnifeItem extends SwordItemCoFH implements ProjectileItem {
     }
 
     @Override
-    public UseAnim getUseAnimation(ItemStack stack) {
+    public ItemUseAnimation getUseAnimation(ItemStack stack) {
 
-        return UseAnim.SPEAR;
+        return ItemUseAnimation.SPEAR;
     }
 
     @Override
-    public void releaseUsing(ItemStack stack, Level world, LivingEntity living, int durationRemaining) {
+    public boolean releaseUsing(ItemStack stack, Level world, LivingEntity living, int durationRemaining) {
 
         if (living instanceof Player player) {
             float power = BowItem.getPowerForTime(this.getUseDuration(stack, living) - durationRemaining);
             if (power < 0.1D) {
-                return;
+                return false;
             }
             if (!world.isClientSide()) {
                 ThrownKnife knife = new ThrownKnife(world, player, stack);
@@ -88,7 +89,9 @@ public class KnifeItem extends SwordItemCoFH implements ProjectileItem {
                 player.getInventory().removeItem(stack);
             }
             player.awardStat(Stats.ITEM_USED.get(this));
+            return true;
         }
+        return false;
     }
 
     // region DISPLAY
@@ -102,9 +105,9 @@ public class KnifeItem extends SwordItemCoFH implements ProjectileItem {
     }
 
     @Override
-    public String getCreatorModId(ItemStack itemStack) {
+    public String getCreatorModId(HolderLookup.Provider registries, ItemStack itemStack) {
 
-        return modId == null || modId.isEmpty() ? super.getCreatorModId(itemStack) : modId;
+        return modId == null || modId.isEmpty() ? super.getCreatorModId(registries, itemStack) : modId;
     }
     // endregion
 

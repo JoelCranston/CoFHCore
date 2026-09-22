@@ -38,7 +38,7 @@ public class CoinItem extends CountedItem {
                 ProxyUtils.setOverlayMessage(playerIn, Component.translatable(localize("info.cofh.heads") + ": " + heads + " " + localize("info.cofh.tails") + ": " + (count - heads)));
             }
         }
-        playerIn.getCooldowns().addCooldown(this, 40);
+        playerIn.getCooldowns().addCooldown(stack, 40);
         return InteractionResult.PASS;
     }
 

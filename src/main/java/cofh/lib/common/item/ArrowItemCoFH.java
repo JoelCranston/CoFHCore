@@ -2,6 +2,7 @@ package cofh.lib.common.item;
 
 import cofh.lib.api.item.ICoFHItem;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Position;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -66,9 +67,9 @@ public class ArrowItemCoFH extends ArrowItem implements ICoFHItem {
     }
 
     @Override
-    public String getCreatorModId(ItemStack itemStack) {
+    public String getCreatorModId(HolderLookup.Provider registries, ItemStack itemStack) {
 
-        return modId == null || modId.isEmpty() ? super.getCreatorModId(itemStack) : modId;
+        return modId == null || modId.isEmpty() ? super.getCreatorModId(registries, itemStack) : modId;
     }
     // endregion
 

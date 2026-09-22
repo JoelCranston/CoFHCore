@@ -36,10 +36,8 @@ public class XpContainerItem extends ItemCoFH implements IXpContainerItem, IFlui
 
     public XpContainerItem(Properties builder, int xpCapacity) {
 
-        super(builder);
+        super(builder.enchantable(5));
         this.xpCapacity = xpCapacity;
-
-        setEnchantability(5);
     }
 
     @Override

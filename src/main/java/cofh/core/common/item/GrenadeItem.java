@@ -42,7 +42,7 @@ public class GrenadeItem extends ItemCoFH implements ProjectileItem {
 
         ItemStack stack = playerIn.getItemInHand(handIn);
         worldIn.playSound(null, playerIn.getX(), playerIn.getY(), playerIn.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.NEUTRAL, 0.5F, 0.4F / (MathHelper.RANDOM.nextFloat() * 0.4F + 0.8F));
-        playerIn.getCooldowns().addCooldown(this, cooldown);
+        playerIn.getCooldowns().addCooldown(stack, cooldown);
         if (!worldIn.isClientSide()) {
             createGrenade(stack, worldIn, playerIn);
         }

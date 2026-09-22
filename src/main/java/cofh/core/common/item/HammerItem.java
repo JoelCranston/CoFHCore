@@ -1,9 +1,8 @@
 package cofh.core.common.item;
 
 import cofh.lib.common.item.PickaxeItemCoFH;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tier;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.item.ToolMaterial;
 
 public class HammerItem extends PickaxeItemCoFH {
 
@@ -13,31 +12,31 @@ public class HammerItem extends PickaxeItemCoFH {
 
     public final int radius;
 
-    public HammerItem(Tier tier, float attackDamageIn, float attackSpeedIn, int radius, Properties builder) {
+    public HammerItem(ToolMaterial material, float attackDamageIn, float attackSpeedIn, int radius, Properties builder) {
 
-        super(tier, (int) attackDamageIn, attackSpeedIn, builder.durability(tier.getUses() * 4));
+        // Disables shields for 5 seconds, as an axe does.
+        super(builder.tool(scaleDurability(material, 4), BlockTags.MINEABLE_WITH_PICKAXE, attackDamageIn, attackSpeedIn, 5.0F));
         this.radius = radius;
     }
 
-    public HammerItem(Tier tier, float attackDamageIn, float attackSpeedIn, Properties builder) {
+    public HammerItem(ToolMaterial material, float attackDamageIn, float attackSpeedIn, Properties builder) {
 
-        this(tier, attackDamageIn, attackSpeedIn, DEFAULT_BASE_AREA, builder);
+        this(material, attackDamageIn, attackSpeedIn, DEFAULT_BASE_AREA, builder);
     }
 
-    public HammerItem(Tier tier, float attackDamageIn, Properties builder) {
+    public HammerItem(ToolMaterial material, float attackDamageIn, Properties builder) {
 
-        this(tier, attackDamageIn, DEFAULT_ATTACK_SPEED, DEFAULT_BASE_AREA, builder);
+        this(material, attackDamageIn, DEFAULT_ATTACK_SPEED, DEFAULT_BASE_AREA, builder);
     }
 
-    public HammerItem(Tier tier, Properties builder) {
+    public HammerItem(ToolMaterial material, Properties builder) {
 
-        this(tier, DEFAULT_ATTACK_DAMAGE, DEFAULT_ATTACK_SPEED, DEFAULT_BASE_AREA, builder);
+        this(material, DEFAULT_ATTACK_DAMAGE, DEFAULT_ATTACK_SPEED, DEFAULT_BASE_AREA, builder);
     }
 
-    @Override
-    public boolean canDisableShield(ItemStack stack, ItemStack shield, LivingEntity entity, LivingEntity attacker) {
+    private static ToolMaterial scaleDurability(ToolMaterial material, int multiplier) {
 
-        return true;
+        return new ToolMaterial(material.incorrectBlocksForDrops(), material.durability() * multiplier, material.speed(), material.attackDamageBonus(), material.enchantmentValue(), material.repairItems());
     }
 
 }

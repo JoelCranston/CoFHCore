@@ -1,36 +1,16 @@
 package cofh.lib.common.item;
 
+import net.minecraft.world.item.Item;
 import cofh.lib.api.item.ICoFHItem;
-import net.minecraft.core.Holder;
-import net.minecraft.world.item.AnimalArmorItem;
-import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
 
-public class HorseArmorItemCoFH extends AnimalArmorItem implements ICoFHItem {
+public class HorseArmorItemCoFH extends Item implements ICoFHItem {
 
-    protected int enchantability = 1;
+    public HorseArmorItemCoFH(ArmorMaterial material, Properties builder) {
 
-    public HorseArmorItemCoFH(Holder<ArmorMaterial> material, boolean dyeable, Properties builder) {
-
-        super(material, AnimalArmorItem.BodyType.EQUESTRIAN, dyeable, builder);
-    }
-
-    public HorseArmorItemCoFH setEnchantability(int enchantability) {
-
-        this.enchantability = enchantability;
-        return this;
-    }
-
-    @Override
-    public boolean isEnchantable(ItemStack stack) {
-
-        return enchantability > 0;
-    }
-
-    @Override
-    public int getEnchantmentValue(ItemStack stack) {
-
-        return enchantability;
+        super(builder.horseArmor(material));
     }
 
     // region DISPLAY
@@ -44,9 +24,9 @@ public class HorseArmorItemCoFH extends AnimalArmorItem implements ICoFHItem {
     }
 
     @Override
-    public String getCreatorModId(ItemStack itemStack) {
+    public String getCreatorModId(HolderLookup.Provider registries, ItemStack itemStack) {
 
-        return modId == null || modId.isEmpty() ? super.getCreatorModId(itemStack) : modId;
+        return modId == null || modId.isEmpty() ? super.getCreatorModId(registries, itemStack) : modId;
     }
     // endregion
 }

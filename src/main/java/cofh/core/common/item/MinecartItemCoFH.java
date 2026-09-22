@@ -43,7 +43,7 @@ public class MinecartItemCoFH extends ItemCoFH {
         if (!level.isClientSide()) {
             RailShape railshape = blockstate.getBlock() instanceof BaseRailBlock rail ? rail.getRailDirection(blockstate, level, blockpos, null) : RailShape.NORTH_SOUTH;
             double d0 = 0.0D;
-            if (railshape.isAscending()) {
+            if (railshape.isSlope()) {
                 d0 = 0.5D;
             }
             createMinecart(stack, level, (double) blockpos.getX() + 0.5D, (double) blockpos.getY() + 0.0625D + d0, (double) blockpos.getZ() + 0.5D);
@@ -94,7 +94,7 @@ public class MinecartItemCoFH extends ItemCoFH {
             RailShape railshape = blockstate.getBlock() instanceof BaseRailBlock rail ? rail.getRailDirection(blockstate, world, blockpos, null) : RailShape.NORTH_SOUTH;
             double d3;
             if (blockstate.is(BlockTags.RAILS)) {
-                if (railshape.isAscending()) {
+                if (railshape.isSlope()) {
                     d3 = 0.6D;
                 } else {
                     d3 = 0.1D;
@@ -105,7 +105,7 @@ public class MinecartItemCoFH extends ItemCoFH {
                 }
                 BlockState state = world.getBlockState(blockpos.below());
                 RailShape shape = state.getBlock() instanceof BaseRailBlock rail ? rail.getRailDirection(state, world, blockpos.below(), null) : RailShape.NORTH_SOUTH;
-                if (direction != Direction.DOWN && shape.isAscending()) {
+                if (direction != Direction.DOWN && shape.isSlope()) {
                     d3 = -0.4D;
                 } else {
                     d3 = -0.9D;

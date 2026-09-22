@@ -1,21 +1,21 @@
 package cofh.core.common.item;
 
+import net.minecraft.world.item.equipment.ArmorType;
 import cofh.core.util.ProxyUtils;
 import cofh.lib.api.item.ICoFHItem;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
 
-public class ArmorItemCoFH extends ArmorItem implements ICoFHItem {
+public class ArmorItemCoFH extends Item implements ICoFHItem {
 
     protected static final double[] RESISTANCE_RATIO = new double[]{0.10D, 0.25D, 0.40D, 0.25D};
 
@@ -42,9 +42,17 @@ public class ArmorItemCoFH extends ArmorItem implements ICoFHItem {
             UUID.fromString("A8BD3E20-FA60-47AF-8A09-B1A57D26F3CC")
     };
 
-    public ArmorItemCoFH(Holder<ArmorMaterial> pMaterial, ArmorItem.Type pType, Item.Properties pProperties) {
+    protected final ArmorType type;
 
-        super(pMaterial, pType, pProperties);
+    public ArmorItemCoFH(ArmorMaterial pMaterial, ArmorType pType, Item.Properties pProperties) {
+
+        super(pProperties.humanoidArmor(pMaterial, pType));
+        this.type = pType;
+    }
+
+    public ArmorType getType() {
+
+        return type;
     }
 
     // region DISPLAY
@@ -58,9 +66,9 @@ public class ArmorItemCoFH extends ArmorItem implements ICoFHItem {
     }
 
     @Override
-    public String getCreatorModId(ItemStack itemStack) {
+    public String getCreatorModId(HolderLookup.Provider registries, ItemStack itemStack) {
 
-        return modId == null || modId.isEmpty() ? super.getCreatorModId(itemStack) : modId;
+        return modId == null || modId.isEmpty() ? super.getCreatorModId(registries, itemStack) : modId;
     }
     // endregion
 

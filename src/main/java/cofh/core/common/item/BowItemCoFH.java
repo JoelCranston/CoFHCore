@@ -1,13 +1,13 @@
 package cofh.core.common.item;
 
 import cofh.lib.api.item.ICoFHItem;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.ToolMaterial;
 
 public class BowItemCoFH extends BowItem implements ICoFHItem {
 
-    protected int enchantability = 1;
     protected float accuracyModifier = 1.0F;
     protected float damageModifier = 1.0F;
     protected float velocityModifier = 1.0F;
@@ -17,33 +17,25 @@ public class BowItemCoFH extends BowItem implements ICoFHItem {
         super(builder);
     }
 
-    public BowItemCoFH(Tier tier, Properties builder) {
+    public BowItemCoFH(ToolMaterial material, Properties builder) {
 
-        super(builder);
-        setParams(tier);
+        super(builder.enchantable(material.enchantmentValue()));
+        setParams(material);
     }
 
-    public BowItemCoFH setParams(Tier tier) {
+    public BowItemCoFH setParams(ToolMaterial material) {
 
-        this.enchantability = tier.getEnchantmentValue();
-        this.damageModifier = tier.getAttackDamageBonus() / 4;
-        this.velocityModifier = tier.getSpeed() / 20;
+        this.damageModifier = material.attackDamageBonus() / 4;
+        this.velocityModifier = material.speed() / 20;
         return this;
     }
 
-    public BowItemCoFH setParams(int enchantability, float accuracyModifier, float damageModifier, float velocityModifier) {
+    public BowItemCoFH setParams(float accuracyModifier, float damageModifier, float velocityModifier) {
 
-        this.enchantability = enchantability;
         this.accuracyModifier = accuracyModifier;
         this.damageModifier = damageModifier;
         this.velocityModifier = velocityModifier;
         return this;
-    }
-
-    @Override
-    public int getEnchantmentValue() {
-
-        return enchantability;
     }
 
     // region DISPLAY
@@ -57,9 +49,9 @@ public class BowItemCoFH extends BowItem implements ICoFHItem {
     }
 
     @Override
-    public String getCreatorModId(ItemStack itemStack) {
+    public String getCreatorModId(HolderLookup.Provider registries, ItemStack itemStack) {
 
-        return modId == null || modId.isEmpty() ? super.getCreatorModId(itemStack) : modId;
+        return modId == null || modId.isEmpty() ? super.getCreatorModId(registries, itemStack) : modId;
     }
     // endregion
 }

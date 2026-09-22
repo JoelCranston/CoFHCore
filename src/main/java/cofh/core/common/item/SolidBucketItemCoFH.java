@@ -22,7 +22,7 @@ public class SolidBucketItemCoFH extends BlockItemCoFH {
 
     public SolidBucketItemCoFH(Block blockIn, SoundEvent placeSound, Properties builder) {
 
-        super(blockIn, builder);
+        super(blockIn, builder.useItemDescriptionPrefix());
         this.placeSound = placeSound;
     }
 
@@ -36,12 +36,6 @@ public class SolidBucketItemCoFH extends BlockItemCoFH {
             player.setItemInHand(interactionhand, Items.BUCKET.getDefaultInstance());
         }
         return interactionresult;
-    }
-
-    @Override
-    public String getDescriptionId() {
-
-        return this.getOrCreateDescriptionId();
     }
 
     @Override

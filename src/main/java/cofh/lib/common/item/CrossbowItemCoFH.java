@@ -9,6 +9,7 @@ import cofh.lib.api.item.ICoFHItem;
 import cofh.lib.util.Utils;
 import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -25,7 +26,9 @@ import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.component.ChargedProjectiles;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
@@ -34,10 +37,10 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class CrossbowItemCoFH extends CrossbowItem implements ICoFHItem {
 
-    protected int enchantability = 1;
     protected float accuracyModifier = 1.0F;
     protected float damageModifier = 1.0F;
     protected float velocityModifier = 1.0F;
@@ -49,29 +52,27 @@ public class CrossbowItemCoFH extends CrossbowItem implements ICoFHItem {
         ProxyUtils.registerItemModelProperty(this, Identifier.parse("ammo"), this::getAmmoModelProperty);
     }
 
-    public CrossbowItemCoFH(Tier tier, Properties builder) {
+    public CrossbowItemCoFH(ToolMaterial material, Properties builder) {
 
-        this(builder);
-        setParams(tier);
+        this(builder.enchantable(material.enchantmentValue()));
+        setParams(material);
     }
 
     public CrossbowItemCoFH(int enchantability, float accuracyModifier, float damageModifier, float velocityModifier, Properties builder) {
 
-        this(builder);
-        setParams(enchantability, accuracyModifier, damageModifier, velocityModifier);
+        this(builder.enchantable(enchantability));
+        setParams(accuracyModifier, damageModifier, velocityModifier);
     }
 
-    public CrossbowItemCoFH setParams(Tier tier) {
+    public CrossbowItemCoFH setParams(ToolMaterial material) {
 
-        this.enchantability = tier.getEnchantmentValue();
-        this.damageModifier = tier.getAttackDamageBonus() / 4;
-        this.velocityModifier = tier.getSpeed() / 20;
+        this.damageModifier = material.attackDamageBonus() / 4;
+        this.velocityModifier = material.speed() / 20;
         return this;
     }
 
-    public CrossbowItemCoFH setParams(int enchantability, float accuracyModifier, float damageModifier, float velocityModifier) {
+    public CrossbowItemCoFH setParams(float accuracyModifier, float damageModifier, float velocityModifier) {
 
-        this.enchantability = enchantability;
         this.accuracyModifier = accuracyModifier;
         this.damageModifier = damageModifier;
         this.velocityModifier = velocityModifier;
@@ -79,16 +80,10 @@ public class CrossbowItemCoFH extends CrossbowItem implements ICoFHItem {
     }
 
     @Override
-    public int getEnchantmentValue() {
-
-        return enchantability;
-    }
-
-    @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip, TooltipFlag flagIn) {
 
         if (isLoaded(stack)) {
-            tooltip.add((Component.translatable("info.cofh.crossbow_loaded")).append(" ").append(getLoadedAmmo(stack).getDisplayName()));
+            tooltip.accept((Component.translatable("info.cofh.crossbow_loaded")).append(" ").append(getLoadedAmmo(stack).getDisplayName()));
         }
     }
 
@@ -151,11 +146,13 @@ public class CrossbowItemCoFH extends CrossbowItem implements ICoFHItem {
     }
 
     @Override
-    public void releaseUsing(ItemStack stack, Level level, LivingEntity living, int durationRemaining) {
+    public boolean releaseUsing(ItemStack stack, Level level, LivingEntity living, int durationRemaining) {
 
         if (durationRemaining < 0 && !isLoaded(stack) && loadAmmo(living, stack)) {
             level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.CROSSBOW_LOADING_END, living instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE, 1.0F, 1.0F / (level.getRandom().nextFloat() * 0.5F + 1.0F) + 0.2F);
+            return true;
         }
+        return false;
     }
 
     @Override
@@ -203,13 +200,13 @@ public class CrossbowItemCoFH extends CrossbowItem implements ICoFHItem {
 
     public boolean loadAmmo(Player player, ItemStack crossbow, ItemStack ammo) {
 
-        crossbow.set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.of(ammo.copy()));
+        crossbow.set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.ofNonEmpty(List.of(ammo.copy())));
         return true;
     }
 
     public ItemStack getLoadedAmmo(ItemStack crossbow) {
 
-        List<ItemStack> loaded = crossbow.getOrDefault(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY).getItems();
+        List<ItemStack> loaded = crossbow.getOrDefault(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY).itemCopies();
         return loaded.isEmpty() ? ItemStack.EMPTY : loaded.get(0);
     }
 
@@ -297,7 +294,7 @@ public class CrossbowItemCoFH extends CrossbowItem implements ICoFHItem {
     // Override to change behavior to e.g. extract energy instead of using durability.
     public void onCrossbowShot(Player shooter, InteractionHand hand, ItemStack crossbow, int damage) {
 
-        crossbow.hurtAndBreak(damage, shooter, LivingEntity.getSlotForHand(hand));
+        crossbow.hurtAndBreak(damage, shooter, hand.asEquipmentSlot());
         if (shooter instanceof ServerPlayer) {
             if (!shooter.level.isClientSide()) {
                 CriteriaTriggers.SHOT_CROSSBOW.trigger((ServerPlayer) shooter, crossbow);
@@ -318,9 +315,9 @@ public class CrossbowItemCoFH extends CrossbowItem implements ICoFHItem {
     }
 
     @Override
-    public String getCreatorModId(ItemStack itemStack) {
+    public String getCreatorModId(HolderLookup.Provider registries, ItemStack itemStack) {
 
-        return modId == null || modId.isEmpty() ? super.getCreatorModId(itemStack) : modId;
+        return modId == null || modId.isEmpty() ? super.getCreatorModId(registries, itemStack) : modId;
     }
     // endregion
 }

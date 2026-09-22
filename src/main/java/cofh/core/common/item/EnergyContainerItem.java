@@ -22,12 +22,10 @@ public abstract class EnergyContainerItem extends ItemCoFH implements IEnergyCon
 
     protected EnergyContainerItem(Properties builder, int maxEnergy, int extract, int receive) {
 
-        super(builder);
+        super(builder.enchantable(5));
         this.maxEnergy = maxEnergy;
         this.extract = extract;
         this.receive = receive;
-
-        setEnchantability(5);
     }
 
     public EnergyContainerItem(Properties builder, int maxEnergy, int maxTransfer) {

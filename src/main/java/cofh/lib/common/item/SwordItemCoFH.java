@@ -1,15 +1,16 @@
 package cofh.lib.common.item;
 
 import cofh.lib.api.item.ICoFHItem;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.ToolMaterial;
 
-public class SwordItemCoFH extends SwordItem implements ICoFHItem {
+public class SwordItemCoFH extends Item implements ICoFHItem {
 
-    public SwordItemCoFH(Tier tier, int attackDamageIn, float attackSpeedIn, Properties builder) {
+    public SwordItemCoFH(ToolMaterial material, int attackDamageIn, float attackSpeedIn, Properties builder) {
 
-        super(tier, builder.attributes(SwordItem.createAttributes(tier, attackDamageIn, attackSpeedIn)));
+        super(builder.sword(material, attackDamageIn, attackSpeedIn));
     }
 
     // region DISPLAY
@@ -23,9 +24,9 @@ public class SwordItemCoFH extends SwordItem implements ICoFHItem {
     }
 
     @Override
-    public String getCreatorModId(ItemStack itemStack) {
+    public String getCreatorModId(HolderLookup.Provider registries, ItemStack itemStack) {
 
-        return modId == null || modId.isEmpty() ? super.getCreatorModId(itemStack) : modId;
+        return modId == null || modId.isEmpty() ? super.getCreatorModId(registries, itemStack) : modId;
     }
     // endregion
 }

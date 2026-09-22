@@ -38,7 +38,7 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 | B.1 mechanical renames | `6f0c7a7`, stragglers `e7896aa` | 1537 |
 | B.2 registration | `f02ba1b` | (included above) |
 | B.3 persistence — bridged at `BlockEntityCoFH`, entities native, `SavedDataType`, tag getters | `8bd2f62` | 1364 |
-| B.4 transfer API — CoFH handlers also implement the new interfaces (per-storage journals), query sites wrap with `.of()` | (this commit) | 1326 |
+| B.4 transfer API — CoFH handlers also implement the new interfaces (per-storage journals), query sites wrap with `.of()` | `ccfc12d` | 1326 |
 | **B.5 items/tools/armour** | next | |
 | B.6 recipes · B.7 client (XL) · B.8 resources · B.9 mixins · B.10 dependents | | |
 

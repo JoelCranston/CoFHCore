@@ -1,16 +1,23 @@
 package cofh.core.common.item;
 
 import cofh.lib.api.item.ICoFHItem;
-import net.minecraft.world.item.DiggerItem;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.ToolMaterial;
+import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.List;
 
 import static cofh.lib.init.tags.BlockTagsCoFH.MINEABLE_WITH_SICKLE;
 
-public class SickleItem extends DiggerItem implements ICoFHItem {
+public class SickleItem extends Item implements ICoFHItem {
 
     private static final float DEFAULT_ATTACK_DAMAGE = 2.5F;
     private static final float DEFAULT_ATTACK_SPEED = -2.6F;
@@ -20,37 +27,41 @@ public class SickleItem extends DiggerItem implements ICoFHItem {
     public final int radius;
     public final int height;
 
-    public SickleItem(Tier tier, float attackDamageIn, float attackSpeedIn, int radius, int height, Properties builder) {
+    public SickleItem(ToolMaterial material, float attackDamageIn, float attackSpeedIn, int radius, int height, Properties builder) {
 
-        super(tier, MINEABLE_WITH_SICKLE, builder.durability(tier.getUses() * 4).attributes(DiggerItem.createAttributes(tier, attackDamageIn, attackSpeedIn)));
+        super(builder.tool(scaleDurability(material, 4), MINEABLE_WITH_SICKLE, attackDamageIn, attackSpeedIn, 0.0F).component(DataComponents.TOOL, createTool(material)));
         this.radius = radius;
         this.height = height;
     }
 
-    public SickleItem(Tier tier, float attackDamageIn, float attackSpeedIn, Properties builder) {
+    public SickleItem(ToolMaterial material, float attackDamageIn, float attackSpeedIn, Properties builder) {
 
-        this(tier, attackDamageIn, attackSpeedIn, DEFAULT_BASE_RADIUS, DEFAULT_BASE_HEIGHT, builder);
+        this(material, attackDamageIn, attackSpeedIn, DEFAULT_BASE_RADIUS, DEFAULT_BASE_HEIGHT, builder);
     }
 
-    public SickleItem(Tier tier, float attackDamageIn, Properties builder) {
+    public SickleItem(ToolMaterial material, float attackDamageIn, Properties builder) {
 
-        this(tier, attackDamageIn, DEFAULT_ATTACK_SPEED, DEFAULT_BASE_RADIUS, DEFAULT_BASE_HEIGHT, builder);
+        this(material, attackDamageIn, DEFAULT_ATTACK_SPEED, DEFAULT_BASE_RADIUS, DEFAULT_BASE_HEIGHT, builder);
     }
 
-    public SickleItem(Tier tier, Properties builder) {
+    public SickleItem(ToolMaterial material, Properties builder) {
 
-        this(tier, DEFAULT_ATTACK_DAMAGE, DEFAULT_ATTACK_SPEED, DEFAULT_BASE_RADIUS, DEFAULT_BASE_HEIGHT, builder);
+        this(material, DEFAULT_ATTACK_DAMAGE, DEFAULT_ATTACK_SPEED, DEFAULT_BASE_RADIUS, DEFAULT_BASE_HEIGHT, builder);
     }
 
-    @Override
-    public float getDestroySpeed(ItemStack stack, BlockState state) {
+    private static Tool createTool(ToolMaterial material) {
 
-        Block block = state.getBlock();
-        if (block == Blocks.COBWEB) {
-            return 15.0F;
-        } else {
-            return super.getDestroySpeed(stack, state);
-        }
+        HolderGetter<Block> blocks = BuiltInRegistries.acquireBootstrapRegistrationLookup(BuiltInRegistries.BLOCK);
+        return new Tool(List.of(
+                Tool.Rule.overrideSpeed(HolderSet.direct(Blocks.COBWEB.builtInRegistryHolder()), 15.0F),
+                Tool.Rule.deniesDrops(blocks.getOrThrow(material.incorrectBlocksForDrops())),
+                Tool.Rule.minesAndDrops(blocks.getOrThrow(MINEABLE_WITH_SICKLE), material.speed())
+        ), 1.0F, 1, true);
+    }
+
+    private static ToolMaterial scaleDurability(ToolMaterial material, int multiplier) {
+
+        return new ToolMaterial(material.incorrectBlocksForDrops(), material.durability() * multiplier, material.speed(), material.attackDamageBonus(), material.enchantmentValue(), material.repairItems());
     }
 
     // region DISPLAY
@@ -64,9 +75,9 @@ public class SickleItem extends DiggerItem implements ICoFHItem {
     }
 
     @Override
-    public String getCreatorModId(ItemStack itemStack) {
+    public String getCreatorModId(HolderLookup.Provider registries, ItemStack itemStack) {
 
-        return modId == null || modId.isEmpty() ? super.getCreatorModId(itemStack) : modId;
+        return modId == null || modId.isEmpty() ? super.getCreatorModId(registries, itemStack) : modId;
     }
     // endregion
 }

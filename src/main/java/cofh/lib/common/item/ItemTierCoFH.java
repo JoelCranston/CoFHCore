@@ -1,51 +1,19 @@
 package cofh.lib.common.item;
 
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.LazyLoadedValue;
-import net.minecraft.world.item.Tier;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.level.block.Block;
 
-import java.util.function.Supplier;
-
-public class ItemTierCoFH implements Tier {
+public class ItemTierCoFH {
 
     private final int level;
-    private final int uses;
-    private final float speed;
-    private final float damage;
-    private final int enchantmentValue;
-    private final TagKey<Block> incorrectBlocksForDrops;
-    private final LazyLoadedValue<Ingredient> repairIngredient;
+    private final ToolMaterial material;
 
-    public ItemTierCoFH(int level, int uses, float speed, float damage, int enchantmentValue, TagKey<Block> incorrectBlocksForDrops, Supplier<Ingredient> repairIngredient) {
+    public ItemTierCoFH(int level, int uses, float speed, float damage, int enchantmentValue, TagKey<Block> incorrectBlocksForDrops, TagKey<Item> repairItems) {
 
         this.level = level;
-        this.uses = uses;
-        this.speed = speed;
-        this.damage = damage;
-        this.enchantmentValue = enchantmentValue;
-        this.incorrectBlocksForDrops = incorrectBlocksForDrops;
-        this.repairIngredient = new LazyLoadedValue<>(repairIngredient);
-    }
-
-    // region IItemTier
-    @Override
-    public int getUses() {
-
-        return this.uses;
-    }
-
-    @Override
-    public float getSpeed() {
-
-        return this.speed;
-    }
-
-    @Override
-    public float getAttackDamageBonus() {
-
-        return this.damage;
+        this.material = new ToolMaterial(incorrectBlocksForDrops, uses, speed, damage, enchantmentValue, repairItems);
     }
 
     public int getLevel() {
@@ -53,22 +21,9 @@ public class ItemTierCoFH implements Tier {
         return this.level;
     }
 
-    @Override
-    public int getEnchantmentValue() {
+    public ToolMaterial getMaterial() {
 
-        return this.enchantmentValue;
+        return this.material;
     }
 
-    @Override
-    public TagKey<Block> getIncorrectBlocksForDrops() {
-
-        return this.incorrectBlocksForDrops;
-    }
-
-    @Override
-    public Ingredient getRepairIngredient() {
-
-        return this.repairIngredient.get();
-    }
-    // endregion
 }

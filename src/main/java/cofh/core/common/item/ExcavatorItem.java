@@ -1,7 +1,7 @@
 package cofh.core.common.item;
 
 import cofh.lib.common.item.ShovelItemCoFH;
-import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.ToolMaterial;
 
 public class ExcavatorItem extends ShovelItemCoFH {
 
@@ -11,25 +11,30 @@ public class ExcavatorItem extends ShovelItemCoFH {
 
     public final int radius;
 
-    public ExcavatorItem(Tier tier, float attackDamageIn, float attackSpeedIn, int radius, Properties builder) {
+    public ExcavatorItem(ToolMaterial material, float attackDamageIn, float attackSpeedIn, int radius, Properties builder) {
 
-        super(tier, attackDamageIn, attackSpeedIn, builder.durability(tier.getUses() * 4));
+        super(scaleDurability(material, 4), attackDamageIn, attackSpeedIn, builder);
         this.radius = radius;
     }
 
-    public ExcavatorItem(Tier tier, float attackDamageIn, float attackSpeedIn, Properties builder) {
+    public ExcavatorItem(ToolMaterial material, float attackDamageIn, float attackSpeedIn, Properties builder) {
 
-        this(tier, attackDamageIn, attackSpeedIn, DEFAULT_BASE_AREA, builder);
+        this(material, attackDamageIn, attackSpeedIn, DEFAULT_BASE_AREA, builder);
     }
 
-    public ExcavatorItem(Tier tier, float attackDamageIn, Properties builder) {
+    public ExcavatorItem(ToolMaterial material, float attackDamageIn, Properties builder) {
 
-        this(tier, attackDamageIn, DEFAULT_ATTACK_SPEED, DEFAULT_BASE_AREA, builder);
+        this(material, attackDamageIn, DEFAULT_ATTACK_SPEED, DEFAULT_BASE_AREA, builder);
     }
 
-    public ExcavatorItem(Tier tier, Properties builder) {
+    public ExcavatorItem(ToolMaterial material, Properties builder) {
 
-        this(tier, DEFAULT_ATTACK_DAMAGE, DEFAULT_ATTACK_SPEED, DEFAULT_BASE_AREA, builder);
+        this(material, DEFAULT_ATTACK_DAMAGE, DEFAULT_ATTACK_SPEED, DEFAULT_BASE_AREA, builder);
+    }
+
+    private static ToolMaterial scaleDurability(ToolMaterial material, int multiplier) {
+
+        return new ToolMaterial(material.incorrectBlocksForDrops(), material.durability() * multiplier, material.speed(), material.attackDamageBonus(), material.enchantmentValue(), material.repairItems());
     }
 
 }

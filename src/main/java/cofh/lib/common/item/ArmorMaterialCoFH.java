@@ -1,15 +1,16 @@
 package cofh.lib.common.item;
 
+import net.minecraft.world.item.Item;
+import net.minecraft.tags.TagKey;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.equipment.EquipmentAsset;
+import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterial;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.equipment.ArmorMaterial;
 
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 public class ArmorMaterialCoFH {
 
@@ -17,14 +18,14 @@ public class ArmorMaterialCoFH {
 
     }
 
-    public static ArmorMaterial create(int[] damageReductionAmountsIn, int enchantabilityIn, Holder<SoundEvent> equipSoundIn, float toughnessIn, float knockbackResistanceIn, Supplier<Ingredient> repairMaterialSupplier) {
+    public static ArmorMaterial create(int durability, int[] defenseIn, int enchantabilityIn, Holder<SoundEvent> equipSoundIn, float toughnessIn, float knockbackResistanceIn, TagKey<Item> repairItems, ResourceKey<EquipmentAsset> assetId) {
 
-        Map<ArmorItem.Type, Integer> defense = new EnumMap<>(ArmorItem.Type.class);
-        ArmorItem.Type[] types = ArmorItem.Type.values();
-        for (int i = 0; i < types.length && i < damageReductionAmountsIn.length; ++i) {
-            defense.put(types[i], damageReductionAmountsIn[i]);
+        Map<ArmorType, Integer> defense = new EnumMap<>(ArmorType.class);
+        ArmorType[] types = ArmorType.values();
+        for (int i = 0; i < types.length && i < defenseIn.length; ++i) {
+            defense.put(types[i], defenseIn[i]);
         }
-        return new ArmorMaterial(defense, enchantabilityIn, equipSoundIn, repairMaterialSupplier, List.of(), toughnessIn, knockbackResistanceIn);
+        return new ArmorMaterial(durability, defense, enchantabilityIn, equipSoundIn, toughnessIn, knockbackResistanceIn, repairItems, assetId);
     }
 
 }

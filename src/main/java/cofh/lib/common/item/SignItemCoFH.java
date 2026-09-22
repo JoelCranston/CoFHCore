@@ -1,6 +1,7 @@
 package cofh.lib.common.item;
 
 import cofh.lib.api.item.ICoFHItem;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SignItem;
 import net.minecraft.world.level.block.Block;
@@ -9,7 +10,7 @@ public class SignItemCoFH extends SignItem implements ICoFHItem {
 
     public SignItemCoFH(Properties propertiesIn, Block floorBlockIn, Block wallBlockIn) {
 
-        super(propertiesIn, floorBlockIn, wallBlockIn);
+        super(floorBlockIn, wallBlockIn, propertiesIn);
     }
 
     // region DISPLAY
@@ -23,9 +24,9 @@ public class SignItemCoFH extends SignItem implements ICoFHItem {
     }
 
     @Override
-    public String getCreatorModId(ItemStack itemStack) {
+    public String getCreatorModId(HolderLookup.Provider registries, ItemStack itemStack) {
 
-        return modId == null || modId.isEmpty() ? super.getCreatorModId(itemStack) : modId;
+        return modId == null || modId.isEmpty() ? super.getCreatorModId(registries, itemStack) : modId;
     }
     // endregion
 }

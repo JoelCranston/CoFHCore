@@ -4,20 +4,24 @@ import cofh.core.common.config.CoreClientConfig;
 import cofh.lib.api.item.ICoFHItem;
 import cofh.lib.util.helpers.SecurityHelper;
 import com.google.common.collect.Sets;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Item.TooltipContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.FuelValues;
 import net.neoforged.neoforge.common.ItemAbility;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,17 +31,10 @@ import static net.minecraft.ChatFormatting.*;
 public class ItemCoFH extends Item implements ICoFHItem {
 
     protected int burnTime = -1;
-    protected int enchantability;
 
     public ItemCoFH(Properties builder) {
 
         super(builder);
-    }
-
-    public ItemCoFH setEnchantability(int enchantability) {
-
-        this.enchantability = enchantability;
-        return this;
     }
 
     public ItemCoFH setBurnTime(int burnTime) {
@@ -51,40 +48,28 @@ public class ItemCoFH extends Item implements ICoFHItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip, TooltipFlag flagIn) {
 
         List<Component> additionalTooltips = new ArrayList<>();
         tooltipDelegate(stack, context.level(), additionalTooltips, flagIn);
 
         if (SecurityHelper.isItemClaimable(stack)) {
-            tooltip.add(getTextComponent("info.cofh.claimable").withStyle(GREEN).withStyle(ITALIC));
+            tooltip.accept(getTextComponent("info.cofh.claimable").withStyle(GREEN).withStyle(ITALIC));
         }
         if (!additionalTooltips.isEmpty()) {
-            if (Screen.hasShiftDown() || CoreClientConfig.alwaysShowDetails.get()) {
-                tooltip.addAll(additionalTooltips);
+            if (Minecraft.getInstance().hasShiftDown() || CoreClientConfig.alwaysShowDetails.get()) {
+                additionalTooltips.forEach(tooltip);
             } else if (CoreClientConfig.holdShiftForDetails.get()) {
-                tooltip.add(getTextComponent("info.cofh.hold_shift_for_details").withStyle(GRAY));
+                tooltip.accept(getTextComponent("info.cofh.hold_shift_for_details").withStyle(GRAY));
             }
         }
     }
 
     @Override
-    public boolean isEnchantable(ItemStack stack) {
-
-        return getEnchantmentValue(stack) > 0;
-    }
-
-    @Override
-    public int getEnchantmentValue(ItemStack stack) {
-
-        return enchantability;
-    }
-
-    @Override
-    public int getBurnTime(ItemStack itemStack, RecipeType<?> recipeType) {
+    public int getBurnTime(ItemStack itemStack, @Nullable RecipeType<?> recipeType, FuelValues fuelValues) {
 
         // Negative burn time throws; defer to the furnace_fuels data map.
-        return burnTime < 0 ? super.getBurnTime(itemStack, recipeType) : burnTime;
+        return burnTime < 0 ? super.getBurnTime(itemStack, recipeType, fuelValues) : burnTime;
     }
 
     protected static Set<ItemAbility> toolActions(ItemAbility... actions) {
@@ -103,9 +88,9 @@ public class ItemCoFH extends Item implements ICoFHItem {
     }
 
     @Override
-    public String getCreatorModId(ItemStack itemStack) {
+    public String getCreatorModId(HolderLookup.Provider registries, ItemStack itemStack) {
 
-        return modId == null || modId.isEmpty() ? super.getCreatorModId(itemStack) : modId;
+        return modId == null || modId.isEmpty() ? super.getCreatorModId(registries, itemStack) : modId;
     }
     // endregion
 }

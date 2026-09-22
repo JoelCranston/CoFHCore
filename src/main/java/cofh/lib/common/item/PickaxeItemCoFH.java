@@ -1,16 +1,21 @@
 package cofh.lib.common.item;
 
 import cofh.lib.api.item.ICoFHItem;
-import net.minecraft.world.item.DiggerItem;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.PickaxeItem;
-import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.ToolMaterial;
 
-public class PickaxeItemCoFH extends PickaxeItem implements ICoFHItem {
+public class PickaxeItemCoFH extends Item implements ICoFHItem {
 
-    public PickaxeItemCoFH(Tier tier, int attackDamageIn, float attackSpeedIn, Properties builder) {
+    public PickaxeItemCoFH(ToolMaterial material, float attackDamageIn, float attackSpeedIn, Properties builder) {
 
-        super(tier, builder.attributes(DiggerItem.createAttributes(tier, attackDamageIn, attackSpeedIn)));
+        this(builder.pickaxe(material, attackDamageIn, attackSpeedIn));
+    }
+
+    protected PickaxeItemCoFH(Properties builder) {
+
+        super(builder);
     }
 
     // region DISPLAY
@@ -24,9 +29,9 @@ public class PickaxeItemCoFH extends PickaxeItem implements ICoFHItem {
     }
 
     @Override
-    public String getCreatorModId(ItemStack itemStack) {
+    public String getCreatorModId(HolderLookup.Provider registries, ItemStack itemStack) {
 
-        return modId == null || modId.isEmpty() ? super.getCreatorModId(itemStack) : modId;
+        return modId == null || modId.isEmpty() ? super.getCreatorModId(registries, itemStack) : modId;
     }
     // endregion
 }

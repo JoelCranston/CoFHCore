@@ -1,13 +1,13 @@
 package cofh.lib.common.item;
 
-import net.minecraft.core.Holder;
-import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorMaterial;
 
+// Dyeable through the minecraft:dyeable item tag.
 public class DyeableHorseArmorItemCoFH extends HorseArmorItemCoFH {
 
-    public DyeableHorseArmorItemCoFH(Holder<ArmorMaterial> material, Properties builder) {
+    public DyeableHorseArmorItemCoFH(ArmorMaterial material, Properties builder) {
 
-        super(material, true, builder);
+        super(material, builder);
     }
 
 }

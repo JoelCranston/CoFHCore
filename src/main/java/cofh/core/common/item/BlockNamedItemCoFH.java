@@ -6,12 +6,7 @@ public class BlockNamedItemCoFH extends BlockItemCoFH {
 
     public BlockNamedItemCoFH(Block blockIn, Properties builder) {
 
-        super(blockIn, builder);
-    }
-
-    public String getDescriptionId() {
-
-        return getOrCreateDescriptionId();
+        super(blockIn, builder.useItemDescriptionPrefix());
     }
 
 }

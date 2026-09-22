@@ -31,11 +31,9 @@ public class FluidContainerItem extends ItemCoFH implements IFluidContainerItem,
 
     public FluidContainerItem(Properties builder, int fluidCapacity, Predicate<FluidStack> validator) {
 
-        super(builder);
+        super(builder.enchantable(5));
         this.fluidCapacity = fluidCapacity;
         this.validator = validator;
-
-        setEnchantability(5);
     }
 
     public FluidContainerItem(Properties builder, int fluidCapacity) {
