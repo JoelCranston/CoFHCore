@@ -429,3 +429,31 @@ the legacy API and would throw on the new one. It's fixed by negating at the cal
 runtime verification yet.
 
 1364 → 1326 errors.
+
+---
+
+## B.5 items, tools, armour, entities, blocks (2026-09-22)
+
+The item family came first, done by hand because it shapes downstream code. 26.1 deletes the
+vanilla tool/armour hierarchy (`SwordItem`, `DiggerItem`, `Tier`, `ArmorItem`, the armour-material
+registry). CoFH's classes keep their names and build on `ToolMaterial`/`Item.Properties` and the
+equipment `ArmorMaterial` record. `ArmorItemCoFH` keeps `getType()` because ThermalCore's armour
+depends on it.
+
+Three traps were only visible in the jar:
+- The tool properties overwrite durability from the material, so the hammer, excavator and sickle
+  would have silently lost their ×4 durability.
+- Enchantability is a component fixed at construction, so CoFH's chained `setEnchantability`
+  could no longer work.
+- Spawn eggs lost NeoForge's deferred helper because entity types now register before items.
+
+The remaining ~230 errors across ~90 files (entities, effects, events, blocks, fluids, commands,
+packets, util, JEI) went to three parallel agents with exclusive file ownership. They changed no
+public signatures and added one helper (`ItemHelper.getBlockEntityType`). Their forced behaviour
+decisions are in the TODO Inbox. The most consequential is that `neighborChanged` no longer
+carries the neighbour's position, which ThermalDynamics' ducts relied on. That is a B.10 design
+problem.
+
+1326 → 1126 (items) → 895 errors. What's left in CoFHCore is B.6 recipes (~150), B.7 client (~740)
+and B.9 mixins (4). Also recorded today: the "after the port" TODO item for item-form energy/fluid
+capabilities (a gap on 1.21.1 as well).

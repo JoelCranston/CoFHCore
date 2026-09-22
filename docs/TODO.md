@@ -39,7 +39,7 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 | B.2 registration | `f02ba1b` | (included above) |
 | B.3 persistence — bridged at `BlockEntityCoFH`, entities native, `SavedDataType`, tag getters | `8bd2f62` | 1364 |
 | B.4 transfer API — CoFH handlers also implement the new interfaces (per-storage journals), query sites wrap with `.of()` | `ccfc12d` | 1326 |
-| B.5 items/tools/armour (`41d84d9`), then entities, blocks, fluids, commands, packets, util | (this commit) | 895 |
+| B.5 items/tools/armour (`41d84d9`), then entities, blocks, fluids, commands, packets, util (`3936c2b`) | `41d84d9`, `3936c2b` | 895 |
 | **B.6 recipes** (incl. `cofh/lib/util/recipes/**`, `crafting/**`) | next | |
 | B.7 client (XL) · B.8 resources · B.9 mixins · B.10 dependents | | |
 

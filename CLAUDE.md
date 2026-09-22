@@ -84,7 +84,7 @@ It is a *reference* here, never a dependency.
 
 | Repo | Branch | State |
 |---|---|---|
-| CoFHCore | `26.1.2` | B.0-B.2 done; **1537 errors** (baseline 2445 / 318 files). Next: B.3 persistence |
+| CoFHCore | `26.1.2` | B.0-B.5 done; **895 errors** (baseline 2445): ~740 client (B.7), ~150 recipes (B.6), 4 mixins (B.9). **Next: B.6 recipes** |
 | CoFHCore | `1.21.1` | 0 errors, boots headless, `runData` clean |
 | ThermalCore | `1.21.1` | 0 errors, boots headless, `runData` clean. Waits for CoFHCore 26.1.2 (B.10) |
 | ThermalDynamics | `1.21.1` | same |
@@ -96,6 +96,32 @@ All repos build with **ModDevGradle 2.0.147**. Shape oracles differ by branch:
 switching branches doesn't rebuild them. The Thermal repos `includeBuild('../CoFHCore')`, so
 **whatever branch CoFHCore has checked out is what they compile against**. Put CoFHCore on
 `1.21.1` to build or run any of them until B.10.
+
+### Resuming Phase B: read this first
+
+- **Where things stand**: [docs/TODO.md](docs/TODO.md) has the per-step table (commit and error
+  count per step), what B.10 inherits from each step, and the Inbox of behaviour changes the new
+  API forced. [docs/api-notes-26.1.2.md](docs/api-notes-26.1.2.md) has every confirmed shape, B.0–B.5.
+- **Design principle, chosen by Joel for B.3 and applied again in B.4: bridge at the edge.** Keep
+  CoFH's own layers (`CompoundTag` read/write chains, legacy `IItemHandler`/`IFluidHandler`/
+  `IEnergyStorage` storages) and adapt only at the vanilla/NeoForge boundary. That keeps the
+  upstream diff small and the Thermal repos mostly unchanged. Prefer it for new questions of the
+  same kind, but ask when a choice shapes downstream code.
+- **Working method**, repeated for each step:
+  1. Compile, then group errors by file and by missing symbol.
+  2. Read the target API in `build/moddev/artifacts/minecraft-patched-26.1.2.109-sources.jar` or the
+     NeoForge sources jar before writing anything.
+  3. For mechanical sweeps (tag getters, renames), use a paren-aware script restricted to known
+     receivers. Afterwards, **restore any commented-out upstream code the sweep touched**: diff
+     against the previous commit and put back changed comment-only lines.
+  4. Fix imports: add what's needed, drop only what the change orphaned, and sort into IntelliJ
+     order only in files whose previous version was already sorted.
+  5. Recompile; the error count should only fall.
+  6. Write the shapes into api-notes, update the TODO table and progress log, commit, push.
+- **Broad, independent tails** (B.5's ~90 files) went well split across parallel agents by exclusive
+  file ownership, with the style guide, the api-notes and "verify against the jar" in the prompt.
+  Review their behaviour decisions afterwards; some belong in the TODO Inbox.
+- The Thermal repos stay on `1.21.1` until CoFHCore compiles on 26.1.2 (B.10).
 
 **Phase A's one owed item is the client pass** (port plan §A.4), which is Joel's to run. The
 `runData` pass already found and fixed one client crash (`LevelRendererMixin`), and
