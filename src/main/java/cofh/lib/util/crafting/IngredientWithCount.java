@@ -2,17 +2,20 @@ package cofh.lib.util.crafting;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -54,9 +57,15 @@ public class IngredientWithCount implements ICustomIngredient {
     }
 
     @Override
-    public Stream<ItemStack> getItems() {
+    public Stream<Holder<Item>> items() {
 
-        return Arrays.stream(ingredient.getItems()).map(stack -> stack.copyWithCount(count));
+        return ingredient.items();
+    }
+
+    @Override
+    public SlotDisplay display() {
+
+        return new SlotDisplay.Composite(items().<SlotDisplay>map(item -> new SlotDisplay.ItemStackSlotDisplay(new ItemStackTemplate(item, count))).toList());
     }
 
     @Override

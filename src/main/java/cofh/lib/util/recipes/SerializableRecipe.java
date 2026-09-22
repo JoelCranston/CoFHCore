@@ -1,11 +1,7 @@
 package cofh.lib.util.recipes;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeInput;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 
 /**
@@ -22,19 +18,7 @@ public abstract class SerializableRecipe implements Recipe<RecipeInput> {
     }
 
     @Override
-    public ItemStack assemble(RecipeInput inv, HolderLookup.Provider pRegistryAccess) {
-
-        return ItemStack.EMPTY;
-    }
-
-    @Override
-    public boolean canCraftInDimensions(int width, int height) {
-
-        return true;
-    }
-
-    @Override
-    public ItemStack getResultItem(HolderLookup.Provider pRegistryAccess) {
+    public ItemStack assemble(RecipeInput inv) {
 
         return ItemStack.EMPTY;
     }
@@ -46,9 +30,34 @@ public abstract class SerializableRecipe implements Recipe<RecipeInput> {
     }
 
     @Override
-    public abstract RecipeSerializer<?> getSerializer();
+    public boolean showNotification() {
+
+        return false;
+    }
 
     @Override
-    public abstract RecipeType<?> getType();
+    public String group() {
+
+        return "";
+    }
+
+    @Override
+    public PlacementInfo placementInfo() {
+
+        return PlacementInfo.NOT_PLACEABLE;
+    }
+
+    @Override
+    public RecipeBookCategory recipeBookCategory() {
+
+        // Never shown; display() is empty.
+        return RecipeBookCategories.CRAFTING_MISC;
+    }
+
+    @Override
+    public abstract RecipeSerializer<? extends Recipe<RecipeInput>> getSerializer();
+
+    @Override
+    public abstract RecipeType<? extends Recipe<RecipeInput>> getType();
     // endregion
 }

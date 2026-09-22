@@ -4,31 +4,29 @@ import cofh.lib.util.DeferredRegisterCoFH;
 import cofh.lib.util.Utils;
 import net.minecraft.advancements.criterion.MinMaxBounds;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.common.conditions.IConditionBuilder;
 import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
-public abstract class RecipeProviderCoFH extends RecipeProvider implements IConditionBuilder {
+public abstract class RecipeProviderCoFH extends RecipeProvider {
 
     protected final String modid;
 
     protected boolean advancements = false;
 
-    public RecipeProviderCoFH(PackOutput output, CompletableFuture<HolderLookup.Provider> registries, String modid) {
+    public RecipeProviderCoFH(HolderLookup.Provider registries, RecipeOutput output, String modid) {
 
-        super(output, registries);
+        super(registries, output);
         this.modid = modid;
     }
 
@@ -93,7 +91,7 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
         String storageName = name(storage);
         String individualName = name(individual);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, storage)
+        ShapedRecipeBuilder.shaped(items, RecipeCategory.MISC, storage)
                 .define('#', individual)
                 .pattern("##")
                 .pattern("##")
@@ -106,7 +104,7 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
         String storageName = name(storage);
         String individualName = name(individual);
 
-        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, individual, 4)
+        ShapelessRecipeBuilder.shapeless(items, RecipeCategory.MISC, individual, 4)
                 .requires(storage)
                 .unlockedBy("has_at_least_4_" + individualName, has(MinMaxBounds.Ints.atLeast(4), individual))
                 .unlockedBy("has_" + storageName, has(storage))
@@ -129,7 +127,7 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
         String storageName = name(storage);
         String individualName = name(individual);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, storage)
+        ShapedRecipeBuilder.shaped(items, RecipeCategory.MISC, storage)
                 .define('#', individual)
                 .pattern("###")
                 .pattern("###")
@@ -143,7 +141,7 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
         String storageName = name(storage);
         String individualName = name(individual);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, storage)
+        ShapedRecipeBuilder.shaped(items, RecipeCategory.MISC, storage)
                 .define('I', individual)
                 .define('#', tag)
                 .pattern("###")
@@ -158,7 +156,7 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
         String storageName = name(storage);
         String individualName = name(individual);
 
-        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, individual, 9)
+        ShapelessRecipeBuilder.shapeless(items, RecipeCategory.MISC, individual, 9)
                 .requires(storage)
                 .unlockedBy("has_at_least_9_" + individualName, has(MinMaxBounds.Ints.atLeast(9), individual))
                 .unlockedBy("has_" + storageName, has(storage))
@@ -237,7 +235,7 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
         TagKey<Item> gemTag = commonTag("gems/" + type);
 
         if (ingot != null) {
-            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, gear)
+            ShapedRecipeBuilder.shaped(items, RecipeCategory.MISC, gear)
                     .define('#', ingotTag)
                     .define('i', Tags.Items.NUGGETS_IRON)
                     .pattern(" # ")
@@ -247,7 +245,7 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
                     .save(consumer, this.modid + ":parts/" + name(gear));
         }
         if (gem != null) {
-            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, gear)
+            ShapedRecipeBuilder.shaped(items, RecipeCategory.MISC, gear)
                     .define('#', gemTag)
                     .define('i', Tags.Items.NUGGETS_IRON)
                     .pattern(" # ")
@@ -263,7 +261,7 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
         if (gear == null || material == null || tag == null) {
             return;
         }
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, gear)
+        ShapedRecipeBuilder.shaped(items, RecipeCategory.MISC, gear)
                 .define('#', tag)
                 .define('i', Tags.Items.NUGGETS_IRON)
                 .pattern(" # ")
@@ -285,7 +283,7 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
 
     protected void generateSmeltingRecipe(DeferredRegisterCoFH<Item> reg, RecipeOutput consumer, Item input, Item output, float xp, String folder, String suffix) {
 
-        SimpleCookingRecipeBuilder.smelting(Ingredient.of(input), RecipeCategory.MISC, output, xp, 200)
+        SimpleCookingRecipeBuilder.smelting(Ingredient.of(input), RecipeCategory.MISC, CookingBookCategory.MISC, output, xp, 200)
                 .unlockedBy("has_" + name(input), has(input))
                 .save(consumer, this.modid + ":" + folder + "/" + name(output) + "_from" + suffix + "_smelting");
     }
@@ -335,11 +333,11 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
 
     protected void generateSmeltingAndBlastingRecipes(DeferredRegisterCoFH<Item> reg, RecipeOutput consumer, Item input, Item output, float xp, String folder, String suffix) {
 
-        SimpleCookingRecipeBuilder.smelting(Ingredient.of(input), RecipeCategory.MISC, output, xp, 200)
+        SimpleCookingRecipeBuilder.smelting(Ingredient.of(input), RecipeCategory.MISC, CookingBookCategory.MISC, output, xp, 200)
                 .unlockedBy(getHasName(input), has(input))
                 .save(consumer, this.modid + ":" + folder + "/" + name(output) + "_from" + suffix + "_smelting");
 
-        SimpleCookingRecipeBuilder.blasting(Ingredient.of(input), RecipeCategory.MISC, output, xp, 100)
+        SimpleCookingRecipeBuilder.blasting(Ingredient.of(input), RecipeCategory.MISC, CookingBookCategory.MISC, output, xp, 100)
                 .unlockedBy(getHasName(input), has(input))
                 .save(consumer, this.modid + ":" + folder + "/" + name(output) + "_from" + suffix + "_blasting");
     }
@@ -351,11 +349,11 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
 
     protected void generateSmeltingAndBlastingRecipes(DeferredRegisterCoFH<Item> reg, RecipeOutput consumer, TagKey<Item> input, String condition, Item output, float xp, String folder, String suffix) {
 
-        SimpleCookingRecipeBuilder.smelting(Ingredient.of(input), RecipeCategory.MISC, output, xp, 200)
+        SimpleCookingRecipeBuilder.smelting(Ingredient.of(items.getOrThrow(input)), RecipeCategory.MISC, CookingBookCategory.MISC, output, xp, 200)
                 .unlockedBy(condition, has(input))
                 .save(consumer, this.modid + ":" + folder + "/" + name(output) + "_from" + suffix + "_smelting");
 
-        SimpleCookingRecipeBuilder.blasting(Ingredient.of(input), RecipeCategory.MISC, output, xp, 100)
+        SimpleCookingRecipeBuilder.blasting(Ingredient.of(items.getOrThrow(input)), RecipeCategory.MISC, CookingBookCategory.MISC, output, xp, 100)
                 .unlockedBy(condition, has(input))
                 .save(consumer, this.modid + ":" + folder + "/" + name(output) + "_from" + suffix + "_blasting");
     }
@@ -367,7 +365,7 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
 
     protected void generateSmeltingAndCookingRecipes(DeferredRegisterCoFH<Item> reg, RecipeOutput consumer, Item input, Item output, float xp, String folder, String suffix) {
 
-        SimpleCookingRecipeBuilder.smelting(Ingredient.of(input), RecipeCategory.FOOD, output, xp, 200)
+        SimpleCookingRecipeBuilder.smelting(Ingredient.of(input), RecipeCategory.FOOD, CookingBookCategory.FOOD, output, xp, 200)
                 .unlockedBy(getHasName(input), has(input))
                 .save(consumer, this.modid + ":" + folder + "/" + name(output) + "_from" + suffix + "_smelting");
 
@@ -387,15 +385,15 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
 
     protected void generateSmeltingAndCookingRecipes(DeferredRegisterCoFH<Item> reg, RecipeOutput consumer, TagKey<Item> input, String condition, Item output, float xp, String folder, String suffix) {
 
-        SimpleCookingRecipeBuilder.smelting(Ingredient.of(input), RecipeCategory.FOOD, output, xp, 200)
+        SimpleCookingRecipeBuilder.smelting(Ingredient.of(items.getOrThrow(input)), RecipeCategory.FOOD, CookingBookCategory.FOOD, output, xp, 200)
                 .unlockedBy(condition, has(input))
                 .save(consumer, this.modid + ":" + folder + "/" + name(output) + "_from" + suffix + "_smelting");
 
-        SimpleCookingRecipeBuilder.smoking(Ingredient.of(input), RecipeCategory.FOOD, output, xp, 100)
+        SimpleCookingRecipeBuilder.smoking(Ingredient.of(items.getOrThrow(input)), RecipeCategory.FOOD, output, xp, 100)
                 .unlockedBy(condition, has(input))
                 .save(consumer, this.modid + ":" + folder + "/" + name(output) + "_from" + suffix + "_smoking");
 
-        SimpleCookingRecipeBuilder.campfireCooking(Ingredient.of(input), RecipeCategory.FOOD, output, xp, 600)
+        SimpleCookingRecipeBuilder.campfireCooking(Ingredient.of(items.getOrThrow(input)), RecipeCategory.FOOD, output, xp, 600)
                 .unlockedBy(condition, has(input))
                 .save(consumer, this.modid + ":" + folder + "/" + name(output) + "_from" + suffix + "_campfire_cooking");
     }
@@ -407,7 +405,7 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
 
     protected void generateStonecuttingRecipe(DeferredRegisterCoFH<Item> reg, RecipeOutput consumer, Item input, Item output, String folder, String suffix) {
 
-        SingleItemRecipeBuilder.stonecutting(Ingredient.of(input), RecipeCategory.BUILDING_BLOCKS, output)
+        SingleItemRecipeBuilder.stonecutting(Ingredient.of(input), RecipeCategory.BUILDING_BLOCKS, output, 1)
                 .unlockedBy("has_" + name(input), has(input))
                 .save(consumer, this.modid + ":" + folder + "/" + name(output) + "_from" + suffix + "_stonecutting");
     }
@@ -419,7 +417,7 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
 
         List<Ingredient> ingredients = new ArrayList<>(tagsIn.length);
         for (TagKey<Item> tag : tagsIn) {
-            ingredients.add(Ingredient.of(tag));
+            ingredients.add(Ingredient.of(items.getOrThrow(tag)));
         }
         return CompoundIngredient.of(ingredients.toArray(Ingredient[]::new));
     }

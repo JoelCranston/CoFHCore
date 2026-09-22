@@ -24,7 +24,7 @@ public interface IDismantleable extends IBlockExtension {
      */
     default void dismantleBlock(Level world, BlockPos pos, BlockState state, HitResult target, Player player, boolean returnDrops) {
 
-        ItemStack dropBlock = this.getCloneItemStack(state, target, world, pos, player);
+        ItemStack dropBlock = this.getCloneItemStack(world, pos, state, false, player);
         world.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL_IMMEDIATE);
         if (!returnDrops || player == null || !player.addItem(dropBlock)) {
             Utils.dropDismantleStackIntoWorld(dropBlock, world, pos);

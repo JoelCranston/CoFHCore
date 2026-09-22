@@ -3,12 +3,9 @@ package cofh.core.util.crafting;
 import cofh.lib.api.control.ISecurable.AccessMode;
 import cofh.lib.init.tags.ItemTagsCoFH;
 import cofh.lib.util.helpers.SecurityHelper;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
@@ -16,16 +13,12 @@ import static cofh.core.init.CoreRecipeSerializers.SECURE_RECIPE_SERIALIZER;
 
 public class SecureRecipe extends CustomRecipe {
 
-    public SecureRecipe(CraftingBookCategory pCategory) {
+    public SecureRecipe() {
 
-        super(pCategory);
     }
 
     @Override
     public boolean matches(CraftingInput inv, Level worldIn) {
-
-        Ingredient ingredientSecure = Ingredient.of(ItemTagsCoFH.LOCKS);
-        Ingredient ingredientSecurable = Ingredient.of(ItemTagsCoFH.SECURABLE);
 
         // boolean flag
         boolean lockItem = false;
@@ -34,9 +27,9 @@ public class SecureRecipe extends CustomRecipe {
         for (int i = 0; i < inv.size(); ++i) {
             ItemStack stack = inv.getItem(i);
             if (!stack.isEmpty()) {
-                if (ingredientSecure.test(stack)) {
+                if (stack.is(ItemTagsCoFH.LOCKS)) {
                     lockItem = true;
-                } else if (ingredientSecurable.test(stack) && !SecurityHelper.hasSecurity(stack)) {
+                } else if (stack.is(ItemTagsCoFH.SECURABLE) && !SecurityHelper.hasSecurity(stack)) {
                     securableItem = true;
                 }
             }
@@ -45,15 +38,13 @@ public class SecureRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingInput inv, HolderLookup.Provider pRegistryAccess) {
-
-        Ingredient ingredientSecurable = Ingredient.of(ItemTagsCoFH.SECURABLE);
+    public ItemStack assemble(CraftingInput inv) {
 
         ItemStack result = ItemStack.EMPTY;
         for (int i = 0; i < inv.size(); ++i) {
             ItemStack stack = inv.getItem(i);
             if (!stack.isEmpty()) {
-                if (ingredientSecurable.test(stack)) {
+                if (stack.is(ItemTagsCoFH.SECURABLE)) {
                     result = stack.copy();
                     break;
                 }
@@ -67,13 +58,7 @@ public class SecureRecipe extends CustomRecipe {
     }
 
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
-
-        return width * height >= 2;
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<SecureRecipe> getSerializer() {
 
         return SECURE_RECIPE_SERIALIZER.get();
     }

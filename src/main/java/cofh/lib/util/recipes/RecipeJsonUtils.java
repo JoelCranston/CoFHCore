@@ -2,6 +2,7 @@ package cofh.lib.util.recipes;
 
 import cofh.lib.common.block.BlockIngredient;
 import cofh.lib.common.fluid.FluidIngredient;
+import cofh.lib.util.crafting.EmptyIngredient;
 import cofh.lib.util.crafting.IngredientWithCount;
 import com.google.gson.*;
 import com.mojang.logging.LogUtils;
@@ -45,7 +46,7 @@ public abstract class RecipeJsonUtils {
     public static Ingredient parseIngredient(JsonElement element) {
 
         if (element == null || element.isJsonNull()) {
-            return Ingredient.of(ItemStack.EMPTY);
+            return EmptyIngredient.EMPTY;
         }
         Ingredient ingredient;
 
@@ -53,7 +54,7 @@ public abstract class RecipeJsonUtils {
             try {
                 ingredient = ingredientFromJson(element);
             } catch (Throwable t) {
-                ingredient = Ingredient.of(ItemStack.EMPTY);
+                ingredient = EmptyIngredient.EMPTY;
                 LOG.debug("Invalid Ingredient - using EMPTY instead!", t);
             }
         } else {
@@ -75,7 +76,7 @@ public abstract class RecipeJsonUtils {
                     return new IngredientWithCount(ingredient, count).toVanilla();
                 }
             } catch (Throwable t) {
-                ingredient = Ingredient.of(ItemStack.EMPTY);
+                ingredient = EmptyIngredient.EMPTY;
                 LOG.debug("Invalid Ingredient - using EMPTY instead!", t);
             }
         }
@@ -118,9 +119,9 @@ public abstract class RecipeJsonUtils {
                     JsonElement nbtElement = object.get(NBT);
                     CompoundTag nbt;
                     if (nbtElement.isJsonObject()) {
-                        nbt = TagParser.parseTag(GSON.toJson(nbtElement));
+                        nbt = TagParser.parseCompoundFully(GSON.toJson(nbtElement));
                     } else {
-                        nbt = TagParser.parseTag(GsonHelper.convertToString(nbtElement, NBT));
+                        nbt = TagParser.parseCompoundFully(GsonHelper.convertToString(nbtElement, NBT));
                     }
                     ingredient.setTag(nbt);
                 }
@@ -218,9 +219,9 @@ public abstract class RecipeJsonUtils {
                 CompoundTag nbt;
                 try {
                     if (nbtElement.isJsonObject()) {
-                        nbt = TagParser.parseTag(GSON.toJson(nbtElement));
+                        nbt = TagParser.parseCompoundFully(GSON.toJson(nbtElement));
                     } else {
-                        nbt = TagParser.parseTag(GsonHelper.convertToString(nbtElement, NBT));
+                        nbt = TagParser.parseCompoundFully(GsonHelper.convertToString(nbtElement, NBT));
                     }
                     stack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
                 } catch (Exception e) {
@@ -269,9 +270,9 @@ public abstract class RecipeJsonUtils {
                 CompoundTag nbt;
                 try {
                     if (nbtElement.isJsonObject()) {
-                        nbt = TagParser.parseTag(GSON.toJson(nbtElement));
+                        nbt = TagParser.parseCompoundFully(GSON.toJson(nbtElement));
                     } else {
-                        nbt = TagParser.parseTag(GsonHelper.convertToString(nbtElement, NBT));
+                        nbt = TagParser.parseCompoundFully(GsonHelper.convertToString(nbtElement, NBT));
                     }
                     stack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
                 } catch (Exception e) {

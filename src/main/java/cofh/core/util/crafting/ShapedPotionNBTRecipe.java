@@ -1,29 +1,56 @@
 package cofh.core.util.crafting;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.level.Level;
+
+import java.util.List;
 
 import static cofh.core.init.CoreRecipeSerializers.SHAPED_POTION_RECIPE_SERIALIZER;
 
 public class ShapedPotionNBTRecipe implements CraftingRecipe {
 
+    public static final MapCodec<ShapedPotionNBTRecipe> CODEC = RecordCodecBuilder.mapCodec(
+            codec -> codec.group(
+                            Recipe.CommonInfo.MAP_CODEC.forGetter(ShapedPotionNBTRecipe::commonInfo),
+                            CraftingRecipe.CraftingBookInfo.MAP_CODEC.forGetter(ShapedPotionNBTRecipe::bookInfo),
+                            ShapedRecipePattern.MAP_CODEC.forGetter(recipe -> recipe.wrappedRecipe.pattern),
+                            ItemStackTemplate.CODEC.fieldOf("result").forGetter(recipe -> recipe.wrappedRecipe.result)
+                    )
+                    .apply(codec, ShapedPotionNBTRecipe::new)
+    );
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, ShapedPotionNBTRecipe> STREAM_CODEC = StreamCodec.composite(
+            Recipe.CommonInfo.STREAM_CODEC, ShapedPotionNBTRecipe::commonInfo,
+            CraftingRecipe.CraftingBookInfo.STREAM_CODEC, ShapedPotionNBTRecipe::bookInfo,
+            ShapedRecipePattern.STREAM_CODEC, recipe -> recipe.wrappedRecipe.pattern,
+            ItemStackTemplate.STREAM_CODEC, recipe -> recipe.wrappedRecipe.result,
+            ShapedPotionNBTRecipe::new);
+
     private final ShapedRecipe wrappedRecipe;
 
-    public ShapedPotionNBTRecipe(String pGroup, CraftingBookCategory pCategory, ShapedRecipePattern pattern, ItemStack pResult) {
+    public ShapedPotionNBTRecipe(Recipe.CommonInfo commonInfo, CraftingRecipe.CraftingBookInfo bookInfo, ShapedRecipePattern pattern, ItemStackTemplate pResult) {
 
-        wrappedRecipe = new ShapedRecipe(pGroup, pCategory, pattern, pResult);
+        wrappedRecipe = new ShapedRecipe(commonInfo, bookInfo, pattern, pResult);
+    }
+
+    private Recipe.CommonInfo commonInfo() {
+
+        return new Recipe.CommonInfo(wrappedRecipe.showNotification());
+    }
+
+    private CraftingRecipe.CraftingBookInfo bookInfo() {
+
+        return new CraftingRecipe.CraftingBookInfo(wrappedRecipe.category(), wrappedRecipe.group());
     }
 
     @Override
@@ -45,9 +72,9 @@ public class ShapedPotionNBTRecipe implements CraftingRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingInput inv, HolderLookup.Provider registryAccess) {
+    public ItemStack assemble(CraftingInput inv) {
 
-        ItemStack result = wrappedRecipe.getResultItem(registryAccess).copy();
+        ItemStack result = wrappedRecipe.assemble(inv);
 
         for (int i = 0; i < inv.size(); ++i) {
             ItemStack stack = inv.getItem(i);
@@ -60,25 +87,31 @@ public class ShapedPotionNBTRecipe implements CraftingRecipe {
     }
 
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
+    public boolean showNotification() {
 
-        return wrappedRecipe.canCraftInDimensions(width, height);
+        return wrappedRecipe.showNotification();
     }
 
     @Override
-    public ItemStack getResultItem(HolderLookup.Provider registryAccess) {
+    public String group() {
 
-        return wrappedRecipe.getResultItem(registryAccess);
+        return wrappedRecipe.group();
     }
 
     @Override
-    public NonNullList<Ingredient> getIngredients() {
+    public PlacementInfo placementInfo() {
 
-        return wrappedRecipe.getIngredients();
+        return wrappedRecipe.placementInfo();
     }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {
+    public List<RecipeDisplay> display() {
+
+        return wrappedRecipe.display();
+    }
+
+    @Override
+    public RecipeSerializer<ShapedPotionNBTRecipe> getSerializer() {
 
         return SHAPED_POTION_RECIPE_SERIALIZER.get();
     }
@@ -100,39 +133,6 @@ public class ShapedPotionNBTRecipe implements CraftingRecipe {
     }
 
     // region SERIALIZER
-    public static class Serializer implements RecipeSerializer<ShapedPotionNBTRecipe> {
-
-        public static final MapCodec<ShapedPotionNBTRecipe> CODEC = RecordCodecBuilder.mapCodec(
-                codec -> codec.group(
-                                Codec.STRING.optionalFieldOf("group", "").forGetter(recipe -> recipe.wrappedRecipe.getGroup()),
-                                CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(recipe -> recipe.wrappedRecipe.category()),
-                                ShapedRecipePattern.MAP_CODEC.forGetter(recipe -> recipe.wrappedRecipe.pattern),
-                                ItemStack.STRICT_CODEC.fieldOf("result").forGetter(p_311730_ -> p_311730_.wrappedRecipe.result)
-                        )
-                        .apply(codec, ShapedPotionNBTRecipe::new)
-        );
-
-        public static final StreamCodec<RegistryFriendlyByteBuf, ShapedPotionNBTRecipe> STREAM_CODEC = StreamCodec.composite(
-                ByteBufCodecs.STRING_UTF8, recipe -> recipe.wrappedRecipe.getGroup(),
-                CraftingBookCategory.STREAM_CODEC, recipe -> recipe.wrappedRecipe.category(),
-                ShapedRecipePattern.STREAM_CODEC, recipe -> recipe.wrappedRecipe.pattern,
-                ItemStack.STREAM_CODEC, recipe -> recipe.wrappedRecipe.result,
-                ShapedPotionNBTRecipe::new);
-
-        @Override
-        public MapCodec<ShapedPotionNBTRecipe> codec() {
-
-            return CODEC;
-        }
-
-        @Override
-        public StreamCodec<RegistryFriendlyByteBuf, ShapedPotionNBTRecipe> streamCodec() {
-
-            return STREAM_CODEC;
-        }
-
-    }
-
     //    public static class Serializer implements RecipeSerializer<ShapedPotionNBTRecipe> {
     //
     //        public ShapedPotionNBTRecipe fromJson(ResourceLocation recipeId, JsonObject json) {

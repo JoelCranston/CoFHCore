@@ -10,7 +10,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 import java.util.List;
@@ -25,14 +24,15 @@ public class TileNBTSync extends LootItemConditionalFunction {
                     .apply(instance, TileNBTSync::new)
     );
 
-    private static LootItemFunctionType INSTANCE;
+    private static boolean registered;
 
     public static void setup() {
 
-        if (INSTANCE != null) {
+        if (registered) {
             return;
         }
-        INSTANCE = Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, Identifier.parse(ID_COFH_CORE + ":nbt_sync"), new LootItemFunctionType(CODEC));
+        Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, Identifier.parse(ID_COFH_CORE + ":nbt_sync"), CODEC);
+        registered = true;
     }
 
     protected TileNBTSync(List<LootItemCondition> conditionsIn) {
@@ -41,15 +41,15 @@ public class TileNBTSync extends LootItemConditionalFunction {
     }
 
     @Override
-    public LootItemFunctionType getType() {
+    public MapCodec<TileNBTSync> codec() {
 
-        return INSTANCE;
+        return CODEC;
     }
 
     @Override
     public ItemStack run(ItemStack stack, LootContext context) {
 
-        return applyToStack(stack, context.getParamOrNull(BLOCK_ENTITY));
+        return applyToStack(stack, context.getOptionalParameter(BLOCK_ENTITY));
     }
 
     public static ItemStack applyToStack(ItemStack stack, BlockEntity tile) {

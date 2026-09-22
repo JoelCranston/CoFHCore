@@ -1,6 +1,7 @@
 package cofh.lib.init.data.loot;
 
 import cofh.lib.common.loot.TileNBTSync;
+import com.mojang.serialization.JavaOps;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.advancements.criterion.StatePropertiesPredicate;
 import net.minecraft.core.Holder;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.storage.loot.ContainerComponentManipulators;
+import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.AlternativesEntry;
@@ -26,6 +28,7 @@ import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.providers.nbt.ContextNbtProvider;
+import net.minecraft.world.level.storage.loot.providers.nbt.NbtProvider;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import org.jetbrains.annotations.NotNull;
@@ -34,6 +37,9 @@ import java.util.Collections;
 import java.util.Set;
 
 public abstract class BlockLootSubProviderCoFH extends BlockLootSubProvider {
+
+    // The block entity NBT source has no public factory; only its codec builds one.
+    private static final NbtProvider BLOCK_ENTITY_NBT = ContextNbtProvider.INLINE_CODEC.parse(JavaOps.INSTANCE, "block_entity").getOrThrow();
 
     private final Set<Block> knownBlocks = new ReferenceOpenHashSet<>();
 
@@ -145,9 +151,9 @@ public abstract class BlockLootSubProviderCoFH extends BlockLootSubProvider {
                 .name(name)
                 .setRolls(ConstantValue.exactly(1))
                 .add(LootItem.lootTableItem(block)
-                        .apply(CopyNameFunction.copyName(CopyNameFunction.NameSource.BLOCK_ENTITY))
+                        .apply(CopyNameFunction.copyName(LootContext.BlockEntityTarget.BLOCK_ENTITY))
                         // Copies into custom data, not block entity data; no BlockEntityTag prefix.
-                        .apply(CopyCustomDataFunction.copyData(ContextNbtProvider.BLOCK_ENTITY)
+                        .apply(CopyCustomDataFunction.copyData(BLOCK_ENTITY_NBT)
                                 .copy("Info", "Info", CopyCustomDataFunction.MergeStrategy.REPLACE)
                                 .copy("Items", "Items", CopyCustomDataFunction.MergeStrategy.REPLACE)
                                 .copy("Energy", "Energy", CopyCustomDataFunction.MergeStrategy.REPLACE))

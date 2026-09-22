@@ -8,15 +8,13 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.DamageTypeTagsProvider;
 import net.minecraft.data.tags.FluidTagsProvider;
-import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.common.data.BlockTagCopyingItemTagProvider;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -28,9 +26,9 @@ public class CoreTagsProvider {
 
     public static class Block extends BlockTagsProvider {
 
-        public Block(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper) {
+        public Block(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
 
-            super(output, lookupProvider, ID_COFH_CORE, existingFileHelper);
+            super(output, lookupProvider, ID_COFH_CORE);
         }
 
         @SuppressWarnings ("unchecked")
@@ -44,11 +42,11 @@ public class CoreTagsProvider {
 
     }
 
-    public static class Item extends ItemTagsProvider {
+    public static class Item extends BlockTagCopyingItemTagProvider {
 
-        public Item(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pLookupProvider, CompletableFuture<TagsProvider.TagLookup<net.minecraft.world.level.block.Block>> pBlockTags, ExistingFileHelper existingFileHelper) {
+        public Item(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pLookupProvider, CompletableFuture<TagsProvider.TagLookup<net.minecraft.world.level.block.Block>> pBlockTags) {
 
-            super(pOutput, pLookupProvider, pBlockTags, ID_COFH_CORE, existingFileHelper);
+            super(pOutput, pLookupProvider, pBlockTags, ID_COFH_CORE);
         }
 
         @Override
@@ -138,9 +136,9 @@ public class CoreTagsProvider {
 
     public static class Fluid extends FluidTagsProvider {
 
-        public Fluid(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pProvider, ExistingFileHelper existingFileHelper) {
+        public Fluid(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pProvider) {
 
-            super(pOutput, pProvider, ID_COFH_CORE, existingFileHelper);
+            super(pOutput, pProvider, ID_COFH_CORE);
         }
 
         @Override
@@ -155,9 +153,9 @@ public class CoreTagsProvider {
 
     public static class DamageType extends DamageTypeTagsProvider {
 
-        public DamageType(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pProvider, ExistingFileHelper existingFileHelper) {
+        public DamageType(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pProvider) {
 
-            super(pOutput, pProvider, ID_COFH_CORE, existingFileHelper);
+            super(pOutput, pProvider, ID_COFH_CORE);
         }
 
         @Override
