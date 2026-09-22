@@ -484,3 +484,39 @@ Also fixed the last B.5 straggler, `IDismantleable`'s `getCloneItemStack` call.
 
 895 → 723 errors. What's left is B.7 client (~715, `RenderTypes`/`RenderHelper`/`CoreShaders`/
 `GuiHelper` at the top), B.7e's `FluidHelper`/fluid types, and the 4 mixins (B.9).
+
+---
+
+## B.7 client, B.8 (CoFHCore), B.9 mixins — CoFHCore compiles on 26.1.2 (2026-09-22)
+
+B.7 was the XL step, and it went the way B.5's tail did: five agents in parallel, each owning a
+file set — GUI framework; models + fluids + client setup; entity renderers; particles; render
+types/shaders/post effects/client events — with two explicit contracts where the areas meet. The
+particle agent coded against `RenderTypes` names the render agent promised to keep (and whose
+`PARTICLE_SHEET_*` changed type to `SingleQuadParticle.Layer`), and the events agent removed the
+delayed-particle pass and the `ITranslucentRenderer` call that the particle and entity agents were
+retiring on their side. Three cross-file requests came back mid-flight (a particle-group
+registration, the true-invisibility render-state modifier, the removal of
+`RenderHelper.renderBlock/renderItem`) and were forwarded to the owning agent or applied here.
+
+The decisions that shape downstream work, all recorded in the api-notes and the TODO:
+- Screens split into extract/submit; text needs an alpha byte; stencil became scissor.
+- Custom block models are `CustomUnbakedBlockStateModel` loaders on `RegisterBlockStateModels`
+  (`SimpleModel`), with a new `SimpleItemModel` for the item half; item tints and item
+  properties moved into the item JSON.
+- `ITranslucentRenderer` is gone; the pipeline orders translucency.
+- The `PoseStack` particles render through a CoFH `ParticleGroup`; sprite particles are
+  `SingleQuadParticle`s.
+- Shaders are `RenderPipeline`s; post effects are stubbed behind a TODO, as the plan allowed.
+
+B.9 followed directly: `hurt` → `hurtServer`; the shield gate moved into `ShieldEvents` on
+`LivingShieldBlockEvent#setBlocked`; the two enchantability mixins became a
+`ModifyDefaultComponentsEvent`; `MultiPlayerGameModeMixin` turned out to be what vanilla now does;
+`MouseHandlerMixin` became a `CalculatePlayerTurnEvent` handler (with the cube-root correction);
+`LevelRendererMixin` was dropped. Every remaining mixin target was checked against the jar.
+
+B.8 on CoFHCore's own resources was small, but it found that the securable recipe has been in the
+pre-1.21 `recipes/` folder — and therefore not loading — since the 1.21.1 hop, on both branches.
+
+723 → 8 → **0 errors**. CoFHCore compiles on NeoForge 26.1.2.109, from a baseline of 2445. Nothing
+has run yet: `runData` (B.8) is next, then a headless boot, then B.10.

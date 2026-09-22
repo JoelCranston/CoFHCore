@@ -2,7 +2,8 @@
 
 Phase A (1.21.1) is **code-complete**: all four repos build clean and boot headless on
 NeoForge 21.1.251, and `runData` now runs in all four. Phase B (26.1.2) is under way on the
-`26.1.2` branch: B.0-B.6 done in CoFHCore, **723 errors** left (client, mixins). See
+`26.1.2` branch: **CoFHCore compiles on 26.1.2 (0 errors)** — B.0-B.9 done; B.8's `runData` regeneration
+and B.10 (the Thermal repos) remain. See
 [api-notes-1.21.1.md](api-notes-1.21.1.md) / [api-notes-26.1.2.md](api-notes-26.1.2.md) for
 confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 
@@ -41,19 +42,17 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 | B.4 transfer API — CoFH handlers also implement the new interfaces (per-storage journals), query sites wrap with `.of()` | `ccfc12d` | 1326 |
 | B.5 items/tools/armour (`41d84d9`), then entities, blocks, fluids, commands, packets, util (`3936c2b`) | `41d84d9`, `3936c2b` | 895 |
 | B.6 recipes, loot functions, datagen | `d21d54a` | 723 |
-| **B.7 client (XL)** · B.8 resources · B.9 mixins · B.10 dependents | next | |
+| B.7 client — five parallel agents (GUI; models/fluids/setup; entities; particles; render types/events) | `cc71b36` | 8 |
+| B.8 CoFHCore resources (recipe folder, item definition, render_type; shaders in B.7) | `789370c` | — |
+| B.9 mixins | `f89000a` | **0** |
+| **B.8 `runData`** (regenerate tags/loot), then **B.10 dependents** | next | |
 
 [port-plan.md](port-plan.md) §6 has each category's contents. Carry-overs into Phase B:
 
-- **B.1 table rows not yet swept**, each owned by its later category: `Screen.hasShiftDown` (7
-  files), `getStillTexture`/`getFlowingTexture` (5, B.7e), the reload/shader events (4, B.7),
-  `ClickType` → `ContainerInput` (1), `getCraftingRemainingItem` (1), `DeferredSpawnEggItem` (1),
-  `RenderType.*` → `RenderTypes` (1). `javax.annotation` (95 files) still resolves; leave it.
-- **B.7 / B.9: `LevelRendererMixin` needs a rewrite, not a retarget.** `renderLevel` still
-  exists on 26.1.2, but the transparency chain is added to a frame graph
-  (`PostChain#addToFrame`, `LevelRenderer.java:547`). The `PostChain#process(F)` call it injects
-  before is gone, and the depth-mask workaround may no longer be needed at all. The 1.21.1 fix
-  (`fa87214`) is on the `1.21.1` branch only.
+- **B.1 table rows**: all swept as of B.7. `javax.annotation` (95 files) still resolves; leave it.
+- **B.9 dropped `LevelRendererMixin`** (its injection point is gone with the frame graph). The depth-mask
+  workaround it carried (Flywheel's, for Fabulous graphics) may or may not still be needed: **check
+  Fabulous graphics with CoFH translucent effects in the client pass.**
 - **B.10 inherits from B.3**: TC/TD block entities keep their `(CompoundTag, Provider)` overrides
   if they extend `BlockEntityCoFH` (check TD's `DuctBlockEntity`); their entities convert natively;
   TD drops `INBTSerializable` from its grid classes and moves `GridContainer` to `SavedDataType`.
@@ -91,6 +90,41 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
     `RecipesReceivedEvent` after `OnDatapackSyncEvent#sendRecipes` (port plan §B.6).
   - Datagen: each recipe provider gains a `RecipeProvider.Runner`, `GatherDataEvent.Client`, no
     `ExistingFileHelper`; delete the five Thermal model/blockstate providers.
+- **B.10 inherits from B.7** (the agents' per-repo recipes are in api-notes B.7; the essentials):
+  - **Screens** (TC/TD/TE): `ContainerScreenCoFH(menu, inv, title, imageWidth, imageHeight)`
+    (`MachineCrafterScreen` 190, `ItemBufferScreen` 178 pass it up); `renderBg` → `extractBackground(g, mx, my, a)`,
+    `renderLabels` → `extractLabels(g, mx, my)`, never override `render`; `mouseClicked(MouseButtonEvent, boolean)`,
+    `mouseReleased(MouseButtonEvent)`, `keyPressed(KeyEvent)`, `hasClickedOutside` without the button,
+    `tick` → `containerTick`; every element/panel draw method takes `GuiGraphicsExtractor`; direct
+    `g.drawString(...)` calls (`EnergyCellScreen`, `FluidCellScreen`, `DeviceSoilInfuserScreen`,
+    `EnergyLimiterAttachmentScreen`, the two servo screens) → `drawString(g, …)` or `g.text(font, …, 0xFF404040, false)`;
+    `SatchelScreen`'s `setShaderTexture0` + `drawTexturedModalRect` → the texture-explicit overload.
+    CoFH element callbacks (`mouseClicked(double, double, int)` etc.) are unchanged.
+  - **Baked models** (TC's six, TD's duct): extend `DelegateBlockStateModel`, override `collectParts`, wrap
+    each part in `ModelUtils.WrappedBakedModelBuilder`, read `level.getModelData(pos).get(ModelUtils.*)`,
+    `ModelUtils.retexture(quad, sprite)`; register on `RegisterBlockStateModels` with
+    `new SimpleModel.Loader(X::new).codec()`; the item side is a static `forItem(ItemStack, BlockStateModelPart)`
+    registered on `RegisterItemModelsEvent` with `new SimpleItemModel.Loader(X::forItem).codec()`. TD's
+    `BackfaceBakedQuad` marker becomes a separate list; its duct geometry loader is a real `UnbakedModelLoader`.
+    `RenderHelper.mulColor` still exists.
+  - **Item properties/tints**: `ProxyUtils.registerItemModelProperty` calls stay; each such item's
+    `items/<name>.json` dispatches with `minecraft:range_dispatch` on the id. Colourable items list
+    `{"type": "cofh_core:colorable", "index": n}` tints. `IClientItemExtensions#getHumanoidArmorModel` is gone —
+    the Beekeeper/Hazmat/Diving suits need the equipment-asset route.
+  - **Fluids** (TC's 14): delete `initializeClient`, register `FluidModel.Unbaked` in a `RegisterFluidModelsEvent`
+    handler. Fluid-container items: `items/*.json` with `"type": "neoforge:fluid_container"`.
+  - **Entity renderers** (TC's 12): the recipe in api-notes B.7(c) — state class, `createRenderState`,
+    `render` → `extractRenderState` + `submit`, items via `ItemModelResolver`, blocks via `BlockModelResolver`,
+    quads via `submitCustomGeometry`, delete `getTextureLocation`, `EntityModel<S>`; boat layers register
+    `BoatModel::createBoatModel`/`createChestBoatModel`.
+  - **Events**: `TCoreClientEvents.handleRenderLevelStageEvent` → `RenderLevelStageEvent.AfterTranslucentParticles`
+    (camera = `getLevelRenderState().cameraRenderState.pos`; line vertices need `setNormal` + `setLineWidth`);
+    TD `DebugRenderer` likewise, its render types on `CoreShaders.POSITION_COLOR_NO_DEPTH`/`LINES_NO_DEPTH`.
+  - **Particles**: nothing at source level (TC only spawns `CoreParticles.*`).
+  - **`DeferredRegisterCoFH.register(name, Type::new)`** is ambiguous for types with two constructors; write
+    `() -> new Type()`.
+- **B.10 inherits from B.9**: a CoFH shield item must carry `DataComponents.BLOCKS_ATTACKS` or
+  `LivingShieldBlockEvent` never fires for it (vanilla's `ShieldItem` sets it via `delayedComponent`).
 - **B.8: regenerate, don't hand-migrate.** The `26.1.2` branch predates the 1.21.1 `runData`
   commits, so its `src/main/generated` still has the stale 1.20 layout. On 26.1 the data run is
   `clientData()`, which the 26.1.2 `build.gradle` already declares. ThermalExpansion's
@@ -125,6 +159,37 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
   - **Item-stored block-entity data needs a `BlockEntityType`.** `ItemHelper.setBlockEntityData`
     infers it. Energy/fluid cells and machines in item form must keep their data when placed.
   - **Lightning from CoFH uses the `TRIGGERED` spawn reason.**
+
+- **B.7 behaviour changes the new API forced (2026-09-22)**, each to confirm in the client pass:
+  - **Post effects are stubbed** (`PostEffect`/`PostBuffer`): the pixelate "stylized graphics" look is gone and
+    `CoreClientConfig.stylizedGraphics` does nothing. A real port needs `assets/cofh_core/post_effect/pixelate.json`
+    (`PostChainConfig`), the `program/pixelate*.fsh` shaders on 330 uniform blocks, loading through
+    `getShaderManager().getPostChain(...)` and a frame-graph insertion (`FrameGraphSetupEvent` or
+    `PostChain#addToFrame` from `AfterLevel`), and `PostBuffer` owning a `TextureTarget`.
+  - **`ShockwaveRenderer` renders nothing** (`VFXHelper.renderShockwave` needs a collector-based rewrite with
+    a `ShockwaveRenderState`). Unused by CoFHCore/ThermalCore registrations.
+  - **Tooltips**: vanilla's slot-item tooltip and CoFH's element/panel tooltip no longer both draw; the first
+    `setTooltipForNextFrame` in a frame (vanilla's) wins.
+  - **GUI fills always alpha-blend** (`drawSizedRect` was unblended); list boxes clip with scissor, not stencil.
+  - **Item colours and item-property models need the item JSON** (`cofh_core:colorable` tints,
+    `range_dispatch` properties); `COLORABLE_ITEMS` in `CoreClientSetupEvents` is now write-only — drop it once
+    the Thermal repos stop calling `addColorable`, or make `ColorableItemTint` consult it.
+  - **Particles**: `ShardParticle`'s trail and body share one batch; the sprite particles lose the `z + 0.1`
+    camera nudge and sample light at the current rather than interpolated position; CoFH custom particles are
+    frustum-culled by bounding box and drawn in `RenderType` first-use order; the three CoFH particle layers
+    write no depth (as before) while vanilla's translucent layer does.
+  - **Render types**: `opaque(...)` now binds lightmap + overlay; `translucent*` use the entity pipeline with
+    `NO_CARDINAL_LIGHTING`/`NO_OVERLAY`; `OVERLAY_LINES`/`OVERLAY_BOX` no longer carry a line width — callers
+    set it per vertex.
+  - **Outlines and block damage** run through vanilla's outline passes and breaking list (same visuals,
+    correct layering); true invisibility depends on the render-state modifier.
+  - `FluidHelper.color`/`RenderHelper.getFluidColor` return white for a fluid without a tint source.
+  - Potion fluid: white in world, potion colour as a stack (same values, now split across `FluidTintSource`).
+- **B.9 behaviour changes**: shield blocking is gated by `canBlock` inside vanilla's angle/`BlocksAttacks`
+  resolution (before, `canBlock` replaced vanilla's check entirely); horse armour (all five, and wolf armour)
+  gets enchantability 15 and shields 1 via default components, as the mixins did.
+- **`1.21.1` branch**: `data/cofh_core/recipes/securable.json` is in the pre-1.21 plural folder there too, so the
+  securable crafting recipe does not load on 1.21.1. Move it to `recipe/` if that branch ships.
 
 - **B.6 behaviour changes (2026-09-22)**:
   - **An invalid or missing CoFH recipe ingredient now matches nothing** (`EmptyIngredient`), where
