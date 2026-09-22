@@ -2,7 +2,7 @@
 
 Phase A (1.21.1) is **code-complete**: all four repos build clean and boot headless on
 NeoForge 21.1.251, and `runData` now runs in all four. Phase B (26.1.2) is under way on the
-`26.1.2` branch: B.0-B.5 done in CoFHCore, **895 errors** left (client, recipes, mixins). See
+`26.1.2` branch: B.0-B.6 done in CoFHCore, **723 errors** left (client, mixins). See
 [api-notes-1.21.1.md](api-notes-1.21.1.md) / [api-notes-26.1.2.md](api-notes-26.1.2.md) for
 confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 
@@ -40,14 +40,13 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 | B.3 persistence — bridged at `BlockEntityCoFH`, entities native, `SavedDataType`, tag getters | `8bd2f62` | 1364 |
 | B.4 transfer API — CoFH handlers also implement the new interfaces (per-storage journals), query sites wrap with `.of()` | `ccfc12d` | 1326 |
 | B.5 items/tools/armour (`41d84d9`), then entities, blocks, fluids, commands, packets, util (`3936c2b`) | `41d84d9`, `3936c2b` | 895 |
-| **B.6 recipes** (incl. `cofh/lib/util/recipes/**`, `crafting/**`) | next | |
-| B.7 client (XL) · B.8 resources · B.9 mixins · B.10 dependents | | |
+| B.6 recipes, loot functions, datagen | `d21d54a` | 723 |
+| **B.7 client (XL)** · B.8 resources · B.9 mixins · B.10 dependents | next | |
 
 [port-plan.md](port-plan.md) §6 has each category's contents. Carry-overs into Phase B:
 
 - **B.1 table rows not yet swept**, each owned by its later category: `Screen.hasShiftDown` (7
-  files), `Ingredient.EMPTY`/`getItems()` (5, B.6),
-  `getStillTexture`/`getFlowingTexture` (5, B.7e), the reload/shader events (4, B.7),
+  files), `getStillTexture`/`getFlowingTexture` (5, B.7e), the reload/shader events (4, B.7),
   `ClickType` → `ContainerInput` (1), `getCraftingRemainingItem` (1), `DeferredSpawnEggItem` (1),
   `RenderType.*` → `RenderTypes` (1). `javax.annotation` (95 files) still resolves; leave it.
 - **B.7 / B.9: `LevelRendererMixin` needs a rewrite, not a retarget.** `renderLevel` still
@@ -79,6 +78,19 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
     (`DuctBlockEntity#neighborChanged`, `DuctBlock#getBlockEntity(fromPos)`). That position no
     longer exists, so the duct needs a different trigger. `ITileCallback#neighborChanged` now
     receives the block's own position.
+- **B.10 inherits from B.6**:
+  - `ThermalRecipe`, `ThermalFuel` and the device mappings/boosts override `getSerializer()`/`getType()`
+    with the narrowed `RecipeSerializer<? extends Recipe<RecipeInput>>`/`RecipeType<…>` returns, drop
+    `getResultItem`/`getIngredients`/`canCraftInDimensions`, take `assemble(input)`, and their
+    serializers become `new RecipeSerializer<>(CODEC, STREAM_CODEC)` (records). Results that were
+    `ItemStack` fields can stay so; only vanilla-facing results need `ItemStackTemplate`.
+  - `Ingredient.EMPTY` → `EmptyIngredient.EMPTY`; `Ingredient.of(tag)` → `stack.is(tag)` at runtime,
+    `items.getOrThrow(tag)` in datagen; `ingredient.getItems()` → `items()` (holders).
+  - Recipe lookups are `serverLevel.recipeAccess().getRecipeFor(type, input, level)`; the client
+    `RecipeAccess` has none, so `ThermalRecipeManagers` fill their client caches from
+    `RecipesReceivedEvent` after `OnDatapackSyncEvent#sendRecipes` (port plan §B.6).
+  - Datagen: each recipe provider gains a `RecipeProvider.Runner`, `GatherDataEvent.Client`, no
+    `ExistingFileHelper`; delete the five Thermal model/blockstate providers.
 - **B.8: regenerate, don't hand-migrate.** The `26.1.2` branch predates the 1.21.1 `runData`
   commits, so its `src/main/generated` still has the stale 1.20 layout. On 26.1 the data run is
   `clientData()`, which the 26.1.2 `build.gradle` already declares. ThermalExpansion's
@@ -113,6 +125,16 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
   - **Item-stored block-entity data needs a `BlockEntityType`.** `ItemHelper.setBlockEntityData`
     infers it. Energy/fluid cells and machines in item form must keep their data when placed.
   - **Lightning from CoFH uses the `TRIGGERED` spawn reason.**
+
+- **B.6 behaviour changes (2026-09-22)**:
+  - **An invalid or missing CoFH recipe ingredient now matches nothing** (`EmptyIngredient`), where
+    `Ingredient.EMPTY` used to match an empty stack. Only malformed JSON reaches it.
+  - **`SecureRecipe` lost `canCraftInDimensions` (≥ 2 slots).** The method no longer exists; a
+    1×1 grid can't hold a lock and a securable item anyway.
+  - **`getStandardTileTable` still copies `Info`/`Items`/`Energy` into `CUSTOM_DATA`**, which nothing
+    reads on 26.1 (item-form data is `BLOCK_ENTITY_DATA`). No table in the four repos uses it.
+  - `IDismantleable#dismantleBlock` passes `includeData = false` to `getCloneItemStack`, matching
+    the old default (`state.getCloneItemStack(level, pos)` carried no data).
 
 - **Behaviour differences the style pass found (2026-09-22), left alone because that pass was
   not allowed to change behaviour.** Each is a 1.21.1 fix to decide on:

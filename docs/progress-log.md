@@ -457,3 +457,30 @@ problem.
 1326 → 1126 (items) → 895 errors. What's left in CoFHCore is B.6 recipes (~150), B.7 client (~740)
 and B.9 mixins (4). Also recorded today: the "after the port" TODO item for item-form energy/fluid
 capabilities (a gap on 1.21.1 as well).
+
+---
+
+## B.6 recipes, loot functions, datagen (2026-09-22)
+
+Small, but it touched three vanilla rewrites at once. Recipes now carry recipe-book metadata
+(`placementInfo`, `group`, `showNotification`, `recipeBookCategory`) and lost every result accessor;
+`RecipeSerializer` is a record; results are `ItemStackTemplate`. `ShapedPotionNBTRecipe` still wraps a
+`ShapedRecipe`, and `SerializableRecipe` — the shim that Thermal's machine recipes ride on — answers
+the new methods with "not placeable, no display".
+
+The one design choice was the empty ingredient. `Ingredient.EMPTY` is gone and the constructor
+refuses an empty set, but `RecipeJsonUtils` falls back to "matches nothing" when a datapack's
+ingredient is malformed. Rather than return `null` into Thermal's ingredient lists, CoFHCore now
+registers a second custom ingredient type, `cofh_core:empty`. It syncs by type like `with_count`.
+
+Datagen changed more than the recipes did: `GatherDataEvent.Client` with provider factories, no
+`ExistingFileHelper`, `RecipeProvider` as a plain object under a `Runner`, and NeoForge's model
+generators gone. The port plan's call — delete the model/blockstate providers, since every generated
+model is committed — was applied to CoFHCore; the Thermal repos' five providers follow in B.10.
+`TileNBTSync` now registers its `MapCodec` directly, and the block-entity `NbtProvider` for
+`getStandardTileTable` has to be built through its codec (no public factory).
+
+Also fixed the last B.5 straggler, `IDismantleable`'s `getCloneItemStack` call.
+
+895 → 723 errors. What's left is B.7 client (~715, `RenderTypes`/`RenderHelper`/`CoreShaders`/
+`GuiHelper` at the top), B.7e's `FluidHelper`/fluid types, and the 4 mixins (B.9).

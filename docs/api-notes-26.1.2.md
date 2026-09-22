@@ -539,3 +539,82 @@ augmentable items' **per-stack** scaling (`getEnchantmentValue` × augment modif
 | `Item#getCraftingRemainingItem(stack)` | NeoForge `getCraftingRemainder(ItemInstance)` → nullable `ItemStackTemplate` (`.create()`) |
 | `BLOCK_ENTITY_DATA` as `CustomData` | `TypedEntityData<BlockEntityType<?>>`: `TypedEntityData.of(type, tag)` / `copyTagWithoutId()`. `BlockItem` applies it only when the type matches. CoFH's `ItemHelper.setBlockEntityData` infers the type (the stack's, else the first type valid for the item's block) |
 | JEI `IIngredientSubtypeInterpreter#apply` → String | `ISubtypeInterpreter<T>#getSubtypeData(T, UidContext)` → Object (`null` = none); `IRecipeManagerPlugin` takes `IRecipeType<T>` |
+
+## B.6 Recipes, loot functions, datagen
+
+### `Recipe<T extends RecipeInput>` (1.21.2 "Recipe Changes", 26.1 serializer records)
+
+| 1.21.1 | 26.1.2 |
+|---|---|
+| `assemble(input, HolderLookup.Provider)` | `assemble(input)` |
+| `getResultItem(registries)`, `getIngredients()`, `canCraftInDimensions(w, h)`, `getToastSymbol()` | **gone**. There is no result accessor; `display()` (`List<RecipeDisplay>`, default empty) is what the recipe book and JEI see |
+| — | **new abstract**: `showNotification()`, `group()`, `placementInfo()` (`PlacementInfo.NOT_PLACEABLE` for anything not placeable by the recipe book), `recipeBookCategory()` (`RecipeBookCategories.*`; only read while iterating `display()`, so any value works for a recipe with no display) |
+| `getSerializer()` → `RecipeSerializer<?>` | `RecipeSerializer<? extends Recipe<T>>`; `getType()` → `RecipeType<? extends Recipe<T>>`. **B.10**: ThermalCore's overrides must narrow to these |
+| `RecipeSerializer` interface with `codec()`/`streamCodec()` | `record RecipeSerializer<T>(MapCodec<T> codec, StreamCodec<RegistryFriendlyByteBuf, T> streamCodec)`; register `() -> new RecipeSerializer<>(CODEC, STREAM_CODEC)` |
+| `SimpleCraftingRecipeSerializer<>(Factory)` | gone. A `CustomRecipe` serializer is `new RecipeSerializer<>(MapCodec.unit(X::new), StreamCodec.unit(new X()))`, as vanilla's `RepairItemRecipe` does |
+| `CustomRecipe(CraftingBookCategory)` | no-arg; `category()` is `MISC`, `isSpecial()` true, `placementInfo()` not placeable |
+| `ShapedRecipe(group, category, pattern, ItemStack)` | `ShapedRecipe(Recipe.CommonInfo(showNotification), CraftingRecipe.CraftingBookInfo(category, group), ShapedRecipePattern, ItemStackTemplate)`; `MAP_CODEC` composes `CommonInfo.MAP_CODEC`, `CraftingBookInfo.MAP_CODEC`, `ShapedRecipePattern.MAP_CODEC` and `ItemStackTemplate.CODEC.fieldOf("result")`. `pattern` and `result` are public fields; `commonInfo`/`bookInfo` are protected on `NormalCraftingRecipe`, so a wrapper rebuilds them from `showNotification()`/`category()`/`group()` |
+| `ItemStack` result | `ItemStackTemplate(Holder<Item>, count, DataComponentPatch)`: `create()` → validated `ItemStack`, `fromNonEmptyStack(stack)`, `apply(patch)` |
+
+`ShapedPotionNBTRecipe` keeps wrapping a `ShapedRecipe` and delegates `placementInfo`/`display`/
+`group`/`showNotification`; `assemble` starts from `wrappedRecipe.assemble(input)`. `SerializableRecipe`
+(the shim base for Thermal's machine recipes) answers the new methods with `false`/`""`/`NOT_PLACEABLE`/
+`CRAFTING_MISC`.
+
+### `Ingredient`
+
+- `Ingredient.EMPTY` is gone and **an `Ingredient` cannot be empty**: the constructor throws on an empty
+  direct `HolderSet` (and on air). Vanilla models absence as `Optional<Ingredient>`. CoFH's lenient JSON
+  parser needs a matches-nothing value, so `EmptyIngredient` (`cofh_core:empty`, an `ICustomIngredient`
+  with no items and `SlotDisplay.Empty`) provides `EmptyIngredient.EMPTY`. Custom ingredients sync by
+  type over NeoForge connections (`IngredientCodecs`), so an empty one survives the trip.
+- `Ingredient.of(TagKey)` is gone: `Ingredient.of(HolderSet<Item>)`. At runtime a stack test is just
+  `stack.is(tag)` (`SecureRecipe`); in datagen use `items.getOrThrow(tag)` (the `HolderGetter<Item>`
+  field on `RecipeProvider`), which is what `ShapedRecipeBuilder.define(char, TagKey)` does.
+- `Ingredient#getItems()` (`ItemStack[]`) → `items()` (`Stream<Holder<Item>>`, deprecated) and
+  `getValues()` (`HolderSet`, throws for custom ingredients). `ICustomIngredient#getItems()` →
+  `items()` returning holders; `display()` is the hook for showing stacks with a count:
+  `new SlotDisplay.Composite(items().<SlotDisplay>map(h -> new SlotDisplay.ItemStackSlotDisplay(new ItemStackTemplate(h, count))).toList())`.
+- `IngredientWithCount` stays as CoFH's counted ingredient (`cofh_core:with_count`). NeoForge's
+  equivalent is `SizedIngredient(Ingredient, int)` with `NESTED_CODEC` (`{"ingredient": …, "count": n}`).
+- `TagParser.parseTag(String)` → `TagParser.parseCompoundFully(String)`.
+
+### Loot functions
+
+| 1.21.1 | 26.1.2 |
+|---|---|
+| `LootItemFunctionType` registered in `BuiltInRegistries.LOOT_FUNCTION_TYPE`; `getType()` | the registry holds `MapCodec<? extends LootItemFunction>` directly; implement `MapCodec<X> codec()` |
+| `LootContext#getParamOrNull(key)` | `getOptionalParameter(ContextKey<T>)`; `getParameter`/`hasParameter` |
+| `CopyNameFunction.copyName(NameSource.BLOCK_ENTITY)` | `copyName(LootContext.BlockEntityTarget.BLOCK_ENTITY)` (a `LootContextArg`) |
+| `CopyCustomDataFunction.copyData(ContextNbtProvider.BLOCK_ENTITY)` | the block-entity `NbtProvider` has no public factory (only `forContextEntity`); build it from `ContextNbtProvider.INLINE_CODEC.parse(JavaOps.INSTANCE, "block_entity")`. Vanilla's own tile drops use `CopyComponentsFunction.copyComponentsFromBlockEntity(LootContextParams.BLOCK_ENTITY).include(...)` instead |
+
+### Datagen
+
+- `GatherDataEvent` is abstract; subscribe to **`GatherDataEvent.Client`** (all data, client and
+  server, in one run — `clientData()` in `build.gradle`). `includeServer()`/`includeClient()`,
+  `getExistingFileHelper()` and `ExistingFileHelper` are gone. Providers are added with
+  `event.createProvider(Ctor::new)` (`(PackOutput)` or `(PackOutput, CompletableFuture<Provider>)`)
+  and block+item tags with `event.createBlockAndItemTags(Block::new, Item::new)`, where the item
+  provider's factory takes `(PackOutput, lookup, CompletableFuture<TagLookup<Block>>)`.
+- `@EventBusSubscriber` has no `bus` parameter; the bus is inferred from the event type.
+- Tag providers drop the trailing `ExistingFileHelper`: NeoForge `BlockTagsProvider(output, lookup, modId)`,
+  `BlockTagCopyingItemTagProvider(output, lookup, blockTags, modId)` (has `copy(blockTag, itemTag)`;
+  vanilla's `ItemTagsProvider` is gone), vanilla `FluidTagsProvider(output, lookup, modId)` and
+  `DamageTypeTagsProvider(output, lookup, modId)`. `tag(key).add(T...)` and `addTags(...)` are unchanged.
+- `RecipeProvider` is no longer a `DataProvider`. Constructor `(HolderLookup.Provider registries,
+  RecipeOutput output)`, fields `registries`, `items` (`HolderGetter<Item>`), `output`; `buildRecipes()`
+  takes no argument, `has(...)` is an instance method. A mod registers a `RecipeProvider.Runner`
+  (`(PackOutput, CompletableFuture<Provider>)`, `createRecipeProvider(registries, output)`, `getName()`).
+  `RecipeProviderCoFH` keeps its `RecipeOutput consumer` helper parameters, so **B.10**: TC/TE's
+  providers pass `this.output` (or the argument) unchanged and gain a `Runner`. `IConditionBuilder`
+  is gone (nothing used it); conditions go through `RecipeOutput#withConditions(...)`.
+- Builders: `ShapedRecipeBuilder.shaped(HolderGetter<Item>, category, ItemLike[, count] | ItemStackTemplate)`,
+  `ShapelessRecipeBuilder.shapeless(items, …)`, `SimpleCookingRecipeBuilder.smelting/blasting(ingredient,
+  RecipeCategory, CookingBookCategory, result, xp, time)` (`smoking`/`campfireCooking` imply `FOOD`),
+  `SingleItemRecipeBuilder.stonecutting(ingredient, category, result, count)`. `save(output, String id)`
+  still exists but throws if the id equals the default one.
+- NeoForge's `BlockStateProvider`/`ItemModelProvider` and `client.model.generators` are gone. Since
+  every generated model is committed, `BlockStateProviderCoFH`, `ItemModelProviderCoFH` and the Core
+  providers are deleted rather than rewritten on vanilla's `ModelProvider`. **B.10**: the same for
+  `TCoreBlockStateProvider`/`TCoreItemModelProvider`, `TDynItemModelProvider`, `TExpBlockStateProvider`/
+  `TExpItemModelProvider`.
