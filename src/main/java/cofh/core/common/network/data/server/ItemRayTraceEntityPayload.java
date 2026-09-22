@@ -1,5 +1,6 @@
 package cofh.core.common.network.data.server;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -15,7 +16,7 @@ public record ItemRayTraceEntityPayload(InteractionHand hand, Vec3 origin, int t
 
     public static final Type<ItemRayTraceEntityPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "item_ray_trace_entity_packet"));
 
-    private static final StreamCodec<FriendlyByteBuf, InteractionHand> HAND_CODEC = ByteBufCodecs.idMapper(
+    private static final StreamCodec<ByteBuf, InteractionHand> HAND_CODEC = ByteBufCodecs.idMapper(
             i -> InteractionHand.values()[i], InteractionHand::ordinal
     );
     private static final StreamCodec<FriendlyByteBuf, Vec3> VEC3_CODEC = StreamCodec.of(FriendlyByteBuf::writeVec3, FriendlyByteBuf::readVec3);

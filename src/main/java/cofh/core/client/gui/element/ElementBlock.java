@@ -45,7 +45,7 @@ public class ElementBlock extends ElementBase {
         if (block != Blocks.AIR) {
             if (block != renderBlock) {
                 if (block instanceof LiquidBlock) {
-                    renderFluid = new FluidStack(((LiquidBlock) block).getFluid(), BUCKET_VOLUME);
+                    renderFluid = new FluidStack(((LiquidBlock) block).fluid, BUCKET_VOLUME);
                     renderStack = ItemStack.EMPTY;
                 } else {
                     renderFluid = FluidStack.EMPTY;

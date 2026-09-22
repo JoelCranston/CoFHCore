@@ -28,7 +28,8 @@ public class RetexturedBakedQuad extends BakedQuad {
     private void remapQuad() {
 
         for (int i = 0; i < 4; ++i) {
-            int j = DefaultVertexFormat.BLOCK.getIntegerSize() * i;
+            // getIntegerSize() is gone; the vertex size is in bytes, four per int.
+            int j = (DefaultVertexFormat.BLOCK.getVertexSize() / 4) * i;
             int uvIndex = 4;
             this.vertices[j + uvIndex] = Float.floatToRawIntBits(this.texture.getU(getUnInterpolatedU(this.sprite, Float.intBitsToFloat(this.vertices[j + uvIndex]))));
             this.vertices[j + uvIndex + 1] = Float.floatToRawIntBits(this.texture.getV(getUnInterpolatedV(this.sprite, Float.intBitsToFloat(this.vertices[j + uvIndex + 1]))));
