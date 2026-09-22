@@ -6,8 +6,8 @@ this file tracks where we are in it and what has been noticed along the way. See
 [api-notes-1.20.6.md](api-notes-1.20.6.md) for API shapes already confirmed (all still valid
 on 1.21.1).
 
-**Snapshot**: branch `1.21.1`, ModDevGradle 2.0.147, `neo_version=21.1.251`. **Baseline on
-1.21.1: `849 errors / 175 files`** (fresh `./gradlew compileJava`, 2026-09-21, log at
+**Snapshot**: branch `1.21.1`, ModDevGradle 2.0.147, `neo_version=21.1.251`. **312 errors / 78
+files** after categories 1-5 and 7 (2026-09-22). The baseline was `849 errors / 175 files` (fresh `./gradlew compileJava`, 2026-09-21, log at
 `/tmp/cofh-A0.log` for that session). Top kinds: `cannot find symbol` 467, `ResourceLocation`
 constructor 164, "does not override" 51, `MobEffect`→`Holder<MobEffect>` 34, enchantment
 key/holder mismatches 16. Re-run before trusting these — they shift every session.
@@ -29,13 +29,13 @@ key/holder mismatches 16. Re-run before trusting these — they shift every sess
 
 - [x] A.0 bump `gradle.properties` (values in §5 A.0), first compile → baseline `849 / 175` (above).
 - [ ] A.1 categories 1–16, in order (§5 A.1). Tick each as it lands with its before/after count:
-  1. [ ] mod metadata & bus (`@EventBusSubscriber`, `Bus.GAME`, `ModContainer#registerConfig`)
-  2. [ ] `ResourceLocation` factories (all four repos in one sweep)
-  3. [ ] ItemStack NBT → data components (remaining ~140 sites family-wide)
-  4. [ ] vertex/rendering API (`Matrix3f`→`Pose`, `addVertex`/`setColor`/…, `buildOrThrow`)
-  5. [ ] `MobEffect`→`Holder<MobEffect>`, `PotionUtils`→`PotionContents`, `PotionColorCalculationEvent` gone
+  1. [x] mod metadata & bus (`@EventBusSubscriber`, `Bus.GAME`, `ModContainer#registerConfig`)
+  2. [x] `ResourceLocation` factories (all four repos in one sweep)
+  3. [x] ItemStack NBT → data components (remaining ~140 sites family-wide)
+  4. [x] vertex/rendering API (`Matrix3f`→`Pose`, `addVertex`/`setColor`/…, `buildOrThrow`)
+  5. [x] `MobEffect`→`Holder<MobEffect>`, `PotionUtils`→`PotionContents`, `PotionColorCalculationEvent` gone (849→829→664→608→434→312 across 1-5+7)
   6. [ ] enchantments → datapack (`HoldingEnchantment` JSON + key, `EnchantmentHelperCoFH.getLevel`)
-  7. [ ] attribute modifier ids
+  7. [x] attribute modifier ids
   8. [ ] tools/armor/crossbow (`CHARGED_PROJECTILES`, `hurtAndBreak`, `getUseDuration`)
   9. [ ] events (damage pipeline, item pickup, spawn placements, `Event.Result` leftovers)
   10. [ ] blocks (crop hooks `canCropGrow`/`fireCropGrowPost`, `SpecialPlantable`, `FoodProperties` record)
@@ -64,7 +64,13 @@ Not started. Branch `26.1.2` is created from `1.21.1` only after Phase A's exit 
 - `ThermalExpansion`'s hand-written machine recipes use `{"item": …, "count": n}` /
   `{"tag": "forge:…"}` parsed by CoFH's own `RecipeJsonUtils` — survives the 1.21.2 ingredient
   format change, but check `RecipeJsonUtils.parseIngredient` compiles (`Ingredient.fromJson` is gone).
-- `PotionColorCalculationEvent` was deleted in NeoForge 21.0 with no replacement event;
-  `EffectEvents` needs a decision (use `PotionContents#getColor()` or drop the tweak).
+- ~~`PotionColorCalculationEvent`~~ resolved in category 5: replaced by
+  `CustomParticleMobEffect#createParticleOptions` returning null (per-effect, not global).
+- **Cross-repo API changes ThermalCore/TD/TE must follow** (all from category 3/7):
+  `IEnergyContainerItem#getOrCreateEnergyTag` → `getEnergyTag` + `mutateEnergyTag`,
+  `IFluidContainerItem#getOrCreateTankTag` → `getTankTag` + `mutateTankTag`,
+  `IMultiModeItem#getOrCreateModeTag` → `getModeTag`/`setModeTag`, `ConfigManager#register` takes
+  the `ModContainer`, and `Constants`' `UUID_*` modifier ids are `ResourceLocation`s now.
+  TC's `EnergyCellBlockItem` overrides two of those.
 - Two mixin classes (`ClientPacketListenerMixin`, `ClientboundSetEntityMotionPacketMixin`) exist
   in `cofh.core.mixin` but are not listed in `mixins.cofhcore.json` — decide keep/delete in A.1.13.
