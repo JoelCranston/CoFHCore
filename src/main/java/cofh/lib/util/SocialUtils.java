@@ -2,6 +2,7 @@ package cofh.lib.util;
 
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -62,7 +63,8 @@ public class SocialUtils {
 
         private final Map<String, Set<GameProfile>> friendLists = new TreeMap<>();
 
-        public static final Factory<FriendData> FACTORY = new Factory<>(FriendData::new, FriendData::new);
+        // 1.20.5: the load half of a SavedData.Factory takes the registry lookup too.
+        public static final Factory<FriendData> FACTORY = new Factory<>(FriendData::new, (nbt, registries) -> new FriendData(nbt));
 
         FriendData() {
 
@@ -143,7 +145,7 @@ public class SocialUtils {
         }
 
         @Override
-        public CompoundTag save(CompoundTag nbt) {
+        public CompoundTag save(CompoundTag nbt, HolderLookup.Provider registries) {
 
             for (Map.Entry<String, Set<GameProfile>> friendList : friendLists.entrySet()) {
                 ListTag list = new ListTag();

@@ -132,13 +132,6 @@ public class Utils {
         return gson.toJson(json);
     }
 
-    public static void loadConfig(ModConfigSpec spec, Path path) {
-
-        final CommentedFileConfig configData = CommentedFileConfig.builder(path).sync().autosave().writingMode(WritingMode.REPLACE).build();
-        configData.load();
-        spec.setConfig(configData);
-    }
-
     public static boolean spawnLightningBolt(Level world, BlockPos pos) {
 
         return spawnLightningBolt(world, pos, null);
@@ -457,7 +450,9 @@ public class Utils {
             return false;
         }
         if (entity instanceof ServerPlayer player && !isFakePlayer(entity)) {
-            if (player.connection.connection.isConnected() && !player.isSleeping()) {
+            // ServerCommonPacketListenerImpl#connection is protected now; the public
+            // isAcceptingMessages() is the same "still connected" check.
+            if (player.connection.isAcceptingMessages() && !player.isSleeping()) {
                 if (entity.isPassenger()) {
                     entity.stopRiding();
                 }
