@@ -29,7 +29,7 @@ public class SlotFalseCopy extends SlotCoFH {
         if (!stack.isEmpty()) {
             stack.setCount(1);
         }
-        container.setItem(this.slot, stack);
+        container.setItem(this.getContainerSlot(), stack);
         setChanged();
     }
 
