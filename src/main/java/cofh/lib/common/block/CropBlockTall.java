@@ -24,7 +24,7 @@ import java.util.List;
 
 import static cofh.lib.util.constants.BlockStatePropertiesCoFH.AGE_0_9;
 import static cofh.lib.util.constants.BlockStatePropertiesCoFH.TOP;
-import static net.minecraft.world.item.enchantment.Enchantments.BLOCK_FORTUNE;
+import static net.minecraft.world.item.enchantment.Enchantments.FORTUNE;
 
 public class CropBlockTall extends CropBlockCoFH {
 
@@ -161,7 +161,7 @@ public class CropBlockTall extends CropBlockCoFH {
             return true;
         }
         if (getPostHarvestAge() >= 0) {
-            int fortune = Utils.getItemEnchantmentLevel(BLOCK_FORTUNE, player.getMainHandItem());
+            int fortune = Utils.getItemEnchantmentLevel(FORTUNE, player.getMainHandItem());
             Utils.dropItemStackIntoWorldWithRandomness(new ItemStack(getCropItem(), 2 + MathHelper.binomialDist(fortune, 0.5D)), world, pos);
             if (isTop(state)) {
                 world.setBlock(pos, this.getStateForAge(getPostHarvestAge() + getTallAge()), 2);

@@ -26,7 +26,7 @@ import static cofh.core.util.references.EnsorcIDs.ID_VOLLEY;
 import static cofh.lib.util.Constants.DAMAGE_ARROW;
 import static cofh.lib.util.Utils.*;
 import static cofh.lib.util.constants.ModIds.ID_ENSORCELLATION;
-import static net.minecraft.world.item.enchantment.Enchantments.INFINITY_ARROWS;
+import static net.minecraft.world.item.enchantment.Enchantments.INFINITY;
 
 @EventBusSubscriber (modid = ModIds.ID_COFH_CORE)
 public class ArcheryEvents {
@@ -60,7 +60,7 @@ public class ArcheryEvents {
         Player shooter = event.getEntity();
         ItemStack ammo = findAmmo(shooter, bow);
 
-        if (ammo.isEmpty() && getItemEnchantmentLevel(INFINITY_ARROWS, bow) > 0) {
+        if (ammo.isEmpty() && getItemEnchantmentLevel(INFINITY, bow) > 0) {
             ammo = new ItemStack(Items.ARROW);
         }
         if (!ammo.isEmpty()) {

@@ -10,6 +10,7 @@ import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 import net.minecraft.world.level.block.DispenserBlock;
 
 import static cofh.lib.util.Utils.getItemEnchantmentLevel;
@@ -37,7 +38,7 @@ public class ArrowItemCoFH extends ArrowItem implements ICoFHItem {
     }
 
     @Override
-    public AbstractArrow createArrow(Level worldIn, ItemStack stack, LivingEntity shooter) {
+    public AbstractArrow createArrow(Level worldIn, ItemStack stack, LivingEntity shooter, @Nullable ItemStack weapon) {
 
         return factory.createArrow(worldIn, shooter);
     }

@@ -41,7 +41,7 @@ public class ArcheryAmmoItemWrapper implements IArcheryAmmoItem {
     @Override
     public boolean isInfinite(ItemStack bow, Player shooter) {
 
-        return shooter != null && shooter.getAbilities().instabuild || getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, bow) > 0 && ammoItem.getItem().getClass() == ArrowItem.class;
+        return shooter != null && shooter.getAbilities().instabuild || getItemEnchantmentLevel(Enchantments.INFINITY, bow) > 0 && ammoItem.getItem().getClass() == ArrowItem.class;
     }
 
 }

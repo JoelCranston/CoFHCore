@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static cofh.lib.util.constants.BlockStatePropertiesCoFH.AGE_0_7;
-import static net.minecraft.world.item.enchantment.Enchantments.BLOCK_FORTUNE;
+import static net.minecraft.world.item.enchantment.Enchantments.FORTUNE;
 
 public class CropBlockCoFH extends CropBlock implements IHarvestable {
 
@@ -194,7 +194,7 @@ public class CropBlockCoFH extends CropBlock implements IHarvestable {
             return true;
         }
         if (getPostHarvestAge() >= 0) {
-            int fortune = Utils.getItemEnchantmentLevel(BLOCK_FORTUNE, player.getMainHandItem());
+            int fortune = Utils.getItemEnchantmentLevel(FORTUNE, player.getMainHandItem());
             Utils.dropItemStackIntoWorldWithRandomness(new ItemStack(getCropItem(), 2 + MathHelper.binomialDist(fortune, 0.5D)), world, pos);
             world.setBlock(pos, getStateForAge(getPostHarvestAge()), 2);
         } else {

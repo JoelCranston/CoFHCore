@@ -74,7 +74,7 @@ public abstract class BlockLootSubProviderCoFH extends BlockLootSubProvider {
 
     /**
      * Fortune as a {@link Holder}: 1.21 loot functions take holders, and {@code Enchantments.*}
-     * are {@link net.minecraft.resources.ResourceKey}s. BLOCK_FORTUNE was renamed to FORTUNE.
+     * are {@link net.minecraft.resources.ResourceKey}s. FORTUNE was renamed to FORTUNE.
      */
     protected Holder<Enchantment> fortune() {
 

@@ -8,6 +8,7 @@ import cofh.lib.api.capability.IArcheryAmmoItem;
 import cofh.lib.api.capability.IArcheryBowItem;
 import cofh.lib.util.Utils;
 import cofh.lib.util.helpers.MathHelper;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -16,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
@@ -80,7 +82,7 @@ public final class ArcheryHelper {
         boolean infinite = shooter.getAbilities().instabuild
                 || ammoCap.isInfinite(bow, shooter)
                 || (isArrow(ammo) && ((ArrowItem) ammo.getItem()).isInfinite(ammo, bow, shooter))
-                || ammo.isEmpty() && getItemEnchantmentLevel(INFINITY_ARROWS, bow) > 0;
+                || ammo.isEmpty() && getItemEnchantmentLevel(INFINITY, bow) > 0;
 
         if (!ammo.isEmpty() || infinite) {
             if (ammo.isEmpty()) {
@@ -96,9 +98,9 @@ public final class ArcheryHelper {
 
                     int encVolley = getItemEnchantmentLevel(getEnchantment(ID_ENSORCELLATION, ID_VOLLEY), bow);
                     int encTrueshot = getItemEnchantmentLevel(getEnchantment(ID_ENSORCELLATION, ID_TRUESHOT), bow);
-                    int encPunch = getItemEnchantmentLevel(PUNCH_ARROWS, bow);
-                    int encPower = getItemEnchantmentLevel(POWER_ARROWS, bow);
-                    int encFlame = getItemEnchantmentLevel(FLAMING_ARROWS, bow);
+                    int encPunch = getItemEnchantmentLevel(PUNCH, bow);
+                    int encPower = getItemEnchantmentLevel(POWER, bow);
+                    int encFlame = getItemEnchantmentLevel(FLAME, bow);
 
                     if (encTrueshot > 0) {
                         accuracyMod *= (1.5F / (1 + encTrueshot));
@@ -114,7 +116,7 @@ public final class ArcheryHelper {
                     for (int shot = 0; shot < numArrows; ++shot) {
                         AbstractArrow arrow = createArrow(world, ammo, shooter);
                         if (bowItem != null) {
-                            arrow = bowItem.customArrow(arrow, ammo);
+                            arrow = bowItem.customArrow(arrow, ammo, bow);
                         }
                         arrow.shootFromRotation(shooter, shooter.getXRot() - volleyPitch * shot, shooter.getYRot(), 0.0F, arrowVelocity * 3.0F * velocityMod, accuracyMod);// * (1 + shot * 2));
                         arrow.setBaseDamage(arrow.getBaseDamage() * damageMod);
@@ -122,17 +124,17 @@ public final class ArcheryHelper {
                         if (arrowVelocity >= 1.0F) {
                             arrow.setCritArrow(true);
                         }
-                        if (encTrueshot > 0) {
-                            arrow.setPierceLevel((byte) encTrueshot);
+                        if (world instanceof ServerLevel serverLevel) {
+                            // Piercing, punch and flame are all weapon enchantment effects now
+                            // (setPierceLevel is private, setKnockback and setSecondsOnFire are
+                            // gone); onProjectileSpawned applies whatever the bow carries.
+                            EnchantmentHelper.onProjectileSpawned(serverLevel, bow, arrow, item -> {});
                         }
                         if (encPower > 0 && arrow.getBaseDamage() > 0) {
                             arrow.setBaseDamage(arrow.getBaseDamage() + (double) encPower * 0.5D + 0.5D);
                         }
-                        if (encPunch > 0) {
-                            arrow.setKnockback(encPunch);
-                        }
                         if (encFlame > 0) {
-                            arrow.setSecondsOnFire(100);
+                            arrow.igniteForSeconds(5.0F);
                         }
                         if (infinite || shot > 0) {
                             arrow.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
@@ -167,7 +169,7 @@ public final class ArcheryHelper {
 
     public static AbstractArrow createDefaultArrow(Level world, ItemStack ammo, Player shooter) {
 
-        return isArrow(ammo) ? ((ArrowItem) ammo.getItem()).createArrow(world, ammo, shooter) : ((ArrowItem) Items.ARROW).createArrow(world, ammo, shooter);
+        return isArrow(ammo) ? ((ArrowItem) ammo.getItem()).createArrow(world, ammo, shooter, ItemStack.EMPTY) : ((ArrowItem) Items.ARROW).createArrow(world, ammo, shooter, ItemStack.EMPTY);
     }
 
     public static ItemStack findAmmo(Player shooter, ItemStack weapon) {
