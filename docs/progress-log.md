@@ -215,3 +215,61 @@ The sweep turned up more than the plan anticipated, and the findings crossed bet
 Also of note: MDG's `validateAccessTransformers` rejected 13 stale lines in ThermalCore's AT
 (all dead since 1.20.x), which is why its AT is now byte-identical to CoFHCore's, as the plan
 prescribes.
+
+---
+
+## Phase A complete — all four repos on 1.21.1 (2026-09-22)
+
+CoFHCore 849 → 0, ThermalCore 575 → 0, ThermalDynamics and ThermalExpansion 0 on their first
+real compile. All four `./gradlew build` clean and reach `Done (…)` headless with no registry,
+recipe or loot-table errors. Every confirmed API shape is written up in
+[api-notes-1.21.1.md](api-notes-1.21.1.md).
+
+### How it was ordered
+
+CoFHCore's last cluster was the client models and particles — the tail of the 1.21 vertex/model
+rewrite, and the part where a wrong guess compiles and then renders nothing, so each signature
+came out of the sources jar first. Once it built, ThermalCore went by root-cause category the
+same way (tags → event bus → recipe lookups → NBT components → persistence → enchantments →
+recipe serializers → entities → armour → vertex → potions/food → projectiles → Patchouli →
+datagen → brewing), one commit each with before/after counts.
+
+ThermalDynamics and ThermalExpansion were ported **in parallel by subagents** while ThermalCore
+was still broken. They could not compile — their builds `includeBuild` ThermalCore — so they
+worked source-level against the sources jar and CoFHCore's already-ported code, then compiled
+clean on the first try once ThermalCore landed. That parallelism was worth it: their combined
+~19 commits cost no critical-path time.
+
+### Things that only a boot could have caught
+
+- **`ModConfigEvent` handled as one event kills the server on shutdown.** `Unloading` fires with
+  the spec detached, so any `.get()` throws "Cannot get config value before config is loaded".
+  The build was clean and the server reached `Done` — it died on exit.
+- **A negative burn time now throws.** CoFH's `-1` "no opinion" default made every CoFH item
+  throw when Thermal's Stirling dynamo enumerated furnace fuels. Must fall through to the
+  default, which reads the `neoforge:furnace_fuels` data map.
+- **198 ThermalCore recipes failed to parse**, and 30 more after the first fix — the result key
+  is `id`, cooking results are objects, and (the part that cost a round trip) **ingredients keep
+  their object form on 1.21.1**; the bare-string shape is 1.21.2. Reverting that half was the
+  difference between 0 and 259 broken recipes.
+- **A client-only mixin listed under `mixins`** rather than `client` fails to apply on a
+  dedicated server.
+
+### Cross-repo API the family now shares
+
+`FluidHelper.writeFluidStack/readFluidStack` (the tile and menu packet buffers are plain
+`FriendlyByteBuf`s with no registry context — casting one to `RegistryFriendlyByteBuf`, which
+both SPLIGAN forks do, is a runtime `ClassCastException`), `Utils.getLevel(ItemEnchantments,
+ResourceKey)`, and `saveOptional` guards in `FluidStorageCoFH#write` / `ItemStorageCoFH`, which
+were calling `save` unguarded and only survived because their callers pre-filtered.
+
+### Owed verification
+
+Everything client-side. A headless boot cannot see model, texture or GUI breakage, and this hop
+rewrote the whole vertex/model/particle surface. §A.4 of the port plan has the checklist.
+
+One pre-existing content gap surfaced rather than regressed: ThermalExpansion's
+`insolator_rubberwood_sapling` recipe references items ThermalCore never registered (filed in
+its Inbox) — on 1.20.4 the old parser produced an empty recipe silently; 1.21's codec path logs
+the error.
+

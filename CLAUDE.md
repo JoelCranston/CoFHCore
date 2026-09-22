@@ -73,19 +73,29 @@ It is a *reference* here, never a dependency.
 
 ## Current state
 
-Branch **`1.21.1`**, building with **ModDevGradle 2.0.147 against NeoForge 21.1.251**
-(Phase 0.3/0.4 and A.0 done here on 2026-09-21; `neoforge.mods.toml`; the 15 dead access
-transformer lines that `validateAccessTransformers` rejected are gone). The twelve 1.20.6
-commits are kept and still valid. Baseline was 849 errors / 175 files; **25 / 5** (2026-09-22). Everything outside client
-rendering compiles. See docs/TODO.md for what each category covered and what remains.
+**Phase A is code-complete: all four repos build clean and boot headless on NeoForge 21.1.251.**
+(2026-09-22)
+
+| Repo | Baseline errors | Now |
+|---|---|---|
+| CoFHCore | 849 / 175 files | 0 |
+| ThermalCore | 575 / ~100 files | 0 |
+| ThermalDynamics | (never compiled standalone) | 0 |
+| ThermalExpansion | (never compiled standalone) | 0 |
+
+Branch **`1.21.1`** in each, building with **ModDevGradle 2.0.147**. Each repo's
+`verify_runserver.sh` reaches `Done (…)` with no registry, recipe or loot-table errors;
+ThermalExpansion's run loads CoFHCore + ThermalCore + ThermalExpansion together.
 
 Shape oracle on this target: `build/moddev/artifacts/neoforge-21.1.251-sources.jar`
 (`unzip -p … net/minecraft/…/X.java`); the MDG artifact names differ from 26.1's
-`minecraft-patched-<ver>` layout.
+`minecraft-patched-<ver>` layout. Every shape confirmed during the hop is written up in
+[docs/api-notes-1.21.1.md](docs/api-notes-1.21.1.md) — **read that before deriving anything
+again**, and before starting Phase B.
 
-The other three repos are still on their NeoGradle 1.20.6-bumped (uncommitted) build files —
-their Phase 0.3/0.4 happens when their Phase A starts, after this repo builds clean.
-
-**Next step**: the client model/render cluster — five files, 25 errors, listed with their root
-causes in docs/TODO.md. After that: categories 12-16 of docs/port-plan.md §5 A.1 (datagen
-entrypoints are largely done, then mixins, the AT sweep, resources, Curios), then `runServer`.
+**Next step**: Phase A's remaining exit criterion is the client pass (§A.4 of the port plan) —
+a `runClient` session covering a machine GUI, an energy/fluid/item cell in world and in item
+form, a duct network, a JEI machine recipe page, the Patchouli guidebook, wrench side-config and
+particles. That is Joel's to run; headless boots cannot see model, texture or GUI breakage, so
+everything client-side is **owed verification**. After that, Phase B (26.1.2) per
+[docs/port-plan.md](docs/port-plan.md) §6.
