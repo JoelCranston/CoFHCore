@@ -50,7 +50,7 @@ public class MinecartItemCoFH extends ItemCoFH {
             level.gameEvent(GameEvent.ENTITY_PLACE, blockpos, GameEvent.Context.of(context.getPlayer(), level.getBlockState(blockpos.below())));
         }
         stack.shrink(1);
-        return InteractionResult.sidedSuccess(level.isClientSide());
+        return InteractionResult.SUCCESS;
     }
 
     protected void createMinecart(ItemStack stack, Level level, double posX, double posY, double posZ) {

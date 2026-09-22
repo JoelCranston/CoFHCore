@@ -38,7 +38,7 @@ public class TileGuiPacket {
 
     public static void sendToClient(IPacketHandlerTile tile, Player player) {
 
-        if (tile == null || tile.world() == null || tile.world().isClientSide) {
+        if (tile == null || tile.world() == null || tile.world().isClientSide()) {
             return;
         }
         if (player instanceof ServerPlayer serverPlayer) {

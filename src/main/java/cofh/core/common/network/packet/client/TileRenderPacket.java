@@ -37,7 +37,7 @@ public class TileRenderPacket {
 
     public static void sendToClient(IPacketHandlerTile tile) {
 
-        if (tile == null || tile.world() == null || tile.world().isClientSide) {
+        if (tile == null || tile.world() == null || tile.world().isClientSide()) {
             return;
         }
         Utils.sendNear(tile.world(), tile.pos(), new TileRenderPayload(tile.pos(), tile.getRenderPacket(new FriendlyByteBuf(Unpooled.buffer()))));

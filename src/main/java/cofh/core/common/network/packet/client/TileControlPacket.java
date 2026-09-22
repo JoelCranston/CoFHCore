@@ -40,7 +40,7 @@ public class TileControlPacket {
 
     public static void sendToClient(IPacketHandlerTile tile) {
 
-        if (tile == null || tile.world() == null || tile.world().isClientSide) {
+        if (tile == null || tile.world() == null || tile.world().isClientSide()) {
             return;
         }
         Utils.sendNear(tile.world(), tile.pos(), new TileControlPayload(tile.pos(), tile.getControlPacket(new FriendlyByteBuf(Unpooled.buffer()))));

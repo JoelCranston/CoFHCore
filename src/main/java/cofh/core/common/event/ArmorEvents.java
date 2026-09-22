@@ -128,7 +128,7 @@ public class ArmorEvents {
      */
     private static void attemptDamagePlayerArmor(LivingEntity entity, float amount) {
 
-        if (entity instanceof Player player && 100 * entity.level().random.nextFloat() < amount) {
+        if (entity instanceof Player player && 100 * entity.level().getRandom().nextFloat() < amount) {
             int perPiece = Math.max(1, (int) Math.floor(Math.min(20.0F, amount) / 4.0F));
             for (EquipmentSlot slot : ARMOR_SLOTS) {
                 ItemStack armor = player.getItemBySlot(slot);
