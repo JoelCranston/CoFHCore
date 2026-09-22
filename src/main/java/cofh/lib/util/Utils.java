@@ -38,11 +38,11 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -129,8 +129,8 @@ public class Utils {
     public static boolean spawnLightningBolt(Level world, BlockPos pos, Entity caster) {
 
         if (Utils.isServerWorld(world)) {
-            LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(world);
-            bolt.moveTo(Vec3.atBottomCenterOf(pos));
+            LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(world, EntitySpawnReason.TRIGGERED);
+            bolt.snapTo(Vec3.atBottomCenterOf(pos));
             bolt.setCause(caster instanceof ServerPlayer player ? player : null);
             world.addFreshEntity(bolt);
         }
@@ -212,7 +212,7 @@ public class Utils {
             target = part.getParent();
         }
         int time = target.invulnerableTime;
-        boolean hurt = target.hurt(source, amount);
+        boolean hurt = target.hurtOrSimulate(source, amount);
         target.invulnerableTime = Math.max(time, invuln);
         return hurt;
     }
@@ -314,17 +314,17 @@ public class Utils {
         if (stack.isEmpty() || player == null) {
             return false;
         }
-        if (stack.getItem() instanceof ArmorItem armorItem) {
-            int index = armorItem.getEquipmentSlot().getIndex();
-            if (player.getInventory().armor.get(index).isEmpty()) {
-                player.getInventory().armor.set(index, stack);
+        Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
+        if (equippable != null && equippable.slot().getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
+            if (player.getItemBySlot(equippable.slot()).isEmpty()) {
+                player.setItemSlot(equippable.slot(), stack);
                 return true;
             }
         }
         Inventory inv = player.getInventory();
-        for (int i = 0; i < inv.items.size(); ++i) {
-            if (inv.items.get(i).isEmpty()) {
-                inv.items.set(i, stack.copy());
+        for (int i = 0; i < inv.getNonEquipmentItems().size(); ++i) {
+            if (inv.getNonEquipmentItems().get(i).isEmpty()) {
+                inv.getNonEquipmentItems().set(i, stack.copy());
                 return true;
             }
         }
@@ -352,7 +352,7 @@ public class Utils {
 
     public static boolean isPotionApplicableNoEvent(LivingEntity entity, MobEffectInstance potioneffectIn) {
 
-        if (entity.getType().is(EntityTypeTags.UNDEAD)) {
+        if (entity.is(EntityTypeTags.UNDEAD)) {
             Holder<MobEffect> effect = potioneffectIn.getEffect();
             return effect != MobEffects.REGENERATION && effect != MobEffects.POISON;
         }
@@ -426,7 +426,7 @@ public class Utils {
         if (entity instanceof LivingEntity) {
             return teleportEntityTo((LivingEntity) entity, x, y, z);
         } else {
-            entity.moveTo(x, y, z, entity.getYRot(), entity.getXRot());
+            entity.snapTo(x, y, z, entity.getYRot(), entity.getXRot());
             entity.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
         }
         return true;

@@ -22,7 +22,7 @@ public class SubCommandHeal {
     static ArgumentBuilder<CommandSourceStack, ?> register() {
 
         return Commands.literal("heal")
-                .requires(source -> source.hasPermission(permissionLevel.get()))
+                .requires(source -> CoFHCommand.hasPermission(source, permissionLevel.get()))
                 // Self
                 .executes(context -> healEntities(context.getSource(), ImmutableList.of(context.getSource().getPlayerOrException())))
                 // Targets Specified

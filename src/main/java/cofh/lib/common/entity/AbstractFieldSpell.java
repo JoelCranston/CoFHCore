@@ -64,9 +64,9 @@ public abstract class AbstractFieldSpell extends AbstractAoESpell implements IEn
     }
 
     @Override
-    protected AABB makeBoundingBox() {
+    protected AABB makeBoundingBox(Vec3 position) {
 
-        return dimensions.makeBoundingBox(position().subtract(0, dimensions.height() * 0.5F, 0));
+        return dimensions.makeBoundingBox(position.subtract(0, dimensions.height() * 0.5F, 0));
     }
 
     @Override

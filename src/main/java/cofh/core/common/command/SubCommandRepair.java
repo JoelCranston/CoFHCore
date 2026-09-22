@@ -7,6 +7,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Collection;
@@ -19,7 +20,7 @@ public class SubCommandRepair {
     static ArgumentBuilder<CommandSourceStack, ?> register() {
 
         return Commands.literal("repair")
-                .requires(source -> source.hasPermission(permissionLevel.get()))
+                .requires(source -> CoFHCommand.hasPermission(source, permissionLevel.get()))
                 // Self
                 .executes(context -> repairEquipment(context.getSource(), ImmutableList.of(context.getSource().getPlayerOrException())))
                 // Targets Specified
@@ -32,7 +33,8 @@ public class SubCommandRepair {
         int repairedEquipment = 0;
 
         for (ServerPlayer entity : targets) {
-            for (ItemStack stack : entity.getAllSlots()) {
+            for (EquipmentSlot slot : EquipmentSlot.VALUES) {
+                ItemStack stack = entity.getItemBySlot(slot);
                 if (stack.isDamageableItem() && stack.isDamaged()) {
                     stack.setDamageValue(0);
                     ++repairedEquipment;

@@ -21,7 +21,7 @@ public class SubCommandIgnite {
     static ArgumentBuilder<CommandSourceStack, ?> register() {
 
         return Commands.literal("ignite")
-                .requires(source -> source.hasPermission(permissionLevel.get()))
+                .requires(source -> CoFHCommand.hasPermission(source, permissionLevel.get()))
                 // Self - default duration
                 .executes(context -> igniteEntities(context.getSource(), ImmutableList.of(context.getSource().getEntityOrException()), DEFAULT_DURATION))
                 // Duration specified

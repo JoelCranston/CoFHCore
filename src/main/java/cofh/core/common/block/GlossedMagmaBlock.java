@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.redstone.Orientation;
 
 import javax.annotation.Nullable;
 
@@ -54,12 +55,12 @@ public class GlossedMagmaBlock extends MagmaBlock {
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
+    public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, @Nullable Orientation orientation, boolean isMoving) {
 
         if (blockIn == this && this.shouldMelt(worldIn, pos, 2)) {
             this.turnIntoLava(state, worldIn, pos);
         }
-        super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
+        super.neighborChanged(state, worldIn, pos, blockIn, orientation, isMoving);
     }
 
     @Override
@@ -86,7 +87,7 @@ public class GlossedMagmaBlock extends MagmaBlock {
     }
 
     @Override
-    public ItemStack getCloneItemStack(LevelReader worldIn, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(LevelReader worldIn, BlockPos pos, BlockState state, boolean includeData) {
 
         return ItemStack.EMPTY;
     }
@@ -95,7 +96,7 @@ public class GlossedMagmaBlock extends MagmaBlock {
     protected void turnIntoLava(BlockState state, Level worldIn, BlockPos pos) {
 
         worldIn.setBlockAndUpdate(pos, Blocks.LAVA.defaultBlockState());
-        worldIn.neighborChanged(pos, Blocks.LAVA, pos);
+        worldIn.neighborChanged(pos, Blocks.LAVA, null);
     }
 
     protected boolean shouldMelt(BlockGetter worldIn, BlockPos pos, int neighborsRequired) {

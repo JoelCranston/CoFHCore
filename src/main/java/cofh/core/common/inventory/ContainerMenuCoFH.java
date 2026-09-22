@@ -8,7 +8,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -156,9 +156,9 @@ public abstract class ContainerMenuCoFH extends AbstractContainerMenu {
     }
 
     @Override
-    public void clicked(int index, int dragType, ClickType clickTypeIn, Player player) {
+    public void clicked(int index, int dragType, ContainerInput clickTypeIn, Player player) {
 
-        if (clickTypeIn == ClickType.SWAP && !allowSwap) {
+        if (clickTypeIn == ContainerInput.SWAP && !allowSwap) {
             return;
         }
         if (falseSlotSupport) {

@@ -36,14 +36,14 @@ public final class DatapackHelper {
     public static <T> HolderSet<T> tagsAnd(Registry<T> tagGetter, TagKey<T>... biomes) {
 
         // noinspection unchecked
-        return holderSetIntersection(Arrays.stream(biomes).<HolderSet<T>>map(tagGetter::getOrCreateTag).toArray(i -> new HolderSet[i]));
+        return holderSetIntersection(Arrays.stream(biomes).<HolderSet<T>>map(tagGetter::getOrThrow).toArray(i -> new HolderSet[i]));
     }
 
     @SafeVarargs
     public static <T> HolderSet<T> tagsOr(Registry<T> tagGetter, TagKey<T>... biomes) {
 
         // noinspection unchecked
-        return holderSetUnion(Arrays.stream(biomes).<HolderSet<T>>map(tagGetter::getOrCreateTag).toArray(i -> new HolderSet[i]));
+        return holderSetUnion(Arrays.stream(biomes).<HolderSet<T>>map(tagGetter::getOrThrow).toArray(i -> new HolderSet[i]));
     }
 
     @SafeVarargs

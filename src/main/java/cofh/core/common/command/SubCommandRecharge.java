@@ -21,7 +21,7 @@ public class SubCommandRecharge {
     static ArgumentBuilder<CommandSourceStack, ?> register() {
 
         return Commands.literal("recharge")
-                .requires(source -> source.hasPermission(permissionLevel))
+                .requires(source -> CoFHCommand.hasPermission(source, permissionLevel))
                 // Self
                 .executes(context -> chargeEntities(context.getSource(), ImmutableList.of(context.getSource().getPlayerOrException())))
                 // Targets Specified

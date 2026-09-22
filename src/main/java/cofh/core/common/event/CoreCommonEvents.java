@@ -108,14 +108,14 @@ public class CoreCommonEvents {
             if (entry != null) {
                 ItemStack itemstack = entry.getValue();
                 if (!itemstack.isEmpty() && itemstack.isDamaged()) {
-                    int i = Math.min((int) (orb.value * itemstack.getXpRepairRatio()), itemstack.getDamageValue());
-                    orb.value -= durabilityToXp(i);
+                    int i = Math.min((int) (orb.getValue() * itemstack.getXpRepairRatio()), itemstack.getDamageValue());
+                    orb.setValue(orb.getValue() - durabilityToXp(i));
                     itemstack.setDamageValue(itemstack.getDamageValue() - i);
                 }
             }
             XpHelper.attemptStoreXP(player, orb);
-            if (orb.value > 0) {
-                player.giveExperiencePoints(orb.value);
+            if (orb.getValue() > 0) {
+                player.giveExperiencePoints(orb.getValue());
             }
             orb.discard();
             event.setCanceled(true);

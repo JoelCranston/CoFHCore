@@ -19,7 +19,7 @@ public class ShieldEvents {
     @SubscribeEvent (priority = HIGH)
     public static void handleShieldBlock(LivingShieldBlockEvent event) {
 
-        if (event.isCanceled()) {
+        if (!event.getBlocked()) {
             return;
         }
         LivingEntity entity = event.getEntity();

@@ -3,7 +3,7 @@ package cofh.core.common.network.packet.server;
 import cofh.core.common.network.data.server.ItemLeftClickPayload;
 import cofh.core.util.helpers.ItemHelper;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class ItemLeftClickPacket {
@@ -30,7 +30,7 @@ public class ItemLeftClickPacket {
 
     public static void sendToServer() {
 
-        PacketDistributor.sendToServer(new ItemLeftClickPayload());
+        ClientPacketDistributor.sendToServer(new ItemLeftClickPayload());
     }
 
 }

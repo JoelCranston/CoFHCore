@@ -1,9 +1,12 @@
 package cofh.lib.util.helpers;
 
 import cofh.core.util.ProxyUtils;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -117,12 +120,12 @@ public final class StringHelper {
 
     public static String toJSON(Component chatComponent) {
 
-        return Component.Serializer.toJson(chatComponent, ProxyUtils.registryAccess());
+        return ComponentSerialization.CODEC.encodeStart(ProxyUtils.registryAccess().createSerializationContext(JsonOps.INSTANCE), chatComponent).getOrThrow().toString();
     }
 
     public static MutableComponent fromJSON(String string) {
 
-        return Component.Serializer.fromJsonLenient(string, ProxyUtils.registryAccess());
+        return ComponentSerialization.CODEC.parse(ProxyUtils.registryAccess().createSerializationContext(JsonOps.INSTANCE), JsonParser.parseString(string)).getOrThrow().copy();
     }
 
     public static MutableComponent getEmptyLine() {

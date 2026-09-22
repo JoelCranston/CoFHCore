@@ -9,7 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class ItemRayTraceBlockPacket {
@@ -28,7 +28,7 @@ public class ItemRayTraceBlockPacket {
             if (player instanceof ServerPlayer serverPlayer) {
                 ItemStack stack = player.getItemInHand(payload.hand());
                 if (stack.getItem() instanceof IBlockRayTraceItem item) {
-                    item.handleBlockRayTrace(serverPlayer.serverLevel(), serverPlayer, payload.hand(), stack, payload.origin(), payload.result());
+                    item.handleBlockRayTrace(serverPlayer.level(), serverPlayer, payload.hand(), stack, payload.origin(), payload.result());
                 }
             }
         });
@@ -38,7 +38,7 @@ public class ItemRayTraceBlockPacket {
 
         Player client = ProxyUtils.getClientPlayer();
         if (client != null && client.equals(player)) {
-            PacketDistributor.sendToServer(new ItemRayTraceBlockPayload(hand, origin, result));
+            ClientPacketDistributor.sendToServer(new ItemRayTraceBlockPayload(hand, origin, result));
         }
     }
 

@@ -10,6 +10,7 @@ import cofh.lib.util.Utils;
 import cofh.lib.util.helpers.SecurityHelper;
 import cofh.lib.util.raytracer.RayTracer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -28,6 +29,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
@@ -100,7 +102,7 @@ public class EntityBlockCoFH extends Block implements EntityBlock, IDismantleabl
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level worldIn, BlockPos pos, Player player, BlockHitResult hit) {
 
-        return useItemOn(ItemStack.EMPTY, state, worldIn, pos, player, InteractionHand.MAIN_HAND, hit).result();
+        return useItemOn(ItemStack.EMPTY, state, worldIn, pos, player, InteractionHand.MAIN_HAND, hit);
     }
 
     protected boolean onBlockActivatedDelegate(Level world, BlockPos pos, BlockState state, Player player, InteractionHand hand, BlockHitResult result) {
@@ -113,13 +115,13 @@ public class EntityBlockCoFH extends Block implements EntityBlock, IDismantleabl
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
+    public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, @Nullable Orientation orientation, boolean isMoving) {
 
         BlockEntityCoFH tile = (BlockEntityCoFH) worldIn.getBlockEntity(pos);
         if (tile != null) {
-            tile.neighborChanged(blockIn, fromPos);
+            tile.neighborChanged(blockIn, pos);
         }
-        super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
+        super.neighborChanged(state, worldIn, pos, blockIn, orientation, isMoving);
     }
 
     @Override
@@ -139,10 +141,10 @@ public class EntityBlockCoFH extends Block implements EntityBlock, IDismantleabl
     }
 
     @Override
-    public int getAnalogOutputSignal(BlockState blockState, Level worldIn, BlockPos pos) {
+    public int getAnalogOutputSignal(BlockState blockState, Level worldIn, BlockPos pos, Direction direction) {
 
         BlockEntity tile = worldIn.getBlockEntity(pos);
-        return tile instanceof ITileCallback ? ((ITileCallback) tile).getComparatorInputOverride() : super.getAnalogOutputSignal(blockState, worldIn, pos);
+        return tile instanceof ITileCallback ? ((ITileCallback) tile).getComparatorInputOverride() : super.getAnalogOutputSignal(blockState, worldIn, pos, direction);
     }
 
     @Override
@@ -158,9 +160,9 @@ public class EntityBlockCoFH extends Block implements EntityBlock, IDismantleabl
     }
 
     @Override
-    public ItemStack getCloneItemStack(LevelReader worldIn, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(LevelReader worldIn, BlockPos pos, BlockState state, boolean includeData) {
 
-        ItemStack stack = super.getCloneItemStack(worldIn, pos, state);
+        ItemStack stack = super.getCloneItemStack(worldIn, pos, state, includeData);
         BlockEntity tile = worldIn.getBlockEntity(pos);
         if (tile instanceof ITileCallback callback) {
             callback.createItemStackTag(stack);

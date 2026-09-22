@@ -28,12 +28,14 @@ public abstract class AbstractGrenade extends ThrowableItemProjectile implements
 
     public AbstractGrenade(EntityType<? extends ThrowableItemProjectile> type, double x, double y, double z, Level worldIn) {
 
-        super(type, x, y, z, worldIn);
+        super(type, worldIn);
+        this.setPos(x, y, z);
     }
 
     public AbstractGrenade(EntityType<? extends ThrowableItemProjectile> type, LivingEntity livingEntityIn, Level worldIn) {
 
-        super(type, livingEntityIn, worldIn);
+        this(type, livingEntityIn.getX(), livingEntityIn.getEyeY() - 0.1F, livingEntityIn.getZ(), worldIn);
+        this.setOwner(livingEntityIn);
     }
 
     public AbstractGrenade setRadius(int radius) {

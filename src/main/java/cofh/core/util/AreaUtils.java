@@ -252,7 +252,7 @@ public class AreaUtils {
 
         if (target instanceof LivingEntity living) {
             living.addEffect(new MobEffectInstance(MobEffects.GLOWING, duration, power));
-            if (living.getType().is(EntityTypeTags.UNDEAD)) {
+            if (living.is(EntityTypeTags.UNDEAD)) {
                 living.hurt(living.level().damageSources().indirectMagic(source instanceof LivingEntity ? source : null, null), 4.0F);
                 living.igniteForSeconds(duration / 20.0F);
             }
@@ -576,7 +576,7 @@ public class AreaUtils {
                 mutable.set(blockpos.getX(), blockpos.getY() + 1, blockpos.getZ());
                 BlockState blockstate1 = levelIn.getBlockState(mutable);
                 if (blockstate1.isAir()) {
-                    if (levelIn.getBiome(mutable).value().getTemperature(blockpos) < 0.8F && isValidSnowPosition(levelIn, mutable)) {
+                    if (levelIn.getBiome(mutable).value().getTemperature(blockpos, levelIn.getSeaLevel()) < 0.8F && isValidSnowPosition(levelIn, mutable)) {
                         levelIn.setBlockAndUpdate(mutable, state);
                     }
                 }

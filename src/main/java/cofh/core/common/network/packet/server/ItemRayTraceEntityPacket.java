@@ -9,7 +9,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class ItemRayTraceEntityPacket {
@@ -30,7 +30,7 @@ public class ItemRayTraceEntityPacket {
                 if (stack.getItem() instanceof IEntityRayTraceItem item) {
                     Entity target = player.level.getEntity(payload.targetId());
                     if (target != null) {
-                        item.handleEntityRayTrace(serverPlayer.serverLevel(), serverPlayer, payload.hand(), stack, payload.origin(), target, target.position().add(payload.offset()), payload.power());
+                        item.handleEntityRayTrace(serverPlayer.level(), serverPlayer, payload.hand(), stack, payload.origin(), target, target.position().add(payload.offset()), payload.power());
                     }
                 }
             }
@@ -41,7 +41,7 @@ public class ItemRayTraceEntityPacket {
 
         Player client = ProxyUtils.getClientPlayer();
         if (client != null && client.equals(player)) {
-            PacketDistributor.sendToServer(new ItemRayTraceEntityPayload(hand, origin, target.getId(), hit, power));
+            ClientPacketDistributor.sendToServer(new ItemRayTraceEntityPayload(hand, origin, target.getId(), hit, power));
         }
     }
 

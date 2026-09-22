@@ -26,7 +26,7 @@ public class EffectEvents {
     }
 
     @SubscribeEvent (priority = EventPriority.HIGH)
-    public static void handleChorusFruitTeleportEvent(EntityTeleportEvent.ChorusFruit event) {
+    public static void handleChorusFruitTeleportEvent(EntityTeleportEvent.ItemConsumption event) {
 
         if (event.isCanceled()) {
             return;

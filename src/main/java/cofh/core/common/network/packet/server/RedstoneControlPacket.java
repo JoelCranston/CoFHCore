@@ -6,7 +6,7 @@ import cofh.lib.api.control.IRedstoneControllable.ControlMode;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class RedstoneControlPacket {
@@ -39,7 +39,7 @@ public class RedstoneControlPacket {
         if (tile == null) {
             return;
         }
-        PacketDistributor.sendToServer(new RedstoneControlPayload(tile.pos(), tile.redstoneControl().getThreshold(), (byte) tile.redstoneControl().getMode().ordinal()));
+        ClientPacketDistributor.sendToServer(new RedstoneControlPayload(tile.pos(), tile.redstoneControl().getThreshold(), (byte) tile.redstoneControl().getMode().ordinal()));
     }
 
 }

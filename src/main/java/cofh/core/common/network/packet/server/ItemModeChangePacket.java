@@ -3,7 +3,7 @@ package cofh.core.common.network.packet.server;
 import cofh.core.common.network.data.server.ItemModeChangePayload;
 import cofh.core.util.helpers.ItemHelper;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class ItemModeChangePacket {
@@ -42,7 +42,7 @@ public class ItemModeChangePacket {
 
     private static void sendToServer(boolean decr) {
 
-        PacketDistributor.sendToServer(new ItemModeChangePayload(decr));
+        ClientPacketDistributor.sendToServer(new ItemModeChangePayload(decr));
     }
 
 }

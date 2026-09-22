@@ -21,7 +21,7 @@ public class SubCommandZap {
     static ArgumentBuilder<CommandSourceStack, ?> register() {
 
         return Commands.literal("zap")
-                .requires(source -> source.hasPermission(permissionLevel))
+                .requires(source -> CoFHCommand.hasPermission(source, permissionLevel))
                 // Self
                 .executes(context -> zapEntities(context.getSource(), ImmutableList.of(context.getSource().getEntityOrException())))
                 // Targets Specified

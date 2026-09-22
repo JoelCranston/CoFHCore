@@ -18,7 +18,7 @@ public class SubCommandAnvil {
     static ArgumentBuilder<CommandSourceStack, ?> register() {
 
         return Commands.literal("anvil")
-                .requires(source -> source.hasPermission(permissionLevel))
+                .requires(source -> CoFHCommand.hasPermission(source, permissionLevel))
                 .executes(context -> openContainer(context.getSource().getPlayerOrException()));
     }
 

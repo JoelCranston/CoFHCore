@@ -41,7 +41,7 @@ public class CakeBlockCoFH extends CakeBlock {
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter reader, BlockPos pos, CollisionContext context) {
 
-        return tall ? SHAPE_BY_BITE_TALL[state.getValue(BITES)] : SHAPE_BY_BITE[state.getValue(BITES)];
+        return tall ? SHAPE_BY_BITE_TALL[state.getValue(BITES)] : super.getShape(state, reader, pos, context);
     }
 
     // A held item routes through useItemOn first, so both are overridden.
@@ -73,11 +73,6 @@ public class CakeBlockCoFH extends CakeBlock {
             player.awardStat(Stats.EAT_CAKE_SLICE);
             player.getFoodData().eat(food);
 
-            for (FoodProperties.PossibleEffect possible : this.food.effects()) {
-                if (!world.isClientSide() && world.getRandom().nextFloat() < possible.probability()) {
-                    player.addEffect(possible.effect());
-                }
-            }
             int i = state.getValue(BITES);
             if (i < 6) {
                 world.setBlock(pos, state.setValue(BITES, i + 1), 3);

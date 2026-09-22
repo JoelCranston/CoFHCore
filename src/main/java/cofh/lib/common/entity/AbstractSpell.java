@@ -4,6 +4,7 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -36,7 +37,7 @@ public abstract class AbstractSpell extends Entity implements TraceableEntity {
 
         this(type, level);
         this.noPhysics = true;
-        moveTo(pos);
+        snapTo(pos);
         if (owner != null) {
             this.owner = owner;
             this.ownerUUID = owner.getUUID();
@@ -102,6 +103,12 @@ public abstract class AbstractSpell extends Entity implements TraceableEntity {
     public boolean fireImmune() {
 
         return true;
+    }
+
+    @Override
+    public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+
+        return false;
     }
 
     @Override

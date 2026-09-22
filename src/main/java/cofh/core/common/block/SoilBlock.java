@@ -3,6 +3,7 @@ package cofh.core.common.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.TriState;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.*;
@@ -12,7 +13,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.ItemAbility;
-import net.neoforged.neoforge.common.util.TriState;
 
 import java.util.function.Supplier;
 
@@ -51,8 +51,8 @@ public class SoilBlock extends Block {
             return tilled ? TriState.TRUE : TriState.FALSE;
         }
         // CAVE, DESERT, PLAINS, FUNGUS
-        if (plantBlock instanceof BushBlock || plantBlock instanceof MushroomBlock || plantBlock instanceof NetherWartBlock
-                || plantBlock instanceof CactusBlock || plantBlock instanceof DeadBushBlock || plantBlock instanceof FungusBlock) {
+        if (plantBlock instanceof VegetationBlock || plantBlock instanceof MushroomBlock || plantBlock instanceof NetherWartBlock
+                || plantBlock instanceof CactusBlock || plantBlock instanceof DryVegetationBlock || plantBlock instanceof NetherFungusBlock) {
             return tilled ? TriState.FALSE : TriState.TRUE;
         }
         // BEACH

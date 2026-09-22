@@ -5,7 +5,7 @@ import cofh.core.util.control.ITransferControllableTile;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class TransferControlPacket {
@@ -38,7 +38,7 @@ public class TransferControlPacket {
         if (tile == null) {
             return;
         }
-        PacketDistributor.sendToServer(new TransferControlPayload(tile.pos(), tile.transferControl().getTransferIn(), tile.transferControl().getTransferOut()));
+        ClientPacketDistributor.sendToServer(new TransferControlPayload(tile.pos(), tile.transferControl().getTransferIn(), tile.transferControl().getTransferOut()));
     }
 
 }

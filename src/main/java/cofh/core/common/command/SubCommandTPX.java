@@ -15,7 +15,7 @@ public class SubCommandTPX {
     static ArgumentBuilder<CommandSourceStack, ?> register() {
 
         return Commands.literal("tpx")
-                .requires(source -> source.hasPermission(permissionLevel));
+                .requires(source -> CoFHCommand.hasPermission(source, permissionLevel));
         // No target - self
         //.executes(context -> execute(context.getSource(), context.getSource().asPlayer()));
     }
@@ -23,7 +23,7 @@ public class SubCommandTPX {
     static ArgumentBuilder<CommandSourceStack, ?> registerAlt() {
 
         return Commands.literal("teleport")
-                .requires(source -> source.hasPermission(permissionLevel));
+                .requires(source -> CoFHCommand.hasPermission(source, permissionLevel));
         // No target - self
         //.executes(context -> execute(context.getSource(), context.getSource().asPlayer()));
     }

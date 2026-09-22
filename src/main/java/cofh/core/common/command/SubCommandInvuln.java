@@ -24,7 +24,7 @@ public class SubCommandInvuln {
     static ArgumentBuilder<CommandSourceStack, ?> register() {
 
         return Commands.literal("invuln")
-                .requires(source -> source.hasPermission(permissionLevel.get()))
+                .requires(source -> CoFHCommand.hasPermission(source, permissionLevel.get()))
                 // Self
                 .executes(context -> flagEntities(context.getSource(), ImmutableList.of(context.getSource().getPlayerOrException()), DEFAULT_FLAG))
                 // Flag Specified
@@ -42,7 +42,7 @@ public class SubCommandInvuln {
     static ArgumentBuilder<CommandSourceStack, ?> registerAlt() {
 
         return Commands.literal("invulnerable")
-                .requires(source -> source.hasPermission(permissionLevel.get()))
+                .requires(source -> CoFHCommand.hasPermission(source, permissionLevel.get()))
                 // Self
                 .executes(context -> flagEntities(context.getSource(), ImmutableList.of(context.getSource().getPlayerOrException()), DEFAULT_FLAG))
                 // Flag Specified

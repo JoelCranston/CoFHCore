@@ -109,7 +109,7 @@ public class FluidFilterMenu extends ContainerMenuCoFH implements IFilterOptions
                 }
             }
             for (int i = 0; i < 9; ++i) {
-                if (i == inventory.selected) {
+                if (i == inventory.getSelectedSlot()) {
                     lockedSlot = new SlotLocked(inventory, i, xOffset + i * 18, yOffset + 58);
                     addSlot(lockedSlot);
                 } else {

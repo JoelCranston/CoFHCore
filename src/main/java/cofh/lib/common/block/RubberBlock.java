@@ -17,7 +17,7 @@ public class RubberBlock extends Block {
     }
 
     @Override
-    public void fallOn(Level worldIn, BlockState state, BlockPos pos, Entity entityIn, float fallDistance) {
+    public void fallOn(Level worldIn, BlockState state, BlockPos pos, Entity entityIn, double fallDistance) {
 
         if (entityIn.isSuppressingBounce()) {
             super.fallOn(worldIn, state, pos, entityIn, fallDistance);
@@ -27,10 +27,10 @@ public class RubberBlock extends Block {
     }
 
     @Override
-    public void updateEntityAfterFallOn(BlockGetter worldIn, Entity entityIn) {
+    public void updateEntityMovementAfterFallOn(BlockGetter worldIn, Entity entityIn) {
 
         if (entityIn.isSuppressingBounce() || Math.abs(entityIn.getDeltaMovement().y) < 0.1D) {
-            super.updateEntityAfterFallOn(worldIn, entityIn);
+            super.updateEntityMovementAfterFallOn(worldIn, entityIn);
         } else {
             this.bounceUp(entityIn);
         }

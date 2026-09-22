@@ -20,14 +20,14 @@ public class SubCommandCrafting {
     static ArgumentBuilder<CommandSourceStack, ?> register() {
 
         return Commands.literal("crafting")
-                .requires(source -> source.hasPermission(permissionLevel.get()))
+                .requires(source -> CoFHCommand.hasPermission(source, permissionLevel.get()))
                 .executes(context -> openContainer(context.getSource().getPlayerOrException()));
     }
 
     static ArgumentBuilder<CommandSourceStack, ?> registerAlt() {
 
         return Commands.literal("workbench")
-                .requires(source -> source.hasPermission(permissionLevel.get()))
+                .requires(source -> CoFHCommand.hasPermission(source, permissionLevel.get()))
                 .executes(context -> openContainer(context.getSource().getPlayerOrException()));
     }
 

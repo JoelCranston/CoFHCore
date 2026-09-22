@@ -29,7 +29,7 @@ public class EffectAddedPacket {
 
         context.enqueueWork(() -> {
             int id = payload.entityId();
-            Holder<MobEffect> effectType = BuiltInRegistries.MOB_EFFECT.getHolder(payload.effect()).orElse(null);
+            Holder<MobEffect> effectType = BuiltInRegistries.MOB_EFFECT.get(payload.effect()).orElse(null);
             int effectDur = payload.duration();
 
             MobEffectInstance effect = effectType != null ? new MobEffectInstance(effectType, effectDur) : null;
@@ -53,7 +53,7 @@ public class EffectAddedPacket {
         if (entity == null || effect == null) {
             return;
         }
-        Utils.sendNear(entity, new EffectAddedPayload(entity.getId(), effect.getEffect().unwrapKey().map(ResourceKey::location).orElse(null), effect.getDuration()));
+        Utils.sendNear(entity, new EffectAddedPayload(entity.getId(), effect.getEffect().unwrapKey().map(ResourceKey::identifier).orElse(null), effect.getDuration()));
 
     }
 
@@ -63,7 +63,7 @@ public class EffectAddedPacket {
             return;
         }
         if (player instanceof ServerPlayer serverPlayer) {
-            PacketDistributor.sendToPlayer(serverPlayer, new EffectAddedPayload(entity.getId(), effect.getEffect().unwrapKey().map(ResourceKey::location).orElse(null), effect.getDuration()));
+            PacketDistributor.sendToPlayer(serverPlayer, new EffectAddedPayload(entity.getId(), effect.getEffect().unwrapKey().map(ResourceKey::identifier).orElse(null), effect.getDuration()));
         }
     }
 

@@ -3,6 +3,7 @@ package cofh.lib.common.block;
 import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -80,11 +81,6 @@ public class FeastBlock extends DirectionalBlock4Way {
                 player.addItem(servItem);
             } else {
                 player.getFoodData().eat(food);
-                for (FoodProperties.PossibleEffect possible : this.food.effects()) {
-                    if (!world.isClientSide() && world.getRandom().nextFloat() < possible.probability()) {
-                        player.addEffect(possible.effect());
-                    }
-                }
             }
             int i = state.getValue(getBitesProperty());
             if (i < getMaxBites()) {
@@ -124,9 +120,9 @@ public class FeastBlock extends DirectionalBlock4Way {
     }
 
     @Override
-    public BlockState updateShape(BlockState stateIn, Direction facing, BlockState facingState, LevelAccessor worldIn, BlockPos currentPos, BlockPos facingPos) {
+    public BlockState updateShape(BlockState stateIn, LevelReader worldIn, ScheduledTickAccess ticks, BlockPos currentPos, Direction facing, BlockPos facingPos, BlockState facingState, RandomSource random) {
 
-        return facing == Direction.DOWN && !stateIn.canSurvive(worldIn, currentPos) ? Blocks.AIR.defaultBlockState() : super.updateShape(stateIn, facing, facingState, worldIn, currentPos, facingPos);
+        return facing == Direction.DOWN && !stateIn.canSurvive(worldIn, currentPos) ? Blocks.AIR.defaultBlockState() : super.updateShape(stateIn, worldIn, ticks, currentPos, facing, facingPos, facingState, random);
     }
 
     @Override

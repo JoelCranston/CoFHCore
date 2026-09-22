@@ -33,7 +33,6 @@ public class RailBlockCoFH extends RailBlock implements IDismantleable, IWrencha
         return this;
     }
 
-    @Override
     public float getRailMaxSpeed(BlockState state, Level world, BlockPos pos, AbstractMinecart cart) {
 
         return maxSpeed;

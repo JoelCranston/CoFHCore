@@ -5,7 +5,7 @@ import cofh.lib.api.block.entity.ITileCallback;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class StorageClearPacket {
@@ -42,7 +42,7 @@ public class StorageClearPacket {
         if (tile == null) {
             return false;
         }
-        PacketDistributor.sendToServer(new StorageClearPayload(tile.pos(), storageType.ordinal(), storageIndex));
+        ClientPacketDistributor.sendToServer(new StorageClearPayload(tile.pos(), storageType.ordinal(), storageIndex));
         return true;
     }
 

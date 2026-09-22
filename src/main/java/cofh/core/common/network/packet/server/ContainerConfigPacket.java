@@ -5,7 +5,7 @@ import cofh.core.common.network.data.server.ContainerConfigPayload;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class ContainerConfigPacket {
@@ -33,7 +33,7 @@ public class ContainerConfigPacket {
         if (container == null) {
             return;
         }
-        PacketDistributor.sendToServer(new ContainerConfigPayload(container.getConfigPacket(new FriendlyByteBuf(Unpooled.buffer()))));
+        ClientPacketDistributor.sendToServer(new ContainerConfigPayload(container.getConfigPacket(new FriendlyByteBuf(Unpooled.buffer()))));
     }
 
 }

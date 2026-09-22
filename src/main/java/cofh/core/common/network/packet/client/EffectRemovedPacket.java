@@ -26,13 +26,10 @@ public class EffectRemovedPacket {
 
         context.enqueueWork(() -> {
             int id = payload.entityId();
-            Holder<MobEffect> effectType = BuiltInRegistries.MOB_EFFECT.getHolder(payload.effect()).orElse(null);
+            Holder<MobEffect> effectType = BuiltInRegistries.MOB_EFFECT.get(payload.effect()).orElse(null);
 
             if (ProxyUtils.getClientWorld().getEntity(id) instanceof LivingEntity entity && !entity.equals(ProxyUtils.getClientPlayer())) {
-                MobEffectInstance existing = entity.removeEffectNoUpdate(effectType);
-                if (existing != null) {
-                    entity.onEffectRemoved(existing);
-                }
+                entity.removeEffectNoUpdate(effectType);
             }
         });
     }
@@ -42,7 +39,7 @@ public class EffectRemovedPacket {
         if (entity == null || effect == null) {
             return;
         }
-        Utils.sendNear(entity, new EffectRemovedPayload(entity.getId(), effect.getEffect().unwrapKey().map(ResourceKey::location).orElse(null)));
+        Utils.sendNear(entity, new EffectRemovedPayload(entity.getId(), effect.getEffect().unwrapKey().map(ResourceKey::identifier).orElse(null)));
     }
 
     public static void sendToClient(LivingEntity entity, MobEffect effect) {

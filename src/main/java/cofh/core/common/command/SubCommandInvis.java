@@ -23,7 +23,7 @@ public class SubCommandInvis {
     static ArgumentBuilder<CommandSourceStack, ?> register() {
 
         return Commands.literal("invis")
-                .requires(source -> source.hasPermission(permissionLevel))
+                .requires(source -> CoFHCommand.hasPermission(source, permissionLevel))
                 // Self
                 .executes(context -> flagEntities(context.getSource(), ImmutableList.of(context.getSource().getPlayerOrException()), DEFAULT_FLAG))
                 // Flag Specified
@@ -41,7 +41,7 @@ public class SubCommandInvis {
     static ArgumentBuilder<CommandSourceStack, ?> registerAlt() {
 
         return Commands.literal("invisible")
-                .requires(source -> source.hasPermission(permissionLevel))
+                .requires(source -> CoFHCommand.hasPermission(source, permissionLevel))
                 // Self
                 .executes(context -> flagEntities(context.getSource(), ImmutableList.of(context.getSource().getPlayerOrException()), DEFAULT_FLAG))
                 // Flag Specified

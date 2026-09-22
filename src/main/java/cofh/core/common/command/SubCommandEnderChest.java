@@ -24,7 +24,7 @@ public class SubCommandEnderChest {
     static ArgumentBuilder<CommandSourceStack, ?> register() {
 
         return Commands.literal("enderchest")
-                .requires(source -> source.hasPermission(permissionLevel.get()))
+                .requires(source -> CoFHCommand.hasPermission(source, permissionLevel.get()))
                 // Self
                 .executes(context -> openContainer(context.getSource().getPlayerOrException(), context.getSource().getPlayerOrException()))
                 // Target Specified

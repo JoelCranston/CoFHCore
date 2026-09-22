@@ -392,3 +392,150 @@ not a regression.
 
 **Owed verification**: nothing in B.4 has run. Once 26.1.2 compiles and boots, move items/fluids/energy
 in and out of a machine with a pipe mod (or a GameTest), including an aborted simulation.
+
+---
+
+## B.5 Items, tools, armour
+
+### Tools: `ToolMaterial` + `Item.Properties`
+
+`SwordItem`, `DiggerItem`, `PickaxeItem`, `TieredItem` and `Tier` are gone.
+`ToolMaterial(TagKey<Block> incorrectBlocksForDrops, int durability, float speed, float attackDamageBonus,
+int enchantmentValue, TagKey<Item> repairItems)` is a record, and a tool is a plain `Item` built with
+`Item.Properties#sword/pickaxe/axe/hoe/shovel(material, damage, speed)` or
+`tool(material, TagKey<Block> minesEfficiently, damage, speed, float disableBlockingSeconds)`.
+**`AxeItem`, `HoeItem` and `ShovelItem` survive** as `Item` subclasses taking
+`(ToolMaterial, float, float, Properties)`, and they still carry stripping, tilling and pathing.
+
+- **The tool properties overwrite durability** from the material (`applyCommonProperties`), so
+  `builder.durability(n).pickaxe(...)` loses `n`. CoFH's hammer, excavator and sickle scale the
+  *material* instead: `new ToolMaterial(…, material.durability() * 4, …)`.
+- `canDisableShield` is gone. Shield-disabling is `Weapon(itemDamagePerAttack, disableBlockingSeconds)`,
+  which `tool(...)` sets. The axe uses 5.0 s, and CoFH's hammer copies it.
+- `Item#getDestroySpeed` is gone; mining speed is only the `TOOL` component's rules. To add a
+  special case (the sickle's cobweb, speed 15), replace the component after `tool(...)` with
+  `new Tool(List.of(Tool.Rule.overrideSpeed(HolderSet.direct(Blocks.COBWEB.builtInRegistryHolder()), 15.0F),
+  Tool.Rule.deniesDrops(…incorrect…), Tool.Rule.minesAndDrops(…tag…, speed)), 1.0F, 1, true)`. Resolve
+  tags with `BuiltInRegistries.acquireBootstrapRegistrationLookup(BuiltInRegistries.BLOCK)`, as vanilla does.
+- `ItemTierCoFH` is no longer a `Tier`. It holds a `ToolMaterial` (`getMaterial()`) plus CoFH's numeric
+  `getLevel()`, and takes a repair **tag** rather than an `Ingredient` supplier.
+
+### Armour: the equipment `ArmorMaterial` record
+
+`ArmorItem`, `AnimalArmorItem` and the `ArmorMaterial` *registry* are gone.
+`net.minecraft.world.item.equipment.ArmorMaterial(int durability, Map<ArmorType, Integer> defense,
+int enchantmentValue, Holder<SoundEvent> equipSound, float toughness, float knockbackResistance,
+TagKey<Item> repairIngredient, ResourceKey<EquipmentAsset> assetId)` is a plain record.
+`Item.Properties#humanoidArmor(material, ArmorType)` sets durability, attributes, enchantability, repair
+and the `EQUIPPABLE` component. `horseArmor(material)` and `wolfArmor(material)` do the same for animals.
+
+- `ArmorItem.Type` → `ArmorType` (`HELMET, CHESTPLATE, LEGGINGS, BOOTS, BODY`, with `getSlot()` and
+  `getDurability(int)`).
+- `ArmorItemCoFH` keeps a `getType()` returning the `ArmorType`, because ThermalCore's armour calls
+  `getType().getSlot()` throughout.
+- `ArmorMaterialCoFH.create(durability, int[] defense, enchantability, equipSound, toughness, kbResist,
+  TagKey<Item> repairItems, ResourceKey<EquipmentAsset> assetId)`. The defense array is in `ArmorType`
+  order (helmet first), as upstream's was in `ArmorItem.Type` order.
+- **B.8/B.10**: each material needs `assets/<ns>/equipment/<name>.json`, and its textures move to
+  `textures/entity/equipment/humanoid[_leggings]/`. The repair ingredient must be an **item tag**.
+- Dyeability is the `minecraft:dyeable` item tag plus the `DYED_COLOR` component, not a class, so the
+  `Dyeable*` classes are now the same as their parents.
+
+### `IItemExtension` / `Item` signatures
+
+| 1.21.1 | 26.1.2 |
+|---|---|
+| `getCreatorModId(ItemStack)` | `getCreatorModId(HolderLookup.Provider registries, ItemStack)` |
+| `getBurnTime(ItemStack, RecipeType<?>)` | `getBurnTime(ItemStack, @Nullable RecipeType<?>, FuelValues)` |
+| `appendHoverText(ItemStack, TooltipContext, List<Component>, TooltipFlag)` | `appendHoverText(ItemStack, TooltipContext, TooltipDisplay, Consumer<Component>, TooltipFlag)` |
+| `isEnchantable(ItemStack)`, `getEnchantmentValue(ItemStack)` | **gone**. `DataComponents.ENCHANTABLE`, set with `Properties#enchantable(n)`; `EnchantmentHelper` reads only the component. A per-stack value means `stack.set(ENCHANTABLE, …)` |
+| `releaseUsing(…)` returns `void` | returns `boolean` (whether the release did something) |
+| `getUseAnimation` → `UseAnim` | `ItemUseAnimation` |
+| `getDescriptionId()` overridable, `getOrCreateDescriptionId()` | **final**. Use `Properties#useItemDescriptionPrefix()` / `useBlockDescriptionPrefix()` / `overrideDescription(id)` |
+| `ItemCooldowns#addCooldown(Item, int)` | `addCooldown(ItemStack, int)` (cooldown group from the stack) |
+| `LivingEntity.getSlotForHand(hand)` | `hand.asEquipmentSlot()` |
+| `ExperienceOrb.value` | `getValue()` / `setValue(int)` |
+| `RailShape#isAscending()` | `isSlope()` |
+| `SignItem(Properties, Block, Block)` | `SignItem(Block sign, Block wallSign, Properties)` |
+| `ChargedProjectiles.of(ItemStack)` / `getItems()` | `ofNonEmpty(List<ItemStack>)` (or `of(ItemStackTemplate)`) / `itemCopies()` |
+| `Screen.hasShiftDown()` | `Minecraft.getInstance().hasShiftDown()` |
+| NeoForge `DeferredSpawnEggItem(Supplier<EntityType>, bg, hl, props)` | vanilla `SpawnEggItem(props.spawnEgg(type))`. Entity types now register before items, so the supplier resolves at construction. The egg's tint colours are no longer vanilla's concern: eggs have individual textures since 1.21.5 (B.7) |
+
+Enchantability had been set **after** construction (`setEnchantability(n)`, chained). Components are
+fixed at construction, so CoFHCore's setters are removed and its container items pass
+`builder.enchantable(5)`. B.10: ThermalCore's `setEnchantability` calls move into the properties, and its
+augmentable items' **per-stack** scaling (`getEnchantmentValue` × augment modifier) must write the
+`ENCHANTABLE` component when augments change.
+
+### Entities, effects, events
+
+| 1.21.1 | 26.1.2 |
+|---|---|
+| `Entity#hurt` → boolean, overridable | `final void hurt`. Override `hurtServer(ServerLevel, DamageSource, float)`, and call `hurtOrSimulate(src, amt)` when you need the result |
+| `Entity#moveTo(...)` | `snapTo(...)` (same overloads) |
+| `Entity#makeBoundingBox()` overridable | `final`. Override `makeBoundingBox(Vec3 position)` |
+| `Entity#spawnAtLocation(stack[, y])` | `spawnAtLocation(ServerLevel, stack[, y])` |
+| `Entity#causeFallDamage(float, …)` | `(double, float, DamageSource)` |
+| `Entity#getCommandSenderWorld()` | `level()` |
+| `entity.getType().is(TagKey)` | `entity.is(TagKey)` (`TypedInstance`) |
+| `EntityType#create(Level)` | `create(Level, EntitySpawnReason)` |
+| `walkDist`, `updateInWaterStateAndDoFluidPushing`, `checkInsideBlocks` | gone. Use `updateFluidInteraction()` and `applyEffectsFromBlocks()` |
+| `Boat`/`ChestBoat(type, level)` | `(type, level, Supplier<Item> dropItem)`. Drops and pick result come from the supplier |
+| `VehicleEntity#destroy(DamageSource)` | `destroy(ServerLevel, DamageSource)` |
+| `AbstractMinecart#getMinecartType()`/`Type` | gone (`isRideable()`/`isFurnace()`); `activateMinecart(ServerLevel, x, y, z, powered)` |
+| `ThrowableItemProjectile(type, x, y, z, level)` | takes a trailing `ItemStack` (or `super(type, level)` + `setPos`) |
+| `PrimedTnt.owner` | `@Nullable EntityReference<LivingEntity>` via `EntityReference.of(entity)` |
+| `GameRules` (`world.level`), `getBoolean(RULE_DOENTITYDROPS)` | `world.level.gamerules.GameRules`, `get(GameRules.ENTITY_DROPS)` |
+| `LivingEntity#getArmorSlots/getAllSlots` | loop over `EquipmentSlot`s with `getItemBySlot` |
+| `Inventory#items`/`armor`/`selected` | `getNonEquipmentItems()` (0–35) / `getItemBySlot(slot)` / `getSelectedSlot()` |
+| `AbstractArrow#getBaseDamage()` | gone. Read the `baseDamage` field (AT) |
+| `MobEffect#applyEffectTick(LivingEntity, int)` | `(ServerLevel, LivingEntity, int)`, **server only**, so client particles must be sent with `ServerLevel#sendParticles` |
+| `MobEffect#applyInstantenousEffect(src, …)` | gains a leading `ServerLevel` |
+| NeoForge `EffectCure` / `fillEffectCures` | **removed**. `removeAllEffects` (milk) clears everything |
+| `LivingEntity#onEffectRemoved(instance)` | gone. Use `removeEffect(holder)`, which posts `MobEffectEvent.Remove` and calls `onEffectsRemoved` |
+| `EntityTeleportEvent.ChorusFruit` | `EntityTeleportEvent.ItemConsumption` |
+| `BlockEvent.BreakEvent` | `event.level.block.BreakBlockEvent` |
+| `LivingShieldBlockEvent` cancellable | not cancellable. Check `getBlocked()` |
+| `DiggerItem` / `*_DIG` abilities | gone. "Is a mining tool" means `stack.has(DataComponents.TOOL)` |
+| `BlockTags.TALL_FLOWERS`, `MossBlock` | gone / `BonemealableFeaturePlacerBlock` |
+
+### Blocks and fluids
+
+| 1.21.1 | 26.1.2 |
+|---|---|
+| `neoforge.common.util.TriState` | `net.minecraft.util.TriState` (`canSustainPlant` unchanged) |
+| `BushBlock` as "any plant" | `VegetationBlock`. `BushBlock` is now just the bush plant; `DeadBushBlock` → `DryVegetationBlock`, `FungusBlock` → `NetherFungusBlock` |
+| `neighborChanged(…, BlockPos fromPos, boolean)` | `(…, @Nullable Orientation, boolean)`. **The neighbour's position is gone**, and `Orientation` is null outside experimental redstone |
+| `getAnalogOutputSignal(state, level, pos)` | `(…, Direction)` |
+| `getCloneItemStack(LevelReader, pos, state)` | `(…, boolean includeData)` |
+| `Block#getDescriptionId()` | `final`. Override `getName()` |
+| `updateShape(state, dir, nState, LevelAccessor, pos, nPos)` | `updateShape(state, LevelReader, ScheduledTickAccess, pos, dir, nPos, nState, RandomSource)` |
+| `entityInside(state, level, pos, entity)` | `(…, InsideBlockEffectApplier, boolean isPrecise)` |
+| `fallOn(…, float)` / `updateEntityAfterFallOn` | `fallOn(…, double)` / `updateEntityMovementAfterFallOn` |
+| `onCaughtFire` → void, `wasExploded(Level, …)` | returns `boolean` (TNT only removes itself when `true`), `wasExploded(ServerLevel, …)` |
+| `getMaxBuildHeight()` | `getMaxY()` (inclusive, one lower) |
+| `IBaseRailBlockExtension#getRailMaxSpeed` | removed, no hook (`MinecartBehavior`) |
+| `Equipable` | gone. Use the `EQUIPPABLE` component on the item |
+| `FoodProperties.effects()` / `PossibleEffect` | gone. Effects live on the `Consumable` component |
+| `ParticleTypes.INSTANT_EFFECT` | `SpellParticleOption.create(type, color, power)` |
+| `PotionContents(potion, color, effects)` | gains `Optional<String> customName`. `Potion.getName(…)` → `PotionContents#getName(prefix)` |
+| `DataComponents.HIDE_ADDITIONAL_TOOLTIP` | `TOOLTIP_DISPLAY` |
+
+### Commands, network, menus, util
+
+| 1.21.1 | 26.1.2 |
+|---|---|
+| `CommandSourceStack#hasPermission(int)` | `source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(n)))` (`server.permissions`). CoFH wraps it as `CoFHCommand.hasPermission(source, level)` |
+| `Player#hasPermissions(4)` | `permissions().hasPermission(Permissions.COMMANDS_OWNER)` |
+| `PacketDistributor.sendToServer` | `client.network.ClientPacketDistributor.sendToServer` |
+| `ServerPlayer#serverLevel()` | `level()` |
+| `FriendlyByteBuf#writeVec3/readVec3` | `Vec3.STREAM_CODEC` |
+| `ClickType` | `ContainerInput` |
+| `Style#withFont(Identifier)` | `withFont(new FontDescription.Resource(id))` |
+| `Component.Serializer.toJson/fromJsonLenient` | `ComponentSerialization.CODEC` with `createSerializationContext(JsonOps.INSTANCE)` |
+| `WeightedEntry.IntrusiveBase` | gone. `WeightedRandom` takes a weight `ToIntFunction` |
+| `Registry#getOrCreateTag` / `getHolder(id)` | `getOrThrow(tag)`/`get(tag)` / `get(id)` → `Optional<Holder.Reference>` |
+| `BlockHitResult(…)` | gains a trailing `worldBorderHit` |
+| `Item#getCraftingRemainingItem(stack)` | NeoForge `getCraftingRemainder(ItemInstance)` → nullable `ItemStackTemplate` (`.create()`) |
+| `BLOCK_ENTITY_DATA` as `CustomData` | `TypedEntityData<BlockEntityType<?>>`: `TypedEntityData.of(type, tag)` / `copyTagWithoutId()`. `BlockItem` applies it only when the type matches. CoFH's `ItemHelper.setBlockEntityData` infers the type (the stack's, else the first type valid for the item's block) |
+| JEI `IIngredientSubtypeInterpreter#apply` → String | `ISubtypeInterpreter<T>#getSubtypeData(T, UidContext)` → Object (`null` = none); `IRecipeManagerPlugin` takes `IRecipeType<T>` |

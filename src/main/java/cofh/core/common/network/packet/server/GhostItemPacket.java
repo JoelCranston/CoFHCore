@@ -6,7 +6,7 @@ import cofh.lib.common.inventory.SlotFalseCopy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import static cofh.core.util.helpers.ItemHelper.cloneStack;
@@ -39,7 +39,7 @@ public class GhostItemPacket {
         if (slotNumber < 0 || stack.isEmpty() || count < 0) {
             return;
         }
-        PacketDistributor.sendToServer(new GhostItemPayload(slotNumber, stack, count));
+        ClientPacketDistributor.sendToServer(new GhostItemPayload(slotNumber, stack, count));
     }
 
 }

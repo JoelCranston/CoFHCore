@@ -2,7 +2,7 @@
 
 Phase A (1.21.1) is **code-complete**: all four repos build clean and boot headless on
 NeoForge 21.1.251, and `runData` now runs in all four. Phase B (26.1.2) is under way on the
-`26.1.2` branch: B.0-B.4 done in CoFHCore, **1326 errors** left. See
+`26.1.2` branch: B.0-B.5 done in CoFHCore, **895 errors** left (client, recipes, mixins). See
 [api-notes-1.21.1.md](api-notes-1.21.1.md) / [api-notes-26.1.2.md](api-notes-26.1.2.md) for
 confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 
@@ -39,8 +39,9 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 | B.2 registration | `f02ba1b` | (included above) |
 | B.3 persistence — bridged at `BlockEntityCoFH`, entities native, `SavedDataType`, tag getters | `8bd2f62` | 1364 |
 | B.4 transfer API — CoFH handlers also implement the new interfaces (per-storage journals), query sites wrap with `.of()` | `ccfc12d` | 1326 |
-| **B.5 items/tools/armour** | next | |
-| B.6 recipes · B.7 client (XL) · B.8 resources · B.9 mixins · B.10 dependents | | |
+| B.5 items/tools/armour (`41d84d9`), then entities, blocks, fluids, commands, packets, util | (this commit) | 895 |
+| **B.6 recipes** (incl. `cofh/lib/util/recipes/**`, `crafting/**`) | next | |
+| B.7 client (XL) · B.8 resources · B.9 mixins · B.10 dependents | | |
 
 [port-plan.md](port-plan.md) §6 has each category's contents. Carry-overs into Phase B:
 
@@ -63,6 +64,21 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
   handler types. Also call `invalidateCapabilities()` after side-config changes and wrench
   rotation. B.4 is **unverified at runtime**: test a machine with a pipe mod or a GameTest,
   including an aborted simulation.
+- **B.10 inherits from B.5**:
+  - ThermalCore's armour takes `ArmorMaterial`/`ArmorType`. Its materials become static records with
+    durability, a repair **item tag** and an equipment asset id, and it needs
+    `assets/thermal/equipment/*.json` (B.8).
+  - `setEnchantability` calls move into the properties. The augmentable items' per-stack
+    enchantability must write the `ENCHANTABLE` component.
+  - `getCreatorModId`/`getBurnTime`/`appendHoverText` take their new signatures everywhere.
+  - `DevicePotionDiffuserBlockEntity` calls `applyInstantenousEffect(serverLevel, …)`.
+  - The Thermal minecarts drop `getMinecartType` and adopt the new `destroy`/`activateMinecart`/
+    `hurtServer` signatures.
+  - `neighborChanged` takes an `Orientation` in `TilledChargedSoilBlock` and TD's `DuctBlock`.
+  - **TD's ducts used the neighbour's `fromPos`** to decide which side changed
+    (`DuctBlockEntity#neighborChanged`, `DuctBlock#getBlockEntity(fromPos)`). That position no
+    longer exists, so the duct needs a different trigger. `ITileCallback#neighborChanged` now
+    receives the block's own position.
 - **B.8: regenerate, don't hand-migrate.** The `26.1.2` branch predates the 1.21.1 `runData`
   commits, so its `src/main/generated` still has the stale 1.20 layout. On 26.1 the data run is
   `clientData()`, which the 26.1.2 `build.gradle` already declares. ThermalExpansion's
@@ -82,6 +98,21 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
    api-notes-26.1.2.md, B.4 "Not covered".
 
 ## Inbox
+
+- **B.5 behaviour changes the new API forced (2026-09-22)**, each to confirm in play:
+  - **CoFH cake and feast blocks no longer apply food effects**, because `FoodProperties` lost them
+    in favour of the `Consumable` component. Nothing in the four repos builds one; restoring it
+    means the block holding its own effect list.
+  - **Custom rail max speed is inert** (`getRailMaxSpeed` has no engine hook). Nothing uses it.
+  - **Neutral effects are now cleared by milk.** NeoForge removed `EffectCure`, so there's no
+    exemption.
+  - **Custom effect particles are sent from the server**, because `applyEffectTick` is
+    server-only. The Wrenched rotation and Chilled freezing run server-side too.
+  - **Area-effect "tool" is `has(DataComponents.TOOL)`**, which now includes swords and shears.
+    That's harmless without Excavating.
+  - **Item-stored block-entity data needs a `BlockEntityType`.** `ItemHelper.setBlockEntityData`
+    infers it. Energy/fluid cells and machines in item form must keep their data when placed.
+  - **Lightning from CoFH uses the `TRIGGERED` spawn reason.**
 
 - **Behaviour differences the style pass found (2026-09-22), left alone because that pass was
   not allowed to change behaviour.** Each is a 1.21.1 fix to decide on:

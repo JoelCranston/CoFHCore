@@ -26,7 +26,7 @@ public class SubHitBlockHitResult extends BlockHitResult implements Comparable<S
 
     protected SubHitBlockHitResult(boolean isMissIn, Vec3 hitVec, Direction faceIn, BlockPos posIn, boolean isInside, Object data, double dist) {
 
-        super(isMissIn, hitVec, faceIn, posIn, isInside);
+        super(isMissIn, hitVec, faceIn, posIn, isInside, false);
         if (data instanceof Integer d) {
             subHit = d;
         } else {

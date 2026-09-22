@@ -3,6 +3,7 @@ package cofh.core.common.effect;
 import cofh.lib.common.effect.CustomParticleMobEffect;
 import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -21,9 +22,9 @@ public class ChilledMobEffect extends CustomParticleMobEffect {
     }
 
     @Override
-    public boolean applyEffectTick(LivingEntity living, int amplifier) {
+    public boolean applyEffectTick(ServerLevel level, LivingEntity living, int amplifier) {
 
-        super.applyEffectTick(living, amplifier);
+        super.applyEffectTick(level, living, amplifier);
 
         if (living.canFreeze()) {
             living.isInPowderSnow = true;

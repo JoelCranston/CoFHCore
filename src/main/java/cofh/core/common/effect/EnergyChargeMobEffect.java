@@ -2,6 +2,7 @@ package cofh.core.common.effect;
 
 import cofh.core.common.capability.CoreCapabilities;
 import cofh.lib.common.effect.MobEffectCoFH;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
@@ -21,7 +22,7 @@ public class EnergyChargeMobEffect extends MobEffectCoFH {
     }
 
     @Override
-    public boolean applyEffectTick(LivingEntity entityLivingBaseIn, int amplifier) {
+    public boolean applyEffectTick(ServerLevel level, LivingEntity entityLivingBaseIn, int amplifier) {
 
         if (entityLivingBaseIn instanceof ServerPlayer player) {
 

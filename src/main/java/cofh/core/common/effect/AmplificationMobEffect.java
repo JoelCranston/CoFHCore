@@ -3,6 +3,7 @@ package cofh.core.common.effect;
 import cofh.lib.common.effect.MobEffectCoFH;
 import cofh.lib.util.Utils;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -25,14 +26,14 @@ public class AmplificationMobEffect extends MobEffectCoFH {
     }
 
     @Override
-    public boolean applyEffectTick(LivingEntity entityLivingBaseIn, int amplifier) {
+    public boolean applyEffectTick(ServerLevel level, LivingEntity entityLivingBaseIn, int amplifier) {
 
         // TODO: Revisit if potion logic ever changes. Instant potions don't need this.
         return true;
     }
 
     @Override
-    public void applyInstantenousEffect(@Nullable Entity source, @Nullable Entity indirectSource, LivingEntity entityLivingBaseIn, int amplifier, double health) {
+    public void applyInstantenousEffect(ServerLevel level, @Nullable Entity source, @Nullable Entity indirectSource, LivingEntity entityLivingBaseIn, int amplifier, double health) {
 
         if (entityLivingBaseIn instanceof Animal) {
             setLoveFlag(indirectSource, (Animal) entityLivingBaseIn);

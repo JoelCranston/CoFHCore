@@ -24,7 +24,7 @@ public abstract class DamagingProjectile extends ProjectileCoFH {
     @Override
     protected void onHitEntity(EntityHitResult result) {
 
-        if (result.getEntity().hurt(getDamageSource(result), getDamage(result))) {
+        if (result.getEntity().hurtOrSimulate(getDamageSource(result), getDamage(result))) {
             onHurt(result);
         }
         setPos(result.getLocation());

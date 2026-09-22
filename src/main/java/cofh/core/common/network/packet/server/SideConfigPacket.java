@@ -6,7 +6,7 @@ import cofh.lib.api.control.IReconfigurable.SideConfig;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import static cofh.lib.api.control.IReconfigurable.SideConfig.SIDE_NONE;
@@ -55,7 +55,7 @@ public class SideConfigPacket {
         for (int i = 0; i < 6; ++i) {
             bSides[i] = (byte) tile.reconfigControl().getSideConfig()[i].ordinal();
         }
-        PacketDistributor.sendToServer(new SideConfigPayload(tile.pos(), bSides));
+        ClientPacketDistributor.sendToServer(new SideConfigPayload(tile.pos(), bSides));
     }
 
 }

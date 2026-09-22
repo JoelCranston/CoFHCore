@@ -21,7 +21,7 @@ public class SubCommandFriend {
     static ArgumentBuilder<CommandSourceStack, ?> register() {
 
         return Commands.literal("friend")
-                .requires(source -> source.hasPermission(permissionLevel.get()))
+                .requires(source -> CoFHCommand.hasPermission(source, permissionLevel.get()))
                 .then(Commands.literal("add")
                         .then(Commands.argument(CMD_PLAYERS, GameProfileArgument.gameProfile())
                                 .executes((context) -> addFriends(context.getSource().getPlayerOrException(), GameProfileArgument.getGameProfiles(context, CMD_PLAYERS)))))

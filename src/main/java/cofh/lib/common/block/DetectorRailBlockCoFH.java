@@ -33,7 +33,6 @@ public class DetectorRailBlockCoFH extends DetectorRailBlock implements IDismant
         return this;
     }
 
-    @Override
     public float getRailMaxSpeed(BlockState state, Level world, BlockPos pos, AbstractMinecart cart) {
 
         return maxSpeed;

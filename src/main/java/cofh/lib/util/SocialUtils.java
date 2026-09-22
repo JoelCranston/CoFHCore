@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
@@ -121,7 +122,7 @@ public class SocialUtils {
 
         boolean clearAllFriendLists(Player player) {
 
-            if (!player.hasPermissions(4)) {
+            if (!player.permissions().hasPermission(Permissions.COMMANDS_OWNER)) {
                 return false;
             }
             friendLists.clear();

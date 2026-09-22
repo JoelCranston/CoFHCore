@@ -2,6 +2,7 @@ package cofh.lib.util;
 
 import cofh.lib.common.block.CropType;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -104,8 +105,8 @@ public class Constants {
     public static final Identifier ENDER_FONT = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "ender");
     public static final Identifier INVIS_FONT = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "invis");
 
-    public static final Style ENDER_STYLE = Style.EMPTY.withFont(ENDER_FONT);
-    public static final Style INVIS_STYLE = Style.EMPTY.withFont(INVIS_FONT);
+    public static final Style ENDER_STYLE = Style.EMPTY.withFont(new FontDescription.Resource(ENDER_FONT));
+    public static final Style INVIS_STYLE = Style.EMPTY.withFont(new FontDescription.Resource(INVIS_FONT));
     // endregion
 
     // region TEXTURES

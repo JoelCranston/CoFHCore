@@ -1,6 +1,7 @@
 package cofh.core.common.effect;
 
 import cofh.lib.common.effect.MobEffectCoFH;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -12,7 +13,7 @@ public class WrenchedMobEffect extends MobEffectCoFH {
     }
 
     @Override
-    public boolean applyEffectTick(LivingEntity entityLivingBaseIn, int amplifier) {
+    public boolean applyEffectTick(ServerLevel level, LivingEntity entityLivingBaseIn, int amplifier) {
 
         entityLivingBaseIn.setYRot(entityLivingBaseIn.getYRot() + 2 * (1 + amplifier));
         return true;

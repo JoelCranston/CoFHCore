@@ -43,7 +43,7 @@ public final class SecurityHelper {
     public static UUID getID(Entity entity) {
 
         if (entity == null) {
-            return DEFAULT_GAME_PROFILE.getId();
+            return DEFAULT_GAME_PROFILE.id();
         }
         if (entity instanceof Player player) {
             if (player instanceof ServerPlayer) {
@@ -79,7 +79,7 @@ public final class SecurityHelper {
         if (hasSecurity(tile)) {
             return ((ISecurable) tile).getOwnerName();
         }
-        return DEFAULT_GAME_PROFILE.getName();
+        return DEFAULT_GAME_PROFILE.name();
     }
     // endregion
 

@@ -2,6 +2,8 @@ package cofh.core.common.block;
 
 import cofh.core.util.ProxyUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Util;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CarvedPumpkinBlock;
@@ -30,13 +32,13 @@ public class CarvedPumpkinBlockCoFH extends CarvedPumpkinBlock {
     }
 
     @Override
-    public String getDescriptionId() {
+    public MutableComponent getName() {
 
         String specificTranslation = Util.makeDescriptionId("block", BuiltInRegistries.BLOCK.getKey(this));
         if (ProxyUtils.canLocalize(specificTranslation)) {
-            return specificTranslation;
+            return Component.translatable(specificTranslation);
         }
-        return translationKey;
+        return Component.translatable(translationKey);
     }
 
 }

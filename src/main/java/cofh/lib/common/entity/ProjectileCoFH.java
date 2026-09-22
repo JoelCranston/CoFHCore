@@ -73,18 +73,17 @@ public class ProjectileCoFH extends Projectile {
     @Override
     public void tick() {
 
-        this.walkDistO = this.walkDist;
         handlePortal();
 
         this.wasInPowderSnow = this.isInPowderSnow;
         this.isInPowderSnow = false;
 
-        updateInWaterStateAndDoFluidPushing();
+        updateFluidInteraction();
         fireTick();
         checkBelowWorld();
         setOldPosAndRot();
         projectileTick(level);
-        checkInsideBlocks();
+        applyEffectsFromBlocks();
         updateVelocity();
         updateRotation();
 

@@ -1,15 +1,17 @@
 package cofh.core.common.entity;
 
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.vehicle.boat.Boat;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
@@ -25,14 +27,14 @@ public class BoatCoFH extends Boat implements IOnPlaced {
 
     protected ItemEnchantments enchantments = ItemEnchantments.EMPTY;
 
-    public BoatCoFH(EntityType<? extends Boat> type, Level worldIn) {
+    public BoatCoFH(EntityType<? extends Boat> type, Level worldIn, Supplier<Item> dropItem) {
 
-        super(type, worldIn);
+        super(type, worldIn, dropItem);
     }
 
-    public BoatCoFH(Supplier<EntityType<? extends Boat>> type, Level worldIn, double posX, double posY, double posZ) {
+    public BoatCoFH(Supplier<EntityType<? extends Boat>> type, Level worldIn, Supplier<Item> dropItem, double posX, double posY, double posZ) {
 
-        this(type.get(), worldIn);
+        this(type.get(), worldIn, dropItem);
         this.setPos(posX, posY, posZ);
         this.xo = posX;
         this.yo = posY;
@@ -81,12 +83,12 @@ public class BoatCoFH extends Boat implements IOnPlaced {
     }
 
     @Override
-    public void destroy(DamageSource source) {
+    public void destroy(ServerLevel level, DamageSource source) {
 
         this.remove(Entity.RemovalReason.KILLED);
-        if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+        if (level.getGameRules().get(GameRules.ENTITY_DROPS)) {
             ItemStack stack = createItemStackTag(getPickResult());
-            this.spawnAtLocation(stack);
+            this.spawnAtLocation(level, stack);
         }
     }
 

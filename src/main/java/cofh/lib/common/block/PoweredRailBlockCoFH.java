@@ -38,7 +38,6 @@ public class PoweredRailBlockCoFH extends PoweredRailBlock implements IDismantle
         return this;
     }
 
-    @Override
     public float getRailMaxSpeed(BlockState state, Level world, BlockPos pos, AbstractMinecart cart) {
 
         return maxSpeed;

@@ -5,6 +5,7 @@ import cofh.lib.api.block.entity.ITickableTile;
 import cofh.lib.util.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SpellParticleOption;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AirBlock;
@@ -41,7 +42,7 @@ public class GlowAirBlock extends AirBlock implements EntityBlock {
     public void animateTick(BlockState stateIn, Level worldIn, BlockPos pos, RandomSource rand) {
 
         if (rand.nextInt(16) == 0) {
-            Utils.spawnBlockParticlesClient(worldIn, ParticleTypes.INSTANT_EFFECT, pos, rand, 2);
+            Utils.spawnBlockParticlesClient(worldIn, SpellParticleOption.create(ParticleTypes.INSTANT_EFFECT, -1, 1.0F), pos, rand, 2);
         }
     }
 

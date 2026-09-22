@@ -3,6 +3,7 @@ package cofh.lib.common.effect;
 import cofh.core.common.network.packet.client.EffectAddedPacket;
 import cofh.core.common.network.packet.client.EffectRemovedPacket;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -34,10 +35,10 @@ public abstract class CustomParticleMobEffect extends MobEffectCoFH {
     }
 
     @Override
-    public boolean applyEffectTick(LivingEntity living, int amplifier) {
+    public boolean applyEffectTick(ServerLevel level, LivingEntity living, int amplifier) {
 
-        if (living.level.isClientSide() && living.level.getRandom().nextInt(getChance()) == 0) {
-            living.level.addParticle(getParticle(), living.getRandomX(1.0D), living.getRandomY(), living.getRandomZ(1.0D), 0.0D, 0.0D, 0.0D);
+        if (level.getRandom().nextInt(getChance()) == 0) {
+            level.sendParticles(getParticle(), living.getRandomX(1.0D), living.getRandomY(), living.getRandomZ(1.0D), 1, 0.0D, 0.0D, 0.0D, 0.0D);
         }
         return true;
     }

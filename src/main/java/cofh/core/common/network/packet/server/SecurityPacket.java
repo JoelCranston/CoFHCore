@@ -4,7 +4,7 @@ import cofh.core.common.network.data.server.SecurityPayload;
 import cofh.lib.api.control.ISecurable;
 import cofh.lib.api.control.ISecurable.AccessMode;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class SecurityPacket {
@@ -29,7 +29,7 @@ public class SecurityPacket {
 
     public static void sendToServer(AccessMode accessMode) {
 
-        PacketDistributor.sendToServer(new SecurityPayload((byte) accessMode.ordinal()));
+        ClientPacketDistributor.sendToServer(new SecurityPayload((byte) accessMode.ordinal()));
     }
 
 }

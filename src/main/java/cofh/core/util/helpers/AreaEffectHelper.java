@@ -6,11 +6,11 @@ import cofh.lib.util.raytracer.RayTracer;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
@@ -40,12 +40,12 @@ public final class AreaEffectHelper {
 
     public static boolean validAreaEffectItem(ItemStack stack) {
 
-        return stack.getCapability(CoreCapabilities.AreaEffectHandler.ITEM) != null || stack.getItem() instanceof DiggerItem;
+        return stack.getCapability(CoreCapabilities.AreaEffectHandler.ITEM) != null || stack.has(DataComponents.TOOL);
     }
 
     public static boolean validAreaEffectMiningItem(ItemStack stack) {
 
-        return stack.getCapability(CoreCapabilities.AreaEffectHandler.ITEM) != null || stack.getItem() instanceof DiggerItem;
+        return stack.getCapability(CoreCapabilities.AreaEffectHandler.ITEM) != null || stack.has(DataComponents.TOOL);
     }
 
     /**
@@ -76,7 +76,7 @@ public final class AreaEffectHelper {
     public static ImmutableList<BlockPos> getBucketableBlocksRadius(ItemStack stack, BlockPos pos, Player player, int radius) {
 
         List<BlockPos> area;
-        Level world = player.getCommandSenderWorld();
+        Level world = player.level();
         Item tool = stack.getItem();
 
         BlockHitResult traceResult = RayTracer.retrace(player, ClipContext.Fluid.SOURCE_ONLY);
@@ -117,7 +117,7 @@ public final class AreaEffectHelper {
     public static ImmutableList<BlockPos> getBreakableBlocksRadius(ItemStack stack, BlockPos pos, Player player, int radius) {
 
         List<BlockPos> area;
-        Level world = player.getCommandSenderWorld();
+        Level world = player.level();
         Item tool = stack.getItem();
 
         BlockHitResult traceResult = RayTracer.retrace(player, ClipContext.Fluid.NONE);
@@ -156,7 +156,7 @@ public final class AreaEffectHelper {
     public static ImmutableList<BlockPos> getBreakableBlocksDepth(ItemStack stack, BlockPos pos, Player player, int radius, int depth) {
 
         List<BlockPos> area;
-        Level world = player.getCommandSenderWorld();
+        Level world = player.level();
         Item tool = stack.getItem();
 
         BlockHitResult traceResult = RayTracer.retrace(player, ClipContext.Fluid.NONE);
@@ -206,7 +206,7 @@ public final class AreaEffectHelper {
     public static ImmutableList<BlockPos> getBreakableBlocksLine(ItemStack stack, BlockPos pos, Player player, int length) {
 
         ArrayList<BlockPos> area = new ArrayList<>();
-        Level world = player.getCommandSenderWorld();
+        Level world = player.level();
         Item tool = stack.getItem();
 
         BlockPos query;
@@ -260,7 +260,7 @@ public final class AreaEffectHelper {
 
     public static ImmutableList<BlockPos> getBreakableWoodenBlocksVertical(ItemStack stack, BlockPos pos, Player player, int length) {
 
-        Level world = player.getCommandSenderWorld();
+        Level world = player.level();
         Item tool = stack.getItem();
         if (length <= 0 || !canToolAffect(tool, stack, world, pos) || player.isSecondaryUseActive()) {
             return ImmutableList.of();
@@ -303,7 +303,7 @@ public final class AreaEffectHelper {
     public static ImmutableList<BlockPos> getPlaceableBlocksRadius(ItemStack stack, BlockPos pos, Player player, int radius) {
 
         List<BlockPos> area;
-        Level world = player.getCommandSenderWorld();
+        Level world = player.level();
         Item tool = stack.getItem();
 
         BlockHitResult traceResult = RayTracer.retrace(player, ClipContext.Fluid.NONE);
@@ -335,7 +335,7 @@ public final class AreaEffectHelper {
     public static ImmutableList<BlockPos> getBlocksCentered(ItemStack stack, BlockPos pos, Player player, int radius, int height) {
 
         List<BlockPos> area;
-        Level world = player.getCommandSenderWorld();
+        Level world = player.level();
         Item tool = stack.getItem();
 
         if (player.isSecondaryUseActive() || !canToolAffect(tool, stack, world, pos) || (radius <= 0 && height <= 0)) {
@@ -352,7 +352,7 @@ public final class AreaEffectHelper {
     public static ImmutableList<BlockPos> getMatureBlocksCentered(ItemStack stack, BlockPos pos, Player player, int radius, int height) {
 
         List<BlockPos> area;
-        Level world = player.getCommandSenderWorld();
+        Level world = player.level();
         Item tool = stack.getItem();
 
         if (player.isSecondaryUseActive() || !canToolAffect(tool, stack, world, pos) || !isMature(world, pos) || (radius <= 0 && height <= 0)) {
@@ -434,8 +434,7 @@ public final class AreaEffectHelper {
                 .or(() -> state.getOptionalValue(AGE_15).map(v -> v >= 15))
                 .or(() -> state.getOptionalValue(AGE_25).map(v -> v >= 25))
                 .orElse(block instanceof BigDripleafBlock || block instanceof BigDripleafStemBlock ||
-                        block instanceof HugeMushroomBlock || state.is(BlockTags.TALL_FLOWERS) ||
-                        block instanceof MossBlock);
+                        block instanceof HugeMushroomBlock || block instanceof BonemealableFeaturePlacerBlock);
     }
     // endregion
 }

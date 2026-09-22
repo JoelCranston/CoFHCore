@@ -11,7 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import static cofh.core.util.filter.FilterHolderType.*;
@@ -113,7 +113,7 @@ public class FilterableGuiTogglePacket {
 
     protected static void sendToServer(byte mode) {
 
-        PacketDistributor.sendToServer(new FilterableGuiTogglePayload(ITEM.ordinal(), -1, BlockPos.ZERO, mode));
+        ClientPacketDistributor.sendToServer(new FilterableGuiTogglePayload(ITEM.ordinal(), -1, BlockPos.ZERO, mode));
     }
     // endregion
 
@@ -130,7 +130,7 @@ public class FilterableGuiTogglePacket {
 
     protected static void sendToServer(BlockPos pos, byte mode) {
 
-        PacketDistributor.sendToServer(new FilterableGuiTogglePayload(TILE.ordinal(), -1, pos, mode));
+        ClientPacketDistributor.sendToServer(new FilterableGuiTogglePayload(TILE.ordinal(), -1, pos, mode));
     }
     // endregion
 
@@ -147,7 +147,7 @@ public class FilterableGuiTogglePacket {
 
     protected static void sendToServer(int entityId, byte mode) {
 
-        PacketDistributor.sendToServer(new FilterableGuiTogglePayload(ENTITY.ordinal(), entityId, BlockPos.ZERO, mode));
+        ClientPacketDistributor.sendToServer(new FilterableGuiTogglePayload(ENTITY.ordinal(), entityId, BlockPos.ZERO, mode));
     }
     // endregion
 }

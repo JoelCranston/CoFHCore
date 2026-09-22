@@ -133,8 +133,8 @@ public class ArmorEvents {
     private static double getFallResistance(LivingEntity entity) {
 
         double ret = 0.0D;
-        for (ItemStack armor : entity.getArmorSlots()) {
-            ret += FALL_RESISTANCE_MAP.getOrDefault(armor.getItem(), 0.0D);
+        for (EquipmentSlot slot : ARMOR_SLOTS) {
+            ret += FALL_RESISTANCE_MAP.getOrDefault(entity.getItemBySlot(slot).getItem(), 0.0D);
         }
         return ret;
     }
@@ -142,8 +142,8 @@ public class ArmorEvents {
     private static double getHazardResistance(LivingEntity entity) {
 
         double ret = 0.0D;
-        for (ItemStack armor : entity.getArmorSlots()) {
-            ret += HAZARD_RESISTANCE_MAP.getOrDefault(armor.getItem(), 0.0D);
+        for (EquipmentSlot slot : ARMOR_SLOTS) {
+            ret += HAZARD_RESISTANCE_MAP.getOrDefault(entity.getItemBySlot(slot).getItem(), 0.0D);
         }
         return ret;
     }
@@ -151,8 +151,8 @@ public class ArmorEvents {
     private static double getStingResistance(LivingEntity entity) {
 
         double ret = 0.0D;
-        for (ItemStack armor : entity.getArmorSlots()) {
-            ret += STING_RESISTANCE_MAP.getOrDefault(armor.getItem(), 0.0D);
+        for (EquipmentSlot slot : ARMOR_SLOTS) {
+            ret += STING_RESISTANCE_MAP.getOrDefault(entity.getItemBySlot(slot).getItem(), 0.0D);
         }
         return ret;
     }

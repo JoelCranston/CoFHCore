@@ -119,7 +119,7 @@ public final class ArcheryHelper {
                             arrow = bowItem.customArrow(arrow, ammo, bow);
                         }
                         arrow.shootFromRotation(shooter, shooter.getXRot() - volleyPitch * shot, shooter.getYRot(), 0.0F, arrowVelocity * 3.0F * velocityMod, accuracyMod);// * (1 + shot * 2));
-                        arrow.setBaseDamage(arrow.getBaseDamage() * damageMod);
+                        arrow.setBaseDamage(arrow.baseDamage * damageMod);
 
                         if (arrowVelocity >= 1.0F) {
                             arrow.setCritArrow(true);
@@ -128,8 +128,8 @@ public final class ArcheryHelper {
                             // Applies the bow's piercing, punch and flame.
                             EnchantmentHelper.onProjectileSpawned(serverLevel, bow, arrow, item -> {});
                         }
-                        if (encPower > 0 && arrow.getBaseDamage() > 0) {
-                            arrow.setBaseDamage(arrow.getBaseDamage() + (double) encPower * 0.5D + 0.5D);
+                        if (encPower > 0 && arrow.baseDamage > 0) {
+                            arrow.setBaseDamage(arrow.baseDamage + (double) encPower * 0.5D + 0.5D);
                         }
                         if (encFlame > 0) {
                             arrow.igniteForSeconds(5.0F);
@@ -202,7 +202,7 @@ public final class ArcheryHelper {
             return retStack[0];
         }
         // INVENTORY
-        for (ItemStack slot : shooter.getInventory().items) {
+        for (ItemStack slot : shooter.getInventory().getNonEquipmentItems()) {
             ammoCap = slot.getCapability(CoreCapabilities.ArcheryHandler.AMMO);
             if (ammoCap != null && !ammoCap.isEmpty(shooter)) {
                 return slot;

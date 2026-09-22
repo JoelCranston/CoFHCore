@@ -2,6 +2,7 @@ package cofh.lib.common.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ColorRGBA;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -47,7 +48,7 @@ public class GunpowderBlock extends ColoredFallingBlock {
             worldIn.setBlock(pos, Blocks.AIR.defaultBlockState(), 11);
             if (!player.isCreative()) {
                 if (item == Items.FLINT_AND_STEEL) {
-                    stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(handIn));
+                    stack.hurtAndBreak(1, player, handIn);
                 } else {
                     stack.shrink(1);
                 }
@@ -57,13 +58,14 @@ public class GunpowderBlock extends ColoredFallingBlock {
     }
 
     @Override
-    public void onCaughtFire(BlockState state, Level world, BlockPos pos, @Nullable Direction face, @Nullable LivingEntity igniter) {
+    public boolean onCaughtFire(BlockState state, Level world, BlockPos pos, @Nullable Direction face, @Nullable LivingEntity igniter) {
 
         explode(world, pos, igniter);
+        return true;
     }
 
     @Override
-    public void wasExploded(Level world, BlockPos pos, Explosion explosionIn) {
+    public void wasExploded(ServerLevel world, BlockPos pos, Explosion explosionIn) {
 
         if (!world.isClientSide()) {
             explode(world, pos, explosionIn.getIndirectSourceEntity());

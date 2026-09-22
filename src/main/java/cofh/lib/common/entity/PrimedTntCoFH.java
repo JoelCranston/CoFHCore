@@ -4,6 +4,7 @@ import cofh.lib.api.IDetonatable;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
@@ -34,7 +35,7 @@ public abstract class PrimedTntCoFH extends PrimedTnt implements IDetonatable {
         this.xo = x;
         this.yo = y;
         this.zo = z;
-        this.owner = igniter;
+        this.owner = EntityReference.of(igniter);
     }
 
     @Override

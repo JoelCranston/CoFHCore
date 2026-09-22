@@ -5,7 +5,7 @@ import cofh.core.common.network.data.server.ClaimXPPayload;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class ClaimXPPacket {
@@ -38,7 +38,7 @@ public class ClaimXPPacket {
         if (tile == null) {
             return false;
         }
-        PacketDistributor.sendToServer(new ClaimXPPayload(tile.pos()));
+        ClientPacketDistributor.sendToServer(new ClaimXPPayload(tile.pos()));
         return true;
     }
 

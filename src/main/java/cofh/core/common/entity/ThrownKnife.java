@@ -107,7 +107,7 @@ public class ThrownKnife extends AbstractArrow {
                     this.setDeltaMovement(this.getDeltaMovement().scale(0.95D).add(diff.normalize().scale(0.05F * loyalty)));
                 } else {
                     if (!this.level.isClientSide() && this.pickup == AbstractArrow.Pickup.ALLOWED) {
-                        this.spawnAtLocation(this.getPickupItem(), 0.1F);
+                        this.spawnAtLocation((ServerLevel) this.level, this.getPickupItem(), 0.1F);
                     }
                     this.discard();
                 }
@@ -147,7 +147,7 @@ public class ThrownKnife extends AbstractArrow {
                 damage = EnchantmentHelper.modifyDamage(serverLevel, stack, target, damageSource, damage);
             }
             Entity owner = this.getOwner();
-            if (target.hurt(damageSource, damage)) {
+            if (target.hurtOrSimulate(damageSource, damage)) {
                 if (target.getType() == EntityType.ENDERMAN) {
                     return;
                 }

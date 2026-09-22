@@ -115,7 +115,7 @@ public abstract class Shockwave extends AbstractAoESpell {
                 continue;
             }
             DamageSource source = getDamageSource(center);
-            if (entity.hurt(source, damage)) {
+            if (entity.hurtOrSimulate(source, damage)) {
                 hitSomething = true;
                 entity.addEffect(new MobEffectInstance(SUNDERED, getDebuffDuration(), MathHelper.weightedRound(strength, this.random) - 1, false, false));
                 entity.knockback(0.8F, -relPos.x(), -relPos.z());

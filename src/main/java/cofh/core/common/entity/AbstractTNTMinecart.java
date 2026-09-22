@@ -3,6 +3,7 @@ package cofh.core.common.entity;
 import cofh.lib.api.IDetonatable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
@@ -11,13 +12,12 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
-import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -70,7 +70,7 @@ public abstract class AbstractTNTMinecart extends AbstractMinecartCoFH implement
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
 
         Entity entity = source.getDirectEntity();
         if (entity instanceof AbstractArrow arrowEntity) {
@@ -78,18 +78,18 @@ public abstract class AbstractTNTMinecart extends AbstractMinecartCoFH implement
                 this.explodeCart(arrowEntity.getDeltaMovement().lengthSqr());
             }
         }
-        return super.hurt(source, amount);
+        return super.hurtServer(level, source, amount);
     }
 
     @Override
-    public void destroy(DamageSource source) {
+    public void destroy(ServerLevel level, DamageSource source) {
 
         double d0 = this.getDeltaMovement().horizontalDistanceSqr();
         if (!source.is(DamageTypeTags.IS_FIRE) && !source.is(DamageTypeTags.IS_EXPLOSION) && !(d0 >= (double) 0.01F)) {
             detonated = true;
-            super.destroy(source);
-            if (!source.is(DamageTypeTags.IS_EXPLOSION) && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-                this.spawnAtLocation(getBlock());
+            super.destroy(level, source);
+            if (!source.is(DamageTypeTags.IS_EXPLOSION) && level.getGameRules().get(GameRules.ENTITY_DROPS)) {
+                this.spawnAtLocation(level, getBlock());
             }
         } else {
             if (this.fuse < 0) {
@@ -100,17 +100,17 @@ public abstract class AbstractTNTMinecart extends AbstractMinecartCoFH implement
     }
 
     @Override
-    public boolean causeFallDamage(float distance, float damageMultiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float damageMultiplier, DamageSource source) {
 
         if (distance >= 3.0F) {
-            float f = distance / 10.0F;
+            float f = (float) distance / 10.0F;
             this.explodeCart(f * f);
         }
         return super.causeFallDamage(distance, damageMultiplier, source);
     }
 
     @Override
-    public void activateMinecart(int x, int y, int z, boolean receivingPower) {
+    public void activateMinecart(ServerLevel level, int x, int y, int z, boolean receivingPower) {
 
         if (receivingPower && this.fuse < 0) {
             this.ignite();
@@ -155,12 +155,6 @@ public abstract class AbstractTNTMinecart extends AbstractMinecartCoFH implement
         output.putInt(TAG_FUSE, this.fuse);
     }
 
-    @Override
-    public Type getMinecartType() {
-
-        return AbstractMinecart.Type.TNT;
-    }
-
     public void ignite() {
 
         this.fuse = 80;
@@ -203,7 +197,7 @@ public abstract class AbstractTNTMinecart extends AbstractMinecartCoFH implement
         } else {
             this.detonate(this.position());
             this.discard();
-            this.spawnAtLocation(getPickResult());
+            this.spawnAtLocation((ServerLevel) level, getPickResult());
         }
     }
 

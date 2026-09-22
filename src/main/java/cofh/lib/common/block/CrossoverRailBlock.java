@@ -57,7 +57,6 @@ public class CrossoverRailBlock extends BaseRailBlock implements IDismantleable 
         builder.add(getShapeProperty(), WATERLOGGED);
     }
 
-    @Override
     public float getRailMaxSpeed(BlockState state, Level world, BlockPos pos, AbstractMinecart cart) {
 
         return maxSpeed;

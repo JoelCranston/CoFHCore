@@ -5,16 +5,21 @@ import cofh.core.common.item.IMultiModeItem;
 import com.google.common.base.Strings;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
+import javax.annotation.Nullable;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -41,8 +46,8 @@ public final class ItemHelper {
             if (stack.isEmpty()) {
                 stack = ItemStack.EMPTY;
             }
-        } else if (item.hasCraftingRemainingItem(stack)) {
-            ItemStack ret = item.getCraftingRemainingItem(stack);
+        } else if (item.getCraftingRemainder(stack) != null) {
+            ItemStack ret = item.getCraftingRemainder(stack).create();
             if (ret.isEmpty()) {
                 return ItemStack.EMPTY;
             }
@@ -151,7 +156,8 @@ public final class ItemHelper {
 
     public static CompoundTag getBlockEntityData(ItemStack stack) {
 
-        return stack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).copyTag();
+        TypedEntityData<BlockEntityType<?>> data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        return data == null ? new CompoundTag() : data.copyTagWithoutId();
     }
 
     public static void setBlockEntityData(ItemStack stack, CompoundTag tag) {
@@ -159,8 +165,26 @@ public final class ItemHelper {
         if (tag == null || tag.isEmpty()) {
             stack.remove(DataComponents.BLOCK_ENTITY_DATA);
         } else {
-            stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+            TypedEntityData<BlockEntityType<?>> data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+            BlockEntityType<?> type = data != null ? data.type() : getBlockEntityType(stack);
+            if (type != null) {
+                stack.set(DataComponents.BLOCK_ENTITY_DATA, TypedEntityData.of(type, tag));
+            }
         }
+    }
+
+    @Nullable
+    public static BlockEntityType<?> getBlockEntityType(ItemStack stack) {
+
+        if (stack.getItem() instanceof BlockItem blockItem) {
+            Block block = blockItem.getBlock();
+            for (BlockEntityType<?> type : BuiltInRegistries.BLOCK_ENTITY_TYPE) {
+                if (type.getValidBlocks().contains(block)) {
+                    return type;
+                }
+            }
+        }
+        return null;
     }
 
     public static CompoundTag setItemStackTagName(CompoundTag tag, String name) {

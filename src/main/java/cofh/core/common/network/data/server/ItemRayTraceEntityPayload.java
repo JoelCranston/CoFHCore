@@ -19,7 +19,7 @@ public record ItemRayTraceEntityPayload(InteractionHand hand, Vec3 origin, int t
     private static final StreamCodec<ByteBuf, InteractionHand> HAND_CODEC = ByteBufCodecs.idMapper(
             i -> InteractionHand.values()[i], InteractionHand::ordinal
     );
-    private static final StreamCodec<FriendlyByteBuf, Vec3> VEC3_CODEC = StreamCodec.of(FriendlyByteBuf::writeVec3, FriendlyByteBuf::readVec3);
+    private static final StreamCodec<ByteBuf, Vec3> VEC3_CODEC = Vec3.STREAM_CODEC;
 
     public static final StreamCodec<FriendlyByteBuf, ItemRayTraceEntityPayload> STREAM_CODEC = StreamCodec.composite(
             HAND_CODEC, ItemRayTraceEntityPayload::hand,

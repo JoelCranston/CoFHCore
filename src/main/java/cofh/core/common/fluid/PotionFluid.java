@@ -81,7 +81,7 @@ public class PotionFluid extends FluidCoFH {
             if (potion.isEmpty() || potion.get().is(Potions.WATER)) {
                 return super.getDescription(stack);
             }
-            return Component.translatable(Potion.getName(potion, Items.POTION.getDescriptionId() + ".effect."));
+            return FluidHelper.getPotionContents(stack).getName(Items.POTION.getDescriptionId() + ".effect.");
         }
 
         @Override
@@ -172,14 +172,14 @@ public class PotionFluid extends FluidCoFH {
     public static FluidStack setCustomColor(FluidStack stack, int color) {
 
         PotionContents contents = stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
-        stack.set(DataComponents.POTION_CONTENTS, new PotionContents(contents.potion(), Optional.of(color), contents.customEffects()));
+        stack.set(DataComponents.POTION_CONTENTS, new PotionContents(contents.potion(), Optional.of(color), contents.customEffects(), contents.customName()));
         return stack;
     }
 
     public static ItemStack setCustomColor(ItemStack stack, int color) {
 
         PotionContents contents = stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
-        stack.set(DataComponents.POTION_CONTENTS, new PotionContents(contents.potion(), Optional.of(color), contents.customEffects()));
+        stack.set(DataComponents.POTION_CONTENTS, new PotionContents(contents.potion(), Optional.of(color), contents.customEffects(), contents.customName()));
         return stack;
     }
 
@@ -213,7 +213,7 @@ public class PotionFluid extends FluidCoFH {
     private static void copyDisplay(DataComponentHolder from, MutableDataComponentHolder to) {
 
         copyComponent(from, to, DataComponents.CUSTOM_NAME);
-        copyComponent(from, to, DataComponents.HIDE_ADDITIONAL_TOOLTIP);
+        copyComponent(from, to, DataComponents.TOOLTIP_DISPLAY);
     }
 
     private static <T> void copyComponent(DataComponentHolder from, MutableDataComponentHolder to, DataComponentType<T> type) {
