@@ -520,3 +520,9 @@ pre-1.21 `recipes/` folder — and therefore not loading — since the 1.21.1 ho
 
 723 → 8 → **0 errors**. CoFHCore compiles on NeoForge 26.1.2.109, from a baseline of 2445. Nothing
 has run yet: `runData` (B.8) is next, then a headless boot, then B.10.
+
+B.8's `runData` then produced output identical to the committed tree, and the dedicated server
+boots to `Done` on 26.1.2 with no CoFH errors and 1516 recipes loaded. The boot found one more
+latent problem: the mixin config was only declared in the jar manifest, so no dev run on either
+branch had ever applied CoFHCore's mixins. `neoforge.mods.toml` now declares it, and the log shows
+`LivingEntityMixin` and `ShearsItemMixin` applying. B.10 is next.

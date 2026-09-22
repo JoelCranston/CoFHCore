@@ -45,7 +45,8 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 | B.7 client — five parallel agents (GUI; models/fluids/setup; entities; particles; render types/events) | `cc71b36` | 8 |
 | B.8 CoFHCore resources (recipe folder, item definition, render_type; shaders in B.7) | `789370c` | — |
 | B.9 mixins | `f89000a` | **0** |
-| **B.8 `runData`** (regenerate tags/loot), then **B.10 dependents** | next | |
+| B.8 `runData` (output identical to what is committed) and a headless boot: `Done`, mixins applied | `mods.toml` fix below | 0 |
+| **B.10 dependents** | next | |
 
 [port-plan.md](port-plan.md) §6 has each category's contents. Carry-overs into Phase B:
 
@@ -188,6 +189,10 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 - **B.9 behaviour changes**: shield blocking is gated by `canBlock` inside vanilla's angle/`BlocksAttacks`
   resolution (before, `canBlock` replaced vanilla's check entirely); horse armour (all five, and wolf armour)
   gets enchantability 15 and shields 1 via default components, as the mixins did.
+- **Mixins never loaded in dev runs before now, on either branch.** The config was declared only as the jar
+  manifest's `MixinConfigs` attribute, which a classes-on-disk run has no jar for; NeoForge reads
+  `[[mixins]] config = "mixins.cofhcore.json"` from `neoforge.mods.toml`, added on `26.1.2`. Add it on `1.21.1`
+  too (its headless boots passed without `LivingEntityMixin` etc. ever applying).
 - **`1.21.1` branch**: `data/cofh_core/recipes/securable.json` is in the pre-1.21 plural folder there too, so the
   securable crafting recipe does not load on 1.21.1. Move it to `recipe/` if that branch ships.
 

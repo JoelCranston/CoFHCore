@@ -84,7 +84,7 @@ It is a *reference* here, never a dependency.
 
 | Repo | Branch | State |
 |---|---|---|
-| CoFHCore | `26.1.2` | **0 errors** (baseline 2445), B.0-B.9 done. Not yet run. **Next: B.8 `runData`, headless boot, then B.10** |
+| CoFHCore | `26.1.2` | **0 errors** (baseline 2445), B.0-B.9 done; `runData` clean, boots headless with mixins applied. **Next: B.10** |
 | CoFHCore | `1.21.1` | 0 errors, boots headless, `runData` clean |
 | ThermalCore | `1.21.1` | 0 errors, boots headless, `runData` clean. Waits for CoFHCore 26.1.2 (B.10) |
 | ThermalDynamics | `1.21.1` | same |

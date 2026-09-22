@@ -17,6 +17,9 @@ Core Library required for the functionality of all CoFH mods.
 
 Also contains a number of optional gameplay tweaks for convenience.
 '''
+[[mixins]]
+config = "mixins.cofhcore.json"
+
 [[dependencies.cofh_core]]
 modId = "minecraft"
 type = "required"
