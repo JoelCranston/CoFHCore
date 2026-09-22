@@ -66,7 +66,7 @@ public abstract class RecipeJsonUtils {
                     count = object.get(AMOUNT).getAsInt();
                 }
                 if (count > 1) {
-                    return new IngredientWithCount(ingredient, count);
+                    return new IngredientWithCount(ingredient, count).toVanilla();
                 }
             } catch (Throwable t) {
                 ingredient = Ingredient.of(ItemStack.EMPTY);

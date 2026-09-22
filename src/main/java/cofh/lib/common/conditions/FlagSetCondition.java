@@ -2,12 +2,14 @@ package cofh.lib.common.conditions;
 
 import cofh.lib.util.FlagManager;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.neoforged.neoforge.common.conditions.ICondition;
 
 public record FlagSetCondition(String flag) implements ICondition {
 
-    public static final Codec<FlagSetCondition> CODEC = RecordCodecBuilder.create(
+    // 1.20.5: a condition registers its MapCodec, not a Codec (dispatch codecs need map codecs).
+    public static final MapCodec<FlagSetCondition> CODEC = RecordCodecBuilder.mapCodec(
             builder -> builder.group(
                             Codec.STRING.fieldOf("flag").forGetter(FlagSetCondition::flag))
                     .apply(builder, FlagSetCondition::new));
@@ -19,7 +21,7 @@ public record FlagSetCondition(String flag) implements ICondition {
     }
 
     @Override
-    public Codec<? extends ICondition> codec() {
+    public MapCodec<? extends ICondition> codec() {
 
         return CODEC;
     }

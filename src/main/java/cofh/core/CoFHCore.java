@@ -20,7 +20,9 @@ import cofh.lib.client.renderer.entity.NothingRenderer;
 import cofh.lib.common.loot.TileNBTSync;
 import cofh.lib.util.DeferredRegisterCoFH;
 import cofh.lib.util.Utils;
+import cofh.lib.util.crafting.CoreIngredientTypes;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataSerializer;
@@ -82,7 +84,7 @@ public class CoFHCore {
     public static final DeferredRegisterCoFH<SoundEvent> SOUND_EVENTS = DeferredRegisterCoFH.create(BuiltInRegistries.SOUND_EVENT, ID_COFH_CORE);
     public static final DeferredRegisterCoFH<BlockEntityType<?>> TILE_ENTITIES = DeferredRegisterCoFH.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, ID_COFH_CORE);
 
-    public static final DeferredRegister<Codec<? extends ICondition>> CONDITION_CODECS = DeferredRegister.create(NeoForgeRegistries.Keys.CONDITION_CODECS, ID_COFH_CORE);
+    public static final DeferredRegister<MapCodec<? extends ICondition>> CONDITION_CODECS = DeferredRegister.create(NeoForgeRegistries.Keys.CONDITION_CODECS, ID_COFH_CORE);
     public static final DeferredRegisterCoFH<EntityDataSerializer<?>> ENTITY_DATA_SERIALIZERS = DeferredRegisterCoFH.create(NeoForgeRegistries.Keys.ENTITY_DATA_SERIALIZERS, ID_COFH_CORE);
     public static final DeferredRegisterCoFH<FluidType> FLUID_TYPES = DeferredRegisterCoFH.create(NeoForgeRegistries.Keys.FLUID_TYPES, ID_COFH_CORE);
 
@@ -120,6 +122,7 @@ public class CoFHCore {
         TILE_ENTITIES.register(modEventBus);
 
         CONDITION_CODECS.register(modEventBus);
+        CoreIngredientTypes.INGREDIENT_TYPES.register(modEventBus);
         ENTITY_DATA_SERIALIZERS.register(modEventBus);
         FLUID_TYPES.register(modEventBus);
 
