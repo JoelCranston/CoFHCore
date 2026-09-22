@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.common.CommonHooks;
-import net.neoforged.neoforge.common.PlantType;
+
 
 import static cofh.lib.util.Constants.FUNGUS;
 import static cofh.lib.util.constants.BlockStatePropertiesCoFH.AGE_0_4;
@@ -28,7 +28,7 @@ public class CropBlockMushroom extends CropBlockCoFH {
             box(2.0D, 0.0D, 2.0D, 14.0D, 12.0D, 14.0D),
             box(2.0D, 0.0D, 2.0D, 14.0D, 12.0D, 14.0D)};
 
-    public CropBlockMushroom(Properties builder, PlantType type, int growLight, float growMod) {
+    public CropBlockMushroom(Properties builder, CropType type, int growLight, float growMod) {
 
         super(builder, type, growLight, growMod);
     }
@@ -53,10 +53,10 @@ public class CropBlockMushroom extends CropBlockCoFH {
     public void randomTick(BlockState state, ServerLevel worldIn, BlockPos pos, RandomSource rand) {
 
         int age = getAge(state);
-        if (age < getMaxAge() && CommonHooks.onCropsGrowPre(worldIn, pos, state, rand.nextInt(20 + age) == 0)) {
+        if (age < getMaxAge() && CommonHooks.canCropGrow(worldIn, pos, state, rand.nextInt(20 + age) == 0)) {
             int newAge = age + 1 == getPostHarvestAge() ? getMaxAge() : age + 1;
             worldIn.setBlock(pos, getStateForAge(newAge), newAge == getMaxAge() ? 3 : 2);
-            CommonHooks.onCropsGrowPost(worldIn, pos, state);
+            CommonHooks.fireCropGrowPost(worldIn, pos, state);
         }
     }
 
@@ -89,7 +89,7 @@ public class CropBlockMushroom extends CropBlockCoFH {
 
         BlockPos blockpos = pos.below();
         if (state.getBlock() == this) { //Forge: This function is called during world gen and placement, before this block is set, so if we are not 'here' then assume it's the pre-check.
-            return worldIn.getBlockState(blockpos).canSustainPlant(worldIn, blockpos, Direction.UP, this);
+            return worldIn.getBlockState(blockpos).canSustainPlant(worldIn, blockpos, Direction.UP, state).isTrue();
         }
         return this.mayPlaceOn(worldIn.getBlockState(blockpos), worldIn, blockpos);
     }

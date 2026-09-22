@@ -1,11 +1,18 @@
 package cofh.lib.common.block;
 
 import net.minecraft.core.BlockPos;
+import cofh.lib.util.Utils;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import org.jetbrains.annotations.Nullable;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
 
@@ -37,15 +44,17 @@ public class OreBlockCoFH extends Block {
     }
 
     @Override
-    public int getExpDrop(BlockState state, LevelReader level, RandomSource randomSource, BlockPos pos, int fortuneLevel, int silkTouchLevel) {
+    // 1.21: the hook takes the breaking entity and the tool rather than pre-computed enchantment
+    // levels - silk touch is read off the tool here instead.
+    public int getExpDrop(BlockState state, LevelAccessor level, BlockPos pos, @Nullable BlockEntity blockEntity, @Nullable Entity breaker, ItemStack tool) {
 
-        if (silkTouchLevel > 0 || maxXp <= 0) {
+        if (maxXp <= 0 || Utils.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, tool) > 0) {
             return 0;
         }
         if (minXp >= maxXp) {
             return minXp;
         }
-        return Mth.nextInt(randomSource, minXp, maxXp);
+        return Mth.nextInt(level.getRandom(), minXp, maxXp);
     }
 
 }

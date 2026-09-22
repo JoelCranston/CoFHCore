@@ -5,20 +5,18 @@ import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.AttachedStemBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.common.IPlantable;
-import net.neoforged.neoforge.common.PlantType;
-import net.neoforged.neoforge.common.ToolAction;
-import net.neoforged.neoforge.common.ToolActions;
+import net.neoforged.neoforge.common.ItemAbilities;
+import net.neoforged.neoforge.common.ItemAbility;
+import net.neoforged.neoforge.common.util.TriState;
 
 import java.util.function.Supplier;
 
 import static cofh.lib.util.Constants.FUNGUS;
-import static net.neoforged.neoforge.common.PlantType.*;
 
 public class SoilBlock extends Block {
 
@@ -37,37 +35,41 @@ public class SoilBlock extends Block {
         return this;
     }
 
+    // NeoForge 21.0 deleted the PlantType/IPlantable system (it was "buggy and quite confusing"):
+    // a soil block is now asked about the plant's own BlockState and answers with a TriState, and
+    // the plant categories are expressed by what the plant block itself will accept. The checks
+    // below reproduce the old categories from the plant state rather than from a PlantType.
     @Override
-    public boolean canSustainPlant(BlockState state, BlockGetter world, BlockPos pos, Direction facing, IPlantable plantable) {
+    public TriState canSustainPlant(BlockState state, BlockGetter world, BlockPos pos, Direction facing, BlockState plant) {
 
-        return canSustainPlant(state, world, pos, facing, plantable, false);
+        return canSustainPlant(state, world, pos, facing, plant, false);
     }
 
-    protected boolean canSustainPlant(BlockState state, BlockGetter world, BlockPos pos, Direction facing, IPlantable plantable, boolean tilled) {
+    protected TriState canSustainPlant(BlockState state, BlockGetter world, BlockPos pos, Direction facing, BlockState plant, boolean tilled) {
 
-        if (plantable.getPlant(world, pos.relative(facing)).getBlock() instanceof AttachedStemBlock) {
-            return true;
+        Block plantBlock = plant.getBlock();
+        if (plantBlock instanceof AttachedStemBlock) {
+            return TriState.TRUE;
         }
-        PlantType type = plantable.getPlantType(world, pos.above());
-
-        if (type == CROP) {
-            return tilled;
+        // CROP: only on tilled soil.
+        if (plantBlock instanceof CropBlock || plantBlock instanceof StemBlock) {
+            return tilled ? TriState.TRUE : TriState.FALSE;
         }
-        if (type == CAVE || type == DESERT || type == PLAINS || type == FUNGUS) {
-            return !tilled;
+        // CAVE / DESERT / PLAINS / FUNGUS: on untilled soil.
+        if (plantBlock instanceof BushBlock || plantBlock instanceof MushroomBlock || plantBlock instanceof NetherWartBlock
+                || plantBlock instanceof CactusBlock || plantBlock instanceof DeadBushBlock || plantBlock instanceof FungusBlock) {
+            return tilled ? TriState.FALSE : TriState.TRUE;
         }
-        if (type == BEACH) {
+        // BEACH: sugar cane and the like, next to water.
+        if (plantBlock instanceof SugarCaneBlock) {
             for (Direction direction : Direction.Plane.HORIZONTAL) {
                 BlockPos qPos = pos.relative(direction);
                 if (world.getFluidState(qPos).is(FluidTags.WATER) || world.getBlockState(qPos).getBlock() == Blocks.FROSTED_ICE) {
-                    return true;
+                    return TriState.TRUE;
                 }
             }
         }
-        //        if (plantable instanceof BushBlock && ((BushBlock) plantable).isValidGround(state, world, pos)) {
-        //            return true;
-        //        }
-        return false;
+        return TriState.DEFAULT;
     }
 
     @Override
@@ -77,9 +79,9 @@ public class SoilBlock extends Block {
     }
 
     @Override
-    public BlockState getToolModifiedState(BlockState state, UseOnContext context, ToolAction toolAction, boolean simulate) {
+    public BlockState getToolModifiedState(BlockState state, UseOnContext context, ItemAbility itemAbility, boolean simulate) {
 
-        if (ToolActions.HOE_TILL == toolAction && context.getItemInHand().canPerformAction(ToolActions.HOE_TILL)) {
+        if (ItemAbilities.HOE_TILL == itemAbility && context.getItemInHand().canPerformAction(ItemAbilities.HOE_TILL)) {
             if (context.getLevel().getBlockState(context.getClickedPos().above()).isAir()) {
                 return otherBlock.get().defaultBlockState();
             }

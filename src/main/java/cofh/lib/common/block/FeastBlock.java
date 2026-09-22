@@ -82,10 +82,10 @@ public class FeastBlock extends DirectionalBlock4Way {
             if (takeServing) {
                 player.addItem(servItem);
             } else {
-                player.getFoodData().eat(food.getNutrition(), food.getSaturationModifier());
-                for (Pair<MobEffectInstance, Float> pair : this.food.getEffects()) {
-                    if (!world.isClientSide && pair.getFirst() != null && world.random.nextFloat() < pair.getSecond()) {
-                        player.addEffect(new MobEffectInstance(pair.getFirst()));
+                player.getFoodData().eat(food);
+                for (FoodProperties.PossibleEffect possible : this.food.effects()) {
+                    if (!world.isClientSide && world.random.nextFloat() < possible.probability()) {
+                        player.addEffect(possible.effect());
                     }
                 }
             }
@@ -160,7 +160,7 @@ public class FeastBlock extends DirectionalBlock4Way {
     //    }
 
     @Override
-    public boolean isPathfindable(BlockState stateIn, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    protected boolean isPathfindable(BlockState stateIn, PathComputationType type) {
 
         return false;
     }

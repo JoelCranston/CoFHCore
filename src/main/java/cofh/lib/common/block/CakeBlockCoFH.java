@@ -78,11 +78,13 @@ public class CakeBlockCoFH extends CakeBlock {
             return InteractionResult.PASS;
         } else {
             player.awardStat(Stats.EAT_CAKE_SLICE);
-            player.getFoodData().eat(food.getNutrition(), food.getSaturationModifier());
+            // FoodProperties is a record now, and its effects are PossibleEffect entries
+            // holding a supplier plus a probability rather than a Pair.
+            player.getFoodData().eat(food);
 
-            for (Pair<MobEffectInstance, Float> pair : this.food.getEffects()) {
-                if (!world.isClientSide && pair.getFirst() != null && world.random.nextFloat() < pair.getSecond()) {
-                    player.addEffect(new MobEffectInstance(pair.getFirst()));
+            for (FoodProperties.PossibleEffect possible : this.food.effects()) {
+                if (!world.isClientSide && world.random.nextFloat() < possible.probability()) {
+                    player.addEffect(possible.effect());
                 }
             }
             int i = state.getValue(BITES);

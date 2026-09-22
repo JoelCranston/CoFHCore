@@ -134,7 +134,7 @@
 //    }
 //
 //    @Override
-//    public boolean isPathfindable(BlockState state, BlockGetter blockGetter, BlockPos pos, PathComputationType type) {
+//    protected boolean isPathfindable(BlockState state, PathComputationType type) {
 //
 //        return true;
 //    }

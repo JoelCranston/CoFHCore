@@ -3,7 +3,7 @@ package cofh.lib.common.block;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.neoforged.neoforge.common.PlantType;
+
 
 import static cofh.lib.util.constants.BlockStatePropertiesCoFH.AGE_0_10;
 
@@ -13,14 +13,14 @@ public class CropBlockPerennial extends CropBlockCoFH {
 
     public int postHarvestAge = DEFAULT_POST_HARVEST_AGE;
 
-    public CropBlockPerennial(Properties builder, PlantType type, int growLight, float growMod) {
+    public CropBlockPerennial(Properties builder, CropType type, int growLight, float growMod) {
 
         super(builder, type, growLight, growMod);
     }
 
     public CropBlockPerennial(Properties builder, int growLight, float growMod) {
 
-        this(builder, PlantType.CROP, growLight, growMod);
+        this(builder, CropType.CROP, growLight, growMod);
     }
 
     public CropBlockPerennial(Properties builder) {

@@ -25,7 +25,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.common.CommonHooks;
-import net.neoforged.neoforge.common.PlantType;
+
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -45,14 +45,14 @@ public class CropBlockCoFH extends CropBlock implements IHarvestable {
             box(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D),
             box(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D)};
 
-    protected final PlantType type;
+    protected final CropType type;
     protected int growLight;
     protected float growMod;
 
     protected Supplier<Item> crop = () -> Items.AIR;
     protected Supplier<Item> seed = () -> Items.AIR;
 
-    public CropBlockCoFH(Properties builder, PlantType type, int growLight, float growMod) {
+    public CropBlockCoFH(Properties builder, CropType type, int growLight, float growMod) {
 
         super(builder);
         this.type = type;
@@ -62,12 +62,12 @@ public class CropBlockCoFH extends CropBlock implements IHarvestable {
 
     public CropBlockCoFH(Properties builder, int growLight, float growMod) {
 
-        this(builder, PlantType.CROP, growLight, growMod);
+        this(builder, CropType.CROP, growLight, growMod);
     }
 
     public CropBlockCoFH(Properties builder) {
 
-        this(builder, PlantType.CROP, 9, 1.0F);
+        this(builder, CropType.CROP, 9, 1.0F);
     }
 
     public CropBlockCoFH growMod(float growMod) {
@@ -113,11 +113,11 @@ public class CropBlockCoFH extends CropBlock implements IHarvestable {
         if (worldIn.getRawBrightness(pos, 0) >= growLight) {
             if (!canHarvest(state)) {
                 int age = getAge(state);
-                float growthChance = Math.max(getGrowthSpeed(this, worldIn, pos) * growMod, 0.1F);
-                if (CommonHooks.onCropsGrowPre(worldIn, pos, state, rand.nextInt((int) (25.0F / growthChance) + 1) == 0)) {
+                float growthChance = Math.max(getGrowthSpeed(state, worldIn, pos) * growMod, 0.1F);
+                if (CommonHooks.canCropGrow(worldIn, pos, state, rand.nextInt((int) (25.0F / growthChance) + 1) == 0)) {
                     int newAge = age + 1 == getPostHarvestAge() ? getMaxAge() : age + 1;
                     worldIn.setBlock(pos, getStateForAge(newAge), 2);
-                    CommonHooks.onCropsGrowPost(worldIn, pos, state);
+                    CommonHooks.fireCropGrowPost(worldIn, pos, state);
                 }
             }
         }
@@ -148,9 +148,9 @@ public class CropBlockCoFH extends CropBlock implements IHarvestable {
         return CROPS_BY_AGE[Mth.clamp(state.getValue(getAgeProperty()), 0, CROPS_BY_AGE.length - 1)];
     }
 
-    public static float getGrowthChanceProxy(Block blockIn, BlockGetter worldIn, BlockPos pos) {
+    public static float getGrowthChanceProxy(BlockState state, BlockGetter worldIn, BlockPos pos) {
 
-        return getGrowthSpeed(blockIn, worldIn, pos);
+        return getGrowthSpeed(state, worldIn, pos);
     }
 
     // region AGE
@@ -254,9 +254,12 @@ public class CropBlockCoFH extends CropBlock implements IHarvestable {
     }
     // endregion
 
-    // region IPlantable
-    @Override
-    public PlantType getPlantType(BlockGetter world, BlockPos pos) {
+    // region PLANT TYPE
+    /**
+     * IPlantable is gone (NeoForge 21.0); a soil block is handed the plant's BlockState and
+     * decides for itself. CoFH's soils read this back off the block.
+     */
+    public CropType getCropType() {
 
         return type;
     }
