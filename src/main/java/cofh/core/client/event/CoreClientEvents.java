@@ -44,7 +44,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import org.joml.Matrix4f;
@@ -60,7 +60,7 @@ import static net.minecraft.ChatFormatting.DARK_GRAY;
 import static net.minecraft.ChatFormatting.GRAY;
 import static net.minecraft.nbt.Tag.TAG_COMPOUND;
 
-@Mod.EventBusSubscriber (value = Dist.CLIENT, modid = ModIds.ID_COFH_CORE)
+@EventBusSubscriber (value = Dist.CLIENT, modid = ModIds.ID_COFH_CORE)
 public class CoreClientEvents {
 
     public static int renderTime;

@@ -14,7 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingAttackEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
@@ -28,7 +28,7 @@ import static net.minecraft.tags.DamageTypeTags.*;
 import static net.minecraft.world.effect.MobEffects.POISON;
 import static net.minecraft.world.effect.MobEffects.WITHER;
 
-@Mod.EventBusSubscriber (modid = ID_COFH_CORE)
+@EventBusSubscriber (modid = ID_COFH_CORE)
 public class ArmorEvents {
 
     private ArmorEvents() {

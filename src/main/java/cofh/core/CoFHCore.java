@@ -127,7 +127,7 @@ public class CoFHCore {
         ENTITY_DATA_SERIALIZERS.register(modEventBus);
         FLUID_TYPES.register(modEventBus);
 
-        CONFIG_MANAGER.register(modEventBus)
+        CONFIG_MANAGER.register(modContainer, modEventBus)
                 .addClientConfig(new CoreClientConfig())
                 .addCommonConfig(new CoreCommonConfig())
                 .addServerConfig(new CoreCommandConfig())

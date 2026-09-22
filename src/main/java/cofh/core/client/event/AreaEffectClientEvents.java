@@ -22,7 +22,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 
 import java.util.List;
@@ -31,7 +31,7 @@ import static cofh.core.util.helpers.AreaEffectHelper.validAreaEffectItem;
 import static cofh.core.util.helpers.AreaEffectHelper.validAreaEffectMiningItem;
 import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 
-@Mod.EventBusSubscriber (value = Dist.CLIENT, modid = ID_COFH_CORE)
+@EventBusSubscriber (value = Dist.CLIENT, modid = ID_COFH_CORE)
 public class AreaEffectClientEvents {
 
     private AreaEffectClientEvents() {

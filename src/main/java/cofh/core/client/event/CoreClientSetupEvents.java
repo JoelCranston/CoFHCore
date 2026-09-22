@@ -8,7 +8,7 @@ import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.world.item.Item;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ModelEvent.RegisterGeometryLoaders;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
@@ -23,7 +23,7 @@ import static cofh.core.client.CoreKeys.MULTIMODE_INCREMENT;
 import static cofh.core.init.CoreParticles.*;
 import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 
-@Mod.EventBusSubscriber (value = Dist.CLIENT, modid = ID_COFH_CORE, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber (value = Dist.CLIENT, modid = ID_COFH_CORE, bus = EventBusSubscriber.Bus.MOD)
 public class CoreClientSetupEvents {
 
     private static final List<Item> COLORABLE_ITEMS = new ArrayList<>();

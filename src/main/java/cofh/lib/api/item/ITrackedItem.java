@@ -13,7 +13,7 @@
 //import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 //import net.neoforged.bus.api.EventPriority;
 //import net.neoforged.bus.api.SubscribeEvent;
-//import net.neoforged.fml.common.Mod;
+//import net.neoforged.fml.common.EventBusSubscriber;
 //
 //import javax.annotation.Nullable;
 //import java.util.Map;
@@ -25,7 +25,7 @@
 ///**
 // * Marker interface for any items that should be tracked.
 // */
-//@Mod.EventBusSubscriber (modid = ID_COFH_CORE)
+//@EventBusSubscriber (modid = ID_COFH_CORE)
 //public interface ITrackedItem {
 //
 //    default void onSelect(Player player, InteractionHand hand, TrackedItemInfo info) {

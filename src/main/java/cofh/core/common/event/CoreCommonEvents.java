@@ -14,7 +14,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
@@ -32,7 +32,7 @@ import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 import static net.minecraft.world.item.enchantment.Enchantments.FEATHER_FALLING;
 import static net.minecraft.world.item.enchantment.Enchantments.MENDING;
 
-@Mod.EventBusSubscriber (modid = ID_COFH_CORE)
+@EventBusSubscriber (modid = ID_COFH_CORE)
 public class CoreCommonEvents {
 
     private CoreCommonEvents() {

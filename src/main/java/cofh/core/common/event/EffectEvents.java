@@ -10,7 +10,7 @@ import net.minecraft.world.item.alchemy.PotionUtils;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityStruckByLightningEvent;
 import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
@@ -26,7 +26,7 @@ import java.util.function.Predicate;
 import static cofh.core.init.CoreMobEffects.*;
 import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 
-@Mod.EventBusSubscriber (modid = ID_COFH_CORE)
+@EventBusSubscriber (modid = ID_COFH_CORE)
 public class EffectEvents {
 
     private EffectEvents() {

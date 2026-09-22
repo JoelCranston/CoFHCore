@@ -8,7 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 
@@ -19,7 +19,7 @@ import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 import static net.minecraft.world.InteractionHand.MAIN_HAND;
 import static net.minecraft.world.InteractionHand.OFF_HAND;
 
-@Mod.EventBusSubscriber (modid = ID_COFH_CORE)
+@EventBusSubscriber (modid = ID_COFH_CORE)
 public class ItemTracker {
 
     // TODO weak reference players

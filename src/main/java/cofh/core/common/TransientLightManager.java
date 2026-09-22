@@ -11,14 +11,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.lighting.BlockLightEngine;
 import net.minecraft.world.level.lighting.LightEngine;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 /**
  * Class that allows for the placement of temporary light sources.
  * You should only call the methods in this class from the client side.
  */
-@Mod.EventBusSubscriber (modid = ModIds.ID_COFH_CORE)
+@EventBusSubscriber (modid = ModIds.ID_COFH_CORE)
 public class TransientLightManager {
 
     protected static final BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();

@@ -1,26 +1,31 @@
 package cofh.core.common.config;
 
 import cofh.core.util.ProxyUtils;
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import com.electronwill.nightconfig.core.io.WritingMode;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
-import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class ConfigManager {
 
     protected List<IBaseConfig> commonSubConfigs = new ArrayList<>();
     protected List<IBaseConfig> serverSubConfigs = new ArrayList<>();
     protected List<IBaseConfig> clientSubConfigs = new ArrayList<>();
+
+    // 1.21.1: ModLoadingContext#registerConfig was removed (NeoForge 21.0 "Deprecations") - a mod
+    // registers its configs through its own ModContainer, which the mod constructor is handed.
+    protected ModContainer container;
+
+    // The common spec used to be file-loaded here by hand, ahead of FML, so values could be read
+    // during registration. 1.21.1 removed that option: ModConfigSpec#setConfig is gone and its
+    // replacement, IConfigSpec#acceptConfig(ILoadedConfig), takes a sealed type only FML can
+    // construct. FML loads registered configs itself before the lifecycle events, and nothing in
+    // this family reads a config value during registration, so the hack is simply dropped.
 
     protected boolean commonInit = false;
     protected boolean clientInit = false;
@@ -35,8 +40,9 @@ public class ConfigManager {
     protected final ModConfigSpec.Builder serverConfig = new ModConfigSpec.Builder();
     protected ModConfigSpec serverSpec;
 
-    public ConfigManager register(IEventBus bus) {
+    public ConfigManager register(ModContainer container, IEventBus bus) {
 
+        this.container = container;
         bus.register(this);
         return this;
     }
@@ -64,26 +70,9 @@ public class ConfigManager {
         if (!commonInit) {
             genCommonConfig();
             commonSpec = commonConfig.build();
-            ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, commonSpec);
+            container.registerConfig(ModConfig.Type.COMMON, commonSpec);
             commonInit = true;
-
-            String configName = String.format(Locale.ROOT, "%s-%s.toml",
-                    ModLoadingContext.get().getActiveContainer().getModId(), ModConfig.Type.COMMON.extension());
-            loadConfig(commonSpec, FMLPaths.CONFIGDIR.get().resolve(configName));
         }
-    }
-
-    public static void loadConfig(ModConfigSpec spec, Path path) {
-
-        final CommentedFileConfig configData = CommentedFileConfig.builder(path)
-                .sync()
-                .preserveInsertionOrder()
-                .autosave()
-                .writingMode(WritingMode.REPLACE)
-                .build();
-
-        configData.load();
-        spec.setConfig(configData);
     }
 
     /**
@@ -94,7 +83,7 @@ public class ConfigManager {
         if (ProxyUtils.isClient() && !clientInit) {
             genClientConfig();
             clientSpec = clientConfig.build();
-            ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, clientSpec);
+            container.registerConfig(ModConfig.Type.CLIENT, clientSpec);
             clientInit = true;
         }
     }
@@ -107,7 +96,7 @@ public class ConfigManager {
         if (!serverInit) {
             genServerConfig();
             serverSpec = serverConfig.build();
-            ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, serverSpec);
+            container.registerConfig(ModConfig.Type.SERVER, serverSpec);
             serverInit = true;
         }
     }

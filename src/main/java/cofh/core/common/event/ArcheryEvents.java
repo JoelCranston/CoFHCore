@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
 import net.neoforged.neoforge.event.entity.player.ArrowLooseEvent;
@@ -28,7 +28,7 @@ import static cofh.lib.util.Utils.*;
 import static cofh.lib.util.constants.ModIds.ID_ENSORCELLATION;
 import static net.minecraft.world.item.enchantment.Enchantments.INFINITY_ARROWS;
 
-@Mod.EventBusSubscriber (modid = ModIds.ID_COFH_CORE)
+@EventBusSubscriber (modid = ModIds.ID_COFH_CORE)
 public class ArcheryEvents {
 
     private ArcheryEvents() {
