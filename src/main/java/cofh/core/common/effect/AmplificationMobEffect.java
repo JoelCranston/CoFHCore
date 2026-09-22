@@ -46,7 +46,7 @@ public class AmplificationMobEffect extends MobEffectCoFH {
         if (animal.getAge() == 0 && !animal.isInLove()) {
             animal.setInLove(player);
             for (int i = 0; i < 4; ++i) {
-                Utils.spawnParticles(animal.level, ParticleTypes.HEART, animal.getX() + animal.level.random.nextDouble(), animal.getY() + 1.0D + animal.level.random.nextDouble(), animal.getZ() + animal.level.random.nextDouble(), 1, 0, 0, 0, 0);
+                Utils.spawnParticles(animal.level, ParticleTypes.HEART, animal.getX() + animal.level.getRandom().nextDouble(), animal.getY() + 1.0D + animal.level.getRandom().nextDouble(), animal.getZ() + animal.level.getRandom().nextDouble(), 1, 0, 0, 0, 0);
             }
         }
     }

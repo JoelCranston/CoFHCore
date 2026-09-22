@@ -118,7 +118,7 @@ public class ItemRayTraceEntityPacket {
 //
 //    public static void sendToServer(Player player, InteractionHand hand, Vec3 origin, Entity target, Vec3 hit, float power) {
 //
-//        if (player.level.isClientSide) {
+//        if (player.level.isClientSide()) {
 //            Player client = ProxyUtils.getClientPlayer();
 //            if (client != null && client.equals(player)) {
 //                ItemRayTraceEntityPacket packet = new ItemRayTraceEntityPacket();

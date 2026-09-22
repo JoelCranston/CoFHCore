@@ -40,7 +40,7 @@ public class TntBlockCoFH extends TntBlock {
     @Override
     public void onCaughtFire(BlockState state, Level world, BlockPos pos, @Nullable Direction face, @Nullable LivingEntity igniter) {
 
-        if (!world.isClientSide) {
+        if (!world.isClientSide()) {
             Entity entity = factory.createTNT(world, (double) pos.getX() + 0.5D, pos.getY(), (double) pos.getZ() + 0.5D, igniter);
             world.addFreshEntity(entity);
             world.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.TNT_PRIMED, SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -50,9 +50,9 @@ public class TntBlockCoFH extends TntBlock {
     @Override
     public void wasExploded(Level worldIn, BlockPos pos, Explosion explosionIn) {
 
-        if (!worldIn.isClientSide) {
+        if (!worldIn.isClientSide()) {
             PrimedTntCoFH entity = factory.createTNT(worldIn, ((float) pos.getX() + 0.5F), pos.getY(), ((float) pos.getZ() + 0.5F), explosionIn.getIndirectSourceEntity());
-            entity.setFuse((short) (worldIn.random.nextInt(entity.getFuse() / 4) + entity.getFuse() / 8));
+            entity.setFuse((short) (worldIn.getRandom().nextInt(entity.getFuse() / 4) + entity.getFuse() / 8));
             worldIn.addFreshEntity(entity);
         }
     }

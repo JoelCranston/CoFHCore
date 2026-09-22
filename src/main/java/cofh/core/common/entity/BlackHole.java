@@ -28,7 +28,7 @@
 //    public void tick() {
 //
 //        // TODO particle
-//        if (level.isClientSide) {
+//        if (level.isClientSide()) {
 //            this.level.addParticle((SimpleParticleType) FROST.get(), this.getRandomX(0.5D), this.getRandomY(), this.getRandomZ(0.5D), 0.0D, 0.0D, 0.0D);
 //        } else {
 //            float rangeSqr = radius * radius;

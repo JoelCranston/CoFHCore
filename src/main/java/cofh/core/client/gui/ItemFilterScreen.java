@@ -10,7 +10,7 @@ import cofh.core.util.helpers.RenderHelper;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
@@ -24,13 +24,13 @@ import static cofh.lib.util.helpers.SoundHelper.playClickSound;
 
 public class ItemFilterScreen extends ContainerScreenCoFH<ItemFilterMenu> {
 
-    public static final ResourceLocation TEXTURE = ResourceLocation.parse(PATH_GUI + "generic.png");
-    public static final ResourceLocation SLOT_OVERLAY = ResourceLocation.parse(PATH_ELEMENTS + "locked_overlay_slot.png");
+    public static final Identifier TEXTURE = Identifier.parse(PATH_GUI + "generic.png");
+    public static final Identifier SLOT_OVERLAY = Identifier.parse(PATH_ELEMENTS + "locked_overlay_slot.png");
 
-    public static final ResourceLocation TEX_DENY_LIST = ResourceLocation.parse(PATH_GUI + "filters/filter_deny_list.png");
-    public static final ResourceLocation TEX_ALLOW_LIST = ResourceLocation.parse(PATH_GUI + "filters/filter_allow_list.png");
-    public static final ResourceLocation TEX_IGNORE_NBT = ResourceLocation.parse(PATH_GUI + "filters/filter_ignore_nbt.png");
-    public static final ResourceLocation TEX_USE_NBT = ResourceLocation.parse(PATH_GUI + "filters/filter_use_nbt.png");
+    public static final Identifier TEX_DENY_LIST = Identifier.parse(PATH_GUI + "filters/filter_deny_list.png");
+    public static final Identifier TEX_ALLOW_LIST = Identifier.parse(PATH_GUI + "filters/filter_allow_list.png");
+    public static final Identifier TEX_IGNORE_NBT = Identifier.parse(PATH_GUI + "filters/filter_ignore_nbt.png");
+    public static final Identifier TEX_USE_NBT = Identifier.parse(PATH_GUI + "filters/filter_use_nbt.png");
 
     public ItemFilterScreen(ItemFilterMenu container, Inventory inv, Component titleIn) {
 

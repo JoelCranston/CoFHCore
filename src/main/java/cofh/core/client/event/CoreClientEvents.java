@@ -25,7 +25,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -34,7 +34,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -115,7 +115,7 @@ public class CoreClientEvents {
                 Holder<Enchantment> ench = stored.keySet().iterator().next();
                 ResourceKey<Enchantment> key = ench.unwrapKey().orElse(null);
                 if (key != null) {
-                    String enchKey = Util.makeDescriptionId("enchantment", key.location()) + ".desc";
+                    String enchKey = Util.makeDescriptionId("enchantment", key.identifier()) + ".desc";
                     if (canLocalize(enchKey)) {
                         tooltip.add(getInfoTextComponent(enchKey));
                     }
@@ -131,8 +131,8 @@ public class CoreClientEvents {
             Item item = event.getItemStack().getItem();
             Block block = Block.byItem(item);
 
-            Set<ResourceLocation> blockTags = block == Blocks.AIR ? Collections.emptySet() : Block.byItem(item).builtInRegistryHolder().tags().map(TagKey::location).collect(Collectors.toSet());
-            Set<ResourceLocation> itemTags = item.builtInRegistryHolder().tags().map(TagKey::location).collect(Collectors.toSet());
+            Set<Identifier> blockTags = block == Blocks.AIR ? Collections.emptySet() : Block.byItem(item).builtInRegistryHolder().tags().map(TagKey::location).collect(Collectors.toSet());
+            Set<Identifier> itemTags = item.builtInRegistryHolder().tags().map(TagKey::location).collect(Collectors.toSet());
 
             if (!blockTags.isEmpty() || !itemTags.isEmpty()) {
                 if (Screen.hasControlDown()) {

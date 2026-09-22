@@ -4,7 +4,7 @@ import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
@@ -17,13 +17,13 @@ public class PostEffect implements ResourceManagerReloadListener {
 
     private static final Collection<PostEffect> EFFECTS = new ArrayList<>();
 
-    protected final ResourceLocation shader;
+    protected final Identifier shader;
     protected PostChain chain;
     protected boolean loaded;
 
-    public PostEffect(ResourceLocation shader) {
+    public PostEffect(Identifier shader) {
 
-        this.shader = ResourceLocation.fromNamespaceAndPath(shader.getNamespace(), "shaders/post/" + shader.getPath() + ".json");
+        this.shader = Identifier.fromNamespaceAndPath(shader.getNamespace(), "shaders/post/" + shader.getPath() + ".json");
         EFFECTS.add(this);
     }
 

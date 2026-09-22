@@ -1,6 +1,6 @@
 package cofh.lib.init.tags;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
@@ -26,7 +26,7 @@ public class FluidTagsCoFH {
     // region HELPERS
     private static TagKey<Fluid> commonTag(String name) {
 
-        return FluidTags.create(ResourceLocation.fromNamespaceAndPath("c", name));
+        return FluidTags.create(Identifier.fromNamespaceAndPath("c", name));
     }
     // endregion
 }

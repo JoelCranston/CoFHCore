@@ -2,12 +2,12 @@ package cofh.lib.init.data.loot;
 
 import cofh.lib.common.loot.TileNBTSync;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
-import net.minecraft.advancements.critereon.EnchantmentPredicate;
-import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.advancements.critereon.MinMaxBounds;
-import net.minecraft.advancements.critereon.StatePropertiesPredicate;
+import net.minecraft.advancements.criterion.EnchantmentPredicate;
+import net.minecraft.advancements.criterion.ItemPredicate;
+import net.minecraft.advancements.criterion.MinMaxBounds;
+import net.minecraft.advancements.criterion.StatePropertiesPredicate;
 import net.minecraft.data.loot.BlockLootSubProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -166,7 +166,7 @@ public abstract class BlockLootSubProviderCoFH extends BlockLootSubProvider {
                                 .copy("Items", "Items", CopyCustomDataFunction.MergeStrategy.REPLACE)
                                 .copy("Energy", "Energy", CopyCustomDataFunction.MergeStrategy.REPLACE))
                         .apply(SetContainerContents.setContents(ContainerComponentManipulators.CONTAINER)
-                                .withEntry(DynamicLoot.dynamicEntry(ResourceLocation.withDefaultNamespace("contents")))));
+                                .withEntry(DynamicLoot.dynamicEntry(Identifier.withDefaultNamespace("contents")))));
         return LootTable.lootTable().withPool(builder);
     }
 

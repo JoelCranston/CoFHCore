@@ -5,12 +5,12 @@ import cofh.core.util.ProxyUtils;
 import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -33,26 +33,26 @@ public class GrenadeItem extends ItemCoFH implements ProjectileItem {
         super(builder);
         this.factory = factory;
 
-        ProxyUtils.registerItemModelProperty(this, ResourceLocation.parse("thrown"), (stack, world, living, seed) -> (stack.getDamageValue() > 0 ? 1.0F : 0.0F));
+        ProxyUtils.registerItemModelProperty(this, Identifier.parse("thrown"), (stack, world, living, seed) -> (stack.getDamageValue() > 0 ? 1.0F : 0.0F));
         // Per-item dispense-behavior subclasses are gone; ProjectileItem plus this call is
         // the modern equivalent (same shape as KnifeItem and ArrowItemCoFH).
         DispenserBlock.registerProjectileBehavior(this);
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
+    public InteractionResult use(Level worldIn, Player playerIn, InteractionHand handIn) {
 
         ItemStack stack = playerIn.getItemInHand(handIn);
         worldIn.playSound(null, playerIn.getX(), playerIn.getY(), playerIn.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.NEUTRAL, 0.5F, 0.4F / (MathHelper.RANDOM.nextFloat() * 0.4F + 0.8F));
         playerIn.getCooldowns().addCooldown(this, cooldown);
-        if (!worldIn.isClientSide) {
+        if (!worldIn.isClientSide()) {
             createGrenade(stack, worldIn, playerIn);
         }
         playerIn.awardStat(Stats.ITEM_USED.get(this));
         if (!playerIn.getAbilities().instabuild) {
             stack.shrink(1);
         }
-        return InteractionResultHolder.sidedSuccess(stack, worldIn.isClientSide());
+        return InteractionResult.SUCCESS;
     }
 
     protected void createGrenade(ItemStack stack, Level world, Player player) {

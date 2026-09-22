@@ -9,10 +9,10 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.core.Holder;
@@ -54,10 +54,10 @@ public class KnifeItem extends SwordItemCoFH implements ProjectileItem {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
+    public InteractionResult use(Level world, Player player, InteractionHand hand) {
 
         player.startUsingItem(hand);
-        return InteractionResultHolder.consume(player.getItemInHand(hand));
+        return InteractionResult.CONSUME;
     }
 
     @Override
@@ -80,7 +80,7 @@ public class KnifeItem extends SwordItemCoFH implements ProjectileItem {
             if (power < 0.1D) {
                 return;
             }
-            if (!world.isClientSide) {
+            if (!world.isClientSide()) {
                 ThrownKnife knife = new ThrownKnife(world, player, stack);
                 knife.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, power * 3.0F, 0.1F);
                 if (player.getAbilities().instabuild) {

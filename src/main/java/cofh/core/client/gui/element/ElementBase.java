@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 import java.util.function.IntSupplier;
@@ -21,7 +21,7 @@ public abstract class ElementBase {
     protected Supplier<Boolean> visible = TRUE;
 
     protected final IGuiAccess gui;
-    protected ResourceLocation texture;
+    protected Identifier texture;
     protected String name = "";
 
     private int posX;
@@ -119,7 +119,7 @@ public abstract class ElementBase {
         return this;
     }
 
-    public final ElementBase setTexture(ResourceLocation texture, int texW, int texH) {
+    public final ElementBase setTexture(Identifier texture, int texW, int texH) {
 
         this.texture = texture;
         this.texW = texW;
@@ -129,7 +129,7 @@ public abstract class ElementBase {
 
     public final ElementBase setTexture(String texture, int texW, int texH) {
 
-        this.texture = ResourceLocation.parse(texture);
+        this.texture = Identifier.parse(texture);
         this.texW = texW;
         this.texH = texH;
         return this;

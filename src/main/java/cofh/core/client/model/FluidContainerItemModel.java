@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
@@ -46,7 +46,7 @@ public final class FluidContainerItemModel implements IUnbakedGeometry<FluidCont
     // Transformer to set quads to max brightness
     private static final IQuadTransformer MAX_LIGHTMAP_TRANSFORMER = QuadTransformers.applyingLightmap(RenderHelper.FULL_BRIGHT);
 
-    private static final ResourceLocation MODEL_LOCATION = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "fluid_container");
+    private static final Identifier MODEL_LOCATION = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "fluid_container");
 
     @Nonnull
     private final FluidStack fluidStack;
@@ -118,7 +118,7 @@ public final class FluidContainerItemModel implements IUnbakedGeometry<FluidCont
 
             FluidStack stack = FluidStack.EMPTY;
             if (jsonObject.has("fluid")) {
-                ResourceLocation fluidName = ResourceLocation.parse(jsonObject.get("fluid").getAsString());
+                Identifier fluidName = Identifier.parse(jsonObject.get("fluid").getAsString());
                 Fluid fluid = BuiltInRegistries.FLUID.get(fluidName);
                 if (fluid != null) {
                     stack = new FluidStack(fluid, BUCKET_VOLUME);

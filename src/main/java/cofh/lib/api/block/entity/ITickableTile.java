@@ -42,10 +42,10 @@ public interface ITickableTile {
             if (ITickableTile.class.isAssignableFrom(clazz)) {
                 return (level1, pos, state, instance) -> ((ITickableTile) instance).tick();
             }
-            if (level.isClientSide && IClientTickable.class.isAssignableFrom(clazz)) {
+            if (level.isClientSide() && IClientTickable.class.isAssignableFrom(clazz)) {
                 return (level1, pos, state, instance) -> ((IClientTickable) instance).tickClient();
             }
-            if (!level.isClientSide && IServerTickable.class.isAssignableFrom(clazz)) {
+            if (!level.isClientSide() && IServerTickable.class.isAssignableFrom(clazz)) {
                 return (level1, pos, state, instance) -> ((IServerTickable) instance).tickServer();
             }
         }

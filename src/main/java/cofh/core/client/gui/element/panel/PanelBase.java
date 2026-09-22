@@ -9,7 +9,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +18,8 @@ import static cofh.lib.util.Constants.PATH_ELEMENTS;
 
 public abstract class PanelBase extends ElementBase {
 
-    public static final ResourceLocation DEFAULT_TEXTURE_LEFT = ResourceLocation.parse(PATH_ELEMENTS + "panel_left.png");
-    public static final ResourceLocation DEFAULT_TEXTURE_RIGHT = ResourceLocation.parse(PATH_ELEMENTS + "panel_right.png");
+    public static final Identifier DEFAULT_TEXTURE_LEFT = Identifier.parse(PATH_ELEMENTS + "panel_left.png");
+    public static final Identifier DEFAULT_TEXTURE_RIGHT = Identifier.parse(PATH_ELEMENTS + "panel_right.png");
 
     public static final int LEFT = 0;
     public static final int RIGHT = 1;
@@ -78,7 +78,7 @@ public abstract class PanelBase extends ElementBase {
         }
     }
 
-    protected void drawPanelIcon(GuiGraphics pGuiGraphics, ResourceLocation texture) {
+    protected void drawPanelIcon(GuiGraphics pGuiGraphics, Identifier texture) {
 
         gui.drawIcon(pGuiGraphics, texture, sideOffset(), 3);
     }

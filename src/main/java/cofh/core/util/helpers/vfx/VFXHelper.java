@@ -17,7 +17,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.model.data.ModelData;
 import org.joml.*;
 
 import java.lang.Math;
@@ -346,8 +346,8 @@ public final class VFXHelper {
                             stack.translate(offset.x, height + y, offset.y);
                             stack.scale(1.01F, 1.01F, 1.01F);
                             // ModelData modelData = renderer.getBlockModel(state).getModelData(level, pos, state, ModelData.EMPTY);
-                            for (RenderType type : renderer.getBlockModel(state).getRenderTypes(state, level.random, ModelData.EMPTY)) {
-                                renderer.renderBatched(state, pos.relative(Direction.UP), level, stack, buffer.getBuffer(type), false, level.random, ModelData.EMPTY, type);
+                            for (RenderType type : renderer.getBlockModel(state).getRenderTypes(state, level.getRandom(), ModelData.EMPTY)) {
+                                renderer.renderBatched(state, pos.relative(Direction.UP), level, stack, buffer.getBuffer(type), false, level.getRandom(), ModelData.EMPTY, type);
                             }
                             stack.popPose();
                         }

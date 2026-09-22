@@ -4,7 +4,7 @@ import cofh.core.client.gui.IGuiAccess;
 import cofh.core.util.helpers.RenderHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 import java.util.function.DoubleSupplier;
@@ -21,7 +21,7 @@ public class ResourcePanel extends PanelBase {
     public static int defaultBackgroundColorOut = 0xd0650b;
     public static int defaultBackgroundColorIn = 0x0a76d0;
 
-    private ResourceLocation icon;
+    private Identifier icon;
 
     private String resource = "";
 
@@ -55,7 +55,7 @@ public class ResourcePanel extends PanelBase {
         setVisible(() -> !resource.isEmpty());
     }
 
-    public ResourcePanel setResource(ResourceLocation icon, String resource, boolean producer) {
+    public ResourcePanel setResource(Identifier icon, String resource, boolean producer) {
 
         this.icon = icon;
         this.resource = resource;

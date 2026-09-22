@@ -3,7 +3,7 @@ package cofh.core.util.helpers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.InventoryMenu;
 
 import java.awt.*;
@@ -14,7 +14,7 @@ public final class ColorHelper {
 
     }
 
-    public static int getColorFrom(ResourceLocation location) {
+    public static int getColorFrom(Identifier location) {
 
         TextureAtlas textureMap = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS);
         TextureAtlasSprite sprite = textureMap.getSprite(location);

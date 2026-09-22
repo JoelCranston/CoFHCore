@@ -3,7 +3,7 @@ package cofh.core.util;
 import cofh.lib.api.IProxyItemPropertyGetter;
 import cofh.lib.api.block.entity.IAreaEffectTile;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -47,12 +47,12 @@ public class Proxy {
         return item == null ? null : addModel(getRegistryName(item), model);
     }
 
-    protected Object addModel(ResourceLocation loc, Object model) {
+    protected Object addModel(Identifier loc, Object model) {
 
         return null;
     }
 
-    public Object getModel(ResourceLocation loc) {
+    public Object getModel(Identifier loc) {
 
         return null;
     }
@@ -61,7 +61,7 @@ public class Proxy {
 
     }
 
-    public void registerItemModelProperty(Item item, ResourceLocation resourceLoc, IProxyItemPropertyGetter propertyGetter) {
+    public void registerItemModelProperty(Item item, Identifier resourceLoc, IProxyItemPropertyGetter propertyGetter) {
 
     }
 

@@ -2,11 +2,11 @@ package cofh.lib.init.data;
 
 import cofh.lib.util.DeferredRegisterCoFH;
 import cofh.lib.util.Utils;
-import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.criterion.MinMaxBounds;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -36,7 +36,7 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
     //    @Override
     //    public CompletableFuture<?> run(CachedOutput pOutput) {
     //
-    //        Set<ResourceLocation> set = Sets.newHashSet();
+    //        Set<Identifier> set = Sets.newHashSet();
     //        List<CompletableFuture<?>> list = new ArrayList<>();
     //        this.buildRecipes((recipe) -> {
     //            if (!set.add(recipe.getId())) {
@@ -59,12 +59,12 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
 
     //    @Override
     //    public CompletableFuture<?> run(final CachedOutput pOutput) {
-    //        final Set<ResourceLocation> set = Sets.newHashSet();
+    //        final Set<Identifier> set = Sets.newHashSet();
     //        final List<CompletableFuture<?>> list = new ArrayList<>();
     //        this.buildRecipes(
     //                new RecipeOutput() {
     //                    @Override
-    //                    public void accept(ResourceLocation id, Recipe<?> recipe, @Nullable AdvancementHolder advancement, ICondition... conditions) {
+    //                    public void accept(Identifier id, Recipe<?> recipe, @Nullable AdvancementHolder advancement, ICondition... conditions) {
     //                        if (!set.add(id)) {
     //                            throw new IllegalStateException("Duplicate recipe " + id);
     //                        } else {
@@ -427,7 +427,7 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
 
     protected static TagKey<Item> commonTag(String name) {
 
-        return ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", name));
+        return ItemTags.create(Identifier.fromNamespaceAndPath("c", name));
     }
 
     protected static String name(Block block) {

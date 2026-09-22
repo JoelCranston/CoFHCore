@@ -8,7 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 public abstract class PostBuffer extends PostEffect implements MultiBufferSource {
@@ -21,7 +21,7 @@ public abstract class PostBuffer extends PostEffect implements MultiBufferSource
     protected RenderTarget target;
     protected boolean active;
 
-    public PostBuffer(ResourceLocation shader, String targetName, RenderStateShard.OutputStateShard fallback) {
+    public PostBuffer(Identifier shader, String targetName, RenderStateShard.OutputStateShard fallback) {
 
         super(shader);
         this.targetName = targetName;
@@ -30,7 +30,7 @@ public abstract class PostBuffer extends PostEffect implements MultiBufferSource
         this.output = fallback;
     }
 
-    public PostBuffer(ResourceLocation shader) {
+    public PostBuffer(Identifier shader) {
 
         this(shader, "final", RenderType.MAIN_TARGET);
     }
@@ -45,12 +45,12 @@ public abstract class PostBuffer extends PostEffect implements MultiBufferSource
         return RenderHelper.bufferSource().getBuffer(type);
     }
 
-    public VertexConsumer getBuffer(ResourceLocation texture) {
+    public VertexConsumer getBuffer(Identifier texture) {
 
         return getBuffer(getRenderType(texture));
     }
 
-    public abstract RenderType getRenderType(ResourceLocation texture);
+    public abstract RenderType getRenderType(Identifier texture);
 
     //public RenderTarget getRenderTarget() {
     //

@@ -9,9 +9,9 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelProperty;
+import net.neoforged.neoforge.model.data.ModelProperty;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.*;
@@ -29,7 +29,7 @@ public class ModelUtils {
     public static final ModelProperty<FluidStack> FLUID = new ModelProperty<>();
     public static final ModelProperty<Integer> LEVEL = new ModelProperty<>();
     public static final ModelProperty<byte[]> SIDES = new ModelProperty<>();
-    public static final ModelProperty<ResourceLocation> UNDERLAY = new ModelProperty<>();
+    public static final ModelProperty<Identifier> UNDERLAY = new ModelProperty<>();
 
     public static class WrappedBakedModelBuilder {
 

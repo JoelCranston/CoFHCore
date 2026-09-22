@@ -5,7 +5,7 @@ import cofh.core.util.helpers.RenderHelper;
 import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 
 import java.util.List;
@@ -33,7 +33,7 @@ public abstract class PanelScrolledText extends PanelBase {
         scrollable = maxFirstLine > 0;
     }
 
-    public abstract ResourceLocation getIcon();
+    public abstract Identifier getIcon();
 
     public abstract Component getTitle();
 

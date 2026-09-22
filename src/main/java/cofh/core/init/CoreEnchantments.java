@@ -2,7 +2,7 @@ package cofh.core.init;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import static cofh.core.util.references.CoreIDs.ID_HOLDING;
@@ -29,6 +29,6 @@ public class CoreEnchantments {
     }
 
     public static final ResourceKey<Enchantment> HOLDING = ResourceKey.create(Registries.ENCHANTMENT,
-            ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, ID_HOLDING));
+            Identifier.fromNamespaceAndPath(ID_COFH_CORE, ID_HOLDING));
 
 }

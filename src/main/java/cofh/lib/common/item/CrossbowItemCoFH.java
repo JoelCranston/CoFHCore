@@ -11,7 +11,7 @@ import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
@@ -19,10 +19,10 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.*;
@@ -49,8 +49,8 @@ public class CrossbowItemCoFH extends CrossbowItem implements ICoFHItem {
     public CrossbowItemCoFH(Properties builder) {
 
         super(builder);
-        ProxyUtils.registerItemModelProperty(this, ResourceLocation.parse("pull"), this::getPullModelProperty);
-        ProxyUtils.registerItemModelProperty(this, ResourceLocation.parse("ammo"), this::getAmmoModelProperty);
+        ProxyUtils.registerItemModelProperty(this, Identifier.parse("pull"), this::getPullModelProperty);
+        ProxyUtils.registerItemModelProperty(this, Identifier.parse("ammo"), this::getAmmoModelProperty);
     }
 
     public CrossbowItemCoFH(Tier tier, Properties builder) {
@@ -119,17 +119,17 @@ public class CrossbowItemCoFH extends CrossbowItem implements ICoFHItem {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
 
         ItemStack stack = player.getItemInHand(hand);
         if (isLoaded(stack)) {
             setLoaded(stack, !shootLoadedAmmo(level, player, hand, stack));
-            return InteractionResultHolder.consume(stack);
+            return InteractionResult.CONSUME;
         } else if (!ArcheryHelper.findAmmo(player, stack).isEmpty() || player.abilities.instabuild) {
             player.startUsingItem(hand);
-            return InteractionResultHolder.consume(stack);
+            return InteractionResult.CONSUME;
         }
-        return InteractionResultHolder.fail(stack);
+        return InteractionResult.FAIL;
     }
 
     @Override
@@ -158,7 +158,7 @@ public class CrossbowItemCoFH extends CrossbowItem implements ICoFHItem {
     public void releaseUsing(ItemStack stack, Level level, LivingEntity living, int durationRemaining) {
 
         if (durationRemaining < 0 && !isLoaded(stack) && loadAmmo(living, stack)) {
-            level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.CROSSBOW_LOADING_END, living instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE, 1.0F, 1.0F / (level.random.nextFloat() * 0.5F + 1.0F) + 0.2F);
+            level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.CROSSBOW_LOADING_END, living instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE, 1.0F, 1.0F / (level.getRandom().nextFloat() * 0.5F + 1.0F) + 0.2F);
         }
     }
 
@@ -260,7 +260,7 @@ public class CrossbowItemCoFH extends CrossbowItem implements ICoFHItem {
                             return false;
                         }
                         level.addFreshEntity(shootProjectile(shooter, projectile, getBaseSpeed(ammo), 1.0F, i * 10.F));
-                        float pitch = level.random.nextFloat() * 0.32F + 0.865F;
+                        float pitch = level.getRandom().nextFloat() * 0.32F + 0.865F;
                         level.playSound(null, shooter.getX(), shooter.getY(), shooter.getZ(), SoundEvents.CROSSBOW_SHOOT, SoundSource.PLAYERS, 1.0F, pitch);
                     }
                 }

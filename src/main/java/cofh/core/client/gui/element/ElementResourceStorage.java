@@ -8,7 +8,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -22,9 +22,9 @@ import static net.minecraft.client.gui.screens.Screen.hasShiftDown;
 
 public abstract class ElementResourceStorage extends ElementBase {
 
-    protected ResourceLocation creativeTexture;
-    protected ResourceLocation underlayTexture;
-    protected ResourceLocation overlayTexture;
+    protected Identifier creativeTexture;
+    protected Identifier underlayTexture;
+    protected Identifier overlayTexture;
 
     protected IResourceStorage storage;
     protected int minDisplay = 1;
@@ -52,7 +52,7 @@ public abstract class ElementResourceStorage extends ElementBase {
             LOG.warn("Attempted to assign a NULL creative texture.");
             return this;
         }
-        this.creativeTexture = ResourceLocation.parse(texture);
+        this.creativeTexture = Identifier.parse(texture);
         return this;
     }
 
@@ -67,7 +67,7 @@ public abstract class ElementResourceStorage extends ElementBase {
             LOG.warn("Attempted to assign a NULL underlay texture.");
             return this;
         }
-        this.underlayTexture = ResourceLocation.parse(texture);
+        this.underlayTexture = Identifier.parse(texture);
         this.drawUnderlay = draw;
         return this;
     }
@@ -83,7 +83,7 @@ public abstract class ElementResourceStorage extends ElementBase {
             LOG.warn("Attempted to assign a NULL overlay texture.");
             return this;
         }
-        this.overlayTexture = ResourceLocation.parse(texture);
+        this.overlayTexture = Identifier.parse(texture);
         this.drawOverlay = draw;
         return this;
     }

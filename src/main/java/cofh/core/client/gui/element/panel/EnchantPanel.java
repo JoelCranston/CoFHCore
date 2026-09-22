@@ -2,7 +2,7 @@ package cofh.core.client.gui.element.panel;
 
 import cofh.core.client.gui.IGuiAccess;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import static cofh.core.util.helpers.GuiHelper.ICON_ENCHANTMENT;
 
@@ -30,7 +30,7 @@ public class EnchantPanel extends PanelScrolledText {
     }
 
     @Override
-    public ResourceLocation getIcon() {
+    public Identifier getIcon() {
 
         return ICON_ENCHANTMENT;
     }

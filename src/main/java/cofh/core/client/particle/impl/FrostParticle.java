@@ -45,7 +45,7 @@ public class FrostParticle extends TextureSheetParticle {
         return (data, level, x, y, z, dx, dy, dz) -> {
             FrostParticle particle = new FrostParticle(level, x, y, z, dx, dy, dz);
             particle.pickSprite(spriteSet);
-            particle.setAlpha(level.random.nextFloat() * 0.2F + 0.7F);
+            particle.setAlpha(level.getRandom().nextFloat() * 0.2F + 0.7F);
             return particle;
         };
     }

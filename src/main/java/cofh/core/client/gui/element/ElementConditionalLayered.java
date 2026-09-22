@@ -4,7 +4,7 @@ import cofh.core.client.gui.IGuiAccess;
 import cofh.core.util.helpers.RenderHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.function.IntSupplier;
@@ -33,10 +33,10 @@ public class ElementConditionalLayered extends ElementBase {
         if (location == null) {
             return this;
         }
-        return addSprite(ResourceLocation.parse(location), condition);
+        return addSprite(Identifier.parse(location), condition);
     }
 
-    public ElementConditionalLayered addSprite(ResourceLocation location, Supplier<Boolean> condition) {
+    public ElementConditionalLayered addSprite(Identifier location, Supplier<Boolean> condition) {
 
         if (!textureExists(location)) {
             return this;

@@ -1,7 +1,7 @@
 package cofh.lib.common.fluid;
 
 import cofh.lib.util.DeferredRegisterCoFH;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
@@ -18,8 +18,8 @@ import java.util.function.Supplier;
  */
 public abstract class FluidCoFH {
 
-    public static final ResourceLocation WATER_OVERLAY = ResourceLocation.parse("block/water_overlay");
-    public static final ResourceLocation UNDERWATER_LOCATION = ResourceLocation.parse("textures/misc/underwater.png");
+    public static final Identifier WATER_OVERLAY = Identifier.parse("block/water_overlay");
+    public static final Identifier UNDERWATER_LOCATION = Identifier.parse("textures/misc/underwater.png");
 
     protected DeferredHolder<Fluid, BaseFlowingFluid> stillFluid;
     protected DeferredHolder<Fluid, BaseFlowingFluid> flowingFluid;

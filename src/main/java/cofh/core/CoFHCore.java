@@ -70,7 +70,7 @@ public class CoFHCore {
     public static final Logger LOG = LogManager.getLogger(ID_COFH_CORE);
 
     public static final ConfigManager CONFIG_MANAGER = new ConfigManager();
-    public static final Proxy PROXY = FMLEnvironment.dist.isClient() ? new ProxyClient() : new Proxy();
+    public static final Proxy PROXY = FMLEnvironment.getDist().isClient() ? new ProxyClient() : new Proxy();
 
     public static final DeferredRegisterCoFH<Block> BLOCKS = DeferredRegisterCoFH.create(BuiltInRegistries.BLOCK, ID_COFH_CORE);
     public static final DeferredRegisterCoFH<Item> ITEMS = DeferredRegisterCoFH.create(BuiltInRegistries.ITEM, ID_COFH_CORE);

@@ -11,8 +11,8 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
@@ -165,7 +165,7 @@ public abstract class AbstractTNTMinecart extends AbstractMinecartCoFH implement
     public void ignite() {
 
         this.fuse = 80;
-        if (!this.level.isClientSide) {
+        if (!this.level.isClientSide()) {
             this.level.broadcastEntityEvent(this, (byte) 10);
             if (!this.isSilent()) {
                 this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.TNT_PRIMED, SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -191,16 +191,16 @@ public abstract class AbstractTNTMinecart extends AbstractMinecartCoFH implement
         if (d0 > 5.0D) {
             d0 = 5.0D;
         }
-        radius += (int) level.random.nextDouble() * 1.5 * d0;
+        radius += (int) level.getRandom().nextDouble() * 1.5 * d0;
         detonated = true;
         explode();
     }
 
     protected void explode() {
 
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             this.level.addParticle(ParticleTypes.EXPLOSION_EMITTER, this.getX(), this.getY(), this.getZ(), 1.0D, 0.0D, 0.0D);
-            this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 2.0F, (1.0F + (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.2F) * 0.7F, false);
+            this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 2.0F, (1.0F + (this.level.getRandom().nextFloat() - this.level.getRandom().nextFloat()) * 0.2F) * 0.7F, false);
         } else {
             this.detonate(this.position());
             this.discard();

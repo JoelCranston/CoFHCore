@@ -9,7 +9,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Item;
@@ -99,9 +99,9 @@ public class PotionFluid extends FluidCoFH {
 
             consumer.accept(new IClientFluidTypeExtensions() {
 
-                private static final ResourceLocation
-                        STILL = ResourceLocation.parse("cofh_core:block/fluids/potion_still"),
-                        FLOW = ResourceLocation.parse("cofh_core:block/fluids/potion_flow");
+                private static final Identifier
+                        STILL = Identifier.parse("cofh_core:block/fluids/potion_still"),
+                        FLOW = Identifier.parse("cofh_core:block/fluids/potion_flow");
 
                 @Override
                 public int getTintColor(FluidStack stack) {
@@ -110,13 +110,13 @@ public class PotionFluid extends FluidCoFH {
                 }
 
                 @Override
-                public ResourceLocation getStillTexture() {
+                public Identifier getStillTexture() {
 
                     return STILL;
                 }
 
                 @Override
-                public ResourceLocation getFlowingTexture() {
+                public Identifier getFlowingTexture() {
 
                     return FLOW;
                 }
@@ -263,7 +263,7 @@ public class PotionFluid extends FluidCoFH {
     //            return 0xFF000000 | getPotionColor(stack);
     //        }
     //
-    //        public static Builder builder(ResourceLocation stillTexture, ResourceLocation flowingTexture) {
+    //        public static Builder builder(Identifier stillTexture, Identifier flowingTexture) {
     //
     //            return new Builder(stillTexture, flowingTexture, PotionFluidAttributes::new) {};
     //        }

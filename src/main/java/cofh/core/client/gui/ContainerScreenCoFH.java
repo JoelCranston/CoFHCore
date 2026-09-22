@@ -10,7 +10,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -28,7 +28,7 @@ public class ContainerScreenCoFH<T extends AbstractContainerMenu> extends Abstra
 
     protected String name = "";
     protected String info = "";
-    protected ResourceLocation texture;
+    protected Identifier texture;
     protected Player player;
 
     protected boolean drawTitle = true;

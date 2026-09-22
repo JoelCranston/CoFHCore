@@ -2,7 +2,7 @@ package cofh.lib.util;
 
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -20,7 +20,7 @@ public class DeferredRegisterCoFH<T> {
 
     private final String modid;
     private final DeferredRegister<T> wrappedRegister;
-    private final Map<ResourceLocation, DeferredHolder<T, ? extends T>> registryObjects = new HashMap<>();
+    private final Map<Identifier, DeferredHolder<T, ? extends T>> registryObjects = new HashMap<>();
 
     private DeferredRegisterCoFH(DeferredRegister<T> wrappedRegister, String modid) {
 
@@ -28,7 +28,7 @@ public class DeferredRegisterCoFH<T> {
         this.wrappedRegister = wrappedRegister;
     }
 
-    public static <B> DeferredRegisterCoFH<B> create(ResourceLocation registryName, String modid) {
+    public static <B> DeferredRegisterCoFH<B> create(Identifier registryName, String modid) {
 
         return new DeferredRegisterCoFH<>(DeferredRegister.create(registryName, modid), modid);
     }
@@ -62,7 +62,7 @@ public class DeferredRegisterCoFH<T> {
         wrappedRegister.register(bus);
     }
 
-    public Map<ResourceLocation, DeferredHolder<T, ? extends T>> getRegistryObjects() {
+    public Map<Identifier, DeferredHolder<T, ? extends T>> getRegistryObjects() {
 
         return registryObjects;
     }
@@ -80,10 +80,10 @@ public class DeferredRegisterCoFH<T> {
 
     public T get(final String modid, final String name) {
 
-        return get(ResourceLocation.fromNamespaceAndPath(modid, name));
+        return get(Identifier.fromNamespaceAndPath(modid, name));
     }
 
-    public T get(final ResourceLocation resourceLoc) {
+    public T get(final Identifier resourceLoc) {
 
         DeferredHolder<T, ? extends T> reg = registryObjects.get(resourceLoc);
         return reg == null ? null : reg.get();
@@ -103,11 +103,11 @@ public class DeferredRegisterCoFH<T> {
 
     public Supplier<T> getSup(final String modid, final String name) {
 
-        return getSup(ResourceLocation.fromNamespaceAndPath(modid, name));
+        return getSup(Identifier.fromNamespaceAndPath(modid, name));
     }
 
     @Nullable
-    public Supplier<T> getSup(final ResourceLocation resourceLoc) {
+    public Supplier<T> getSup(final Identifier resourceLoc) {
 
         return (Supplier<T>) registryObjects.get(resourceLoc);
     }

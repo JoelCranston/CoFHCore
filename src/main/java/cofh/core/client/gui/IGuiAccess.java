@@ -8,7 +8,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import org.joml.Matrix4f;
 
@@ -41,7 +41,7 @@ public interface IGuiAccess {
         RenderHelper.resetShaderColor();
     }
 
-    default void drawIcon(GuiGraphics pGuiGraphics, ResourceLocation texture, int x, int y) {
+    default void drawIcon(GuiGraphics pGuiGraphics, Identifier texture, int x, int y) {
 
         RenderHelper.setPosTexShader();
         RenderHelper.setShaderTexture0(texture);
@@ -49,7 +49,7 @@ public interface IGuiAccess {
         drawTexturedModalRect(pGuiGraphics.pose(), x, y, 0, 0, 16, 16, 16, 16);
     }
 
-    default void drawIcon(GuiGraphics pGuiGraphics, ResourceLocation texture, int color, int x, int y) {
+    default void drawIcon(GuiGraphics pGuiGraphics, Identifier texture, int color, int x, int y) {
 
         RenderHelper.setPosTexShader();
         RenderHelper.setShaderTexture0(texture);

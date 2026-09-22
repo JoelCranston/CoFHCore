@@ -66,7 +66,7 @@
 //        if (!(entity instanceof LivingEntity) || entity.getFeetBlockState().is(this)) {
 //            entity.makeStuckInBlock(state, new Vec3(IN_BLOCK_HORIZONTAL_SPEED_MULTIPLIER, IN_BLOCK_VERTICAL_SPEED_MULTIPLIER, IN_BLOCK_HORIZONTAL_SPEED_MULTIPLIER));
 //        }
-//        if (!level.isClientSide) {
+//        if (!level.isClientSide()) {
 //            entity.setSharedFlagOnFire(false);
 //        }
 //    }

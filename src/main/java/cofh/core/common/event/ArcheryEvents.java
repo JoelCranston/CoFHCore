@@ -4,7 +4,7 @@ import cofh.core.common.capability.CoreCapabilities;
 import cofh.core.common.capability.templates.ArcheryBowItemWrapper;
 import cofh.lib.api.capability.IArcheryBowItem;
 import cofh.lib.util.constants.ModIds;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -65,9 +65,9 @@ public class ArcheryEvents {
         }
         if (!ammo.isEmpty()) {
             shooter.startUsingItem(event.getHand());
-            event.setAction(InteractionResultHolder.consume(bow));
+            event.setAction(InteractionResult.CONSUME);
         } else if (!shooter.getAbilities().instabuild) {
-            event.setAction(InteractionResultHolder.fail(bow));
+            event.setAction(InteractionResult.FAIL);
         }
     }
 

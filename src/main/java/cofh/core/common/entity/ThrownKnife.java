@@ -9,7 +9,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -20,7 +20,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -102,13 +102,13 @@ public class ThrownKnife extends AbstractArrow {
                     this.setNoPhysics(true);
                     Vec3 diff = owner.getEyePosition(1.0F).subtract(this.position());
                     this.setPosRaw(this.getX(), this.getY() + diff.y * 0.015D * loyalty, this.getZ());
-                    if (this.level.isClientSide) {
+                    if (this.level.isClientSide()) {
                         this.yOld = this.getY();
                     }
 
                     this.setDeltaMovement(this.getDeltaMovement().scale(0.95D).add(diff.normalize().scale(0.05F * loyalty)));
                 } else {
-                    if (!this.level.isClientSide && this.pickup == AbstractArrow.Pickup.ALLOWED) {
+                    if (!this.level.isClientSide() && this.pickup == AbstractArrow.Pickup.ALLOWED) {
                         this.spawnAtLocation(this.getPickupItem(), 0.1F);
                     }
                     this.discard();
@@ -230,6 +230,6 @@ public class ThrownKnife extends AbstractArrow {
         return this.level.damageSources().source(KNIFE_DAMAGE, this, getOwner());
     }
 
-    protected static final ResourceKey<DamageType> KNIFE_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "knife"));
+    protected static final ResourceKey<DamageType> KNIFE_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, Identifier.fromNamespaceAndPath(ID_COFH_CORE, "knife"));
 
 }

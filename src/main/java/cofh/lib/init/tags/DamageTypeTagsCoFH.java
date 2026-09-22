@@ -1,7 +1,7 @@
 package cofh.lib.init.tags;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageType;
 
@@ -20,12 +20,12 @@ public class DamageTypeTagsCoFH {
     // region HELPERS
     private static TagKey<DamageType> cofhTag(String name) {
 
-        return TagKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, name));
+        return TagKey.create(Registries.DAMAGE_TYPE, Identifier.fromNamespaceAndPath(ID_COFH_CORE, name));
     }
 
     private static TagKey<DamageType> commonTag(String name) {
 
-        return TagKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath("c", name));
+        return TagKey.create(Registries.DAMAGE_TYPE, Identifier.fromNamespaceAndPath("c", name));
     }
     // endregion
 }

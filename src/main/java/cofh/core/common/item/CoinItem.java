@@ -3,7 +3,7 @@ package cofh.core.common.item;
 import cofh.core.util.ProxyUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -18,13 +18,13 @@ public class CoinItem extends CountedItem {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
+    public InteractionResult use(Level worldIn, Player playerIn, InteractionHand handIn) {
 
         ItemStack stack = playerIn.getItemInHand(handIn);
         int count = stack.getCount();
         int heads = 0;
 
-        if (worldIn.isClientSide) {
+        if (worldIn.isClientSide()) {
             if (count == 1) {
                 if (worldIn.getRandom().nextBoolean()) {
                     ProxyUtils.setOverlayMessage(playerIn, Component.translatable("info.cofh.heads"));
@@ -39,7 +39,7 @@ public class CoinItem extends CountedItem {
             }
         }
         playerIn.getCooldowns().addCooldown(this, 40);
-        return InteractionResultHolder.pass(playerIn.getItemInHand(handIn));
+        return InteractionResult.PASS;
     }
 
 }

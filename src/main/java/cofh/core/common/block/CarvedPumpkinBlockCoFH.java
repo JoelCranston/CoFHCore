@@ -1,7 +1,7 @@
 package cofh.core.common.block;
 
 import cofh.core.util.ProxyUtils;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CarvedPumpkinBlock;

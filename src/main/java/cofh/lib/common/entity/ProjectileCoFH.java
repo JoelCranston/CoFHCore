@@ -185,7 +185,7 @@ public class ProjectileCoFH extends Projectile {
             this.fallDistance *= this.getFluidFallDistanceModifier(NeoForgeMod.LAVA_TYPE.value());
         }
 
-        if (this.level.isClientSide) {
+        if (this.level.isClientSide()) {
             this.clearFire();
         } else {
             if (this.remainingFireTicks > 0) {

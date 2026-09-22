@@ -5,7 +5,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
@@ -59,17 +58,17 @@ public class CakeBlockCoFH extends CakeBlock {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 
-        if (worldIn.isClientSide) {
+        if (worldIn.isClientSide()) {
             if (this.eatPiece(worldIn, pos, state, player).consumesAction()) {
-                return ItemInteractionResult.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
             if (stack.isEmpty()) {
-                return ItemInteractionResult.CONSUME;
+                return InteractionResult.CONSUME;
             }
         }
-        return this.eatPiece(worldIn, pos, state, player) == InteractionResult.SUCCESS ? ItemInteractionResult.SUCCESS : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return this.eatPiece(worldIn, pos, state, player) == InteractionResult.SUCCESS ? InteractionResult.SUCCESS : InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
     protected InteractionResult eatPiece(Level world, BlockPos pos, BlockState state, Player player) {
@@ -83,7 +82,7 @@ public class CakeBlockCoFH extends CakeBlock {
             player.getFoodData().eat(food);
 
             for (FoodProperties.PossibleEffect possible : this.food.effects()) {
-                if (!world.isClientSide && world.random.nextFloat() < possible.probability()) {
+                if (!world.isClientSide() && world.getRandom().nextFloat() < possible.probability()) {
                     player.addEffect(possible.effect());
                 }
             }

@@ -28,7 +28,7 @@ public abstract class PrimedTntCoFH extends PrimedTnt implements IDetonatable {
 
         this(type, worldIn);
         this.setPos(x, y, z);
-        double d0 = worldIn.random.nextDouble() * (double) ((float) Math.PI * 2F);
+        double d0 = worldIn.getRandom().nextDouble() * (double) ((float) Math.PI * 2F);
         this.setDeltaMovement(-Math.sin(d0) * 0.02D, 0.2F, -Math.cos(d0) * 0.02D);
         this.setFuse(80);
         this.xo = x;
@@ -40,9 +40,9 @@ public abstract class PrimedTntCoFH extends PrimedTnt implements IDetonatable {
     @Override
     protected void explode() {
 
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             this.level.addParticle(ParticleTypes.EXPLOSION_EMITTER, this.getX(), this.getY(), this.getZ(), 1.0D, 0.0D, 0.0D);
-            this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 2.0F, (1.0F + (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.2F) * 0.7F, false);
+            this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 2.0F, (1.0F + (this.level.getRandom().nextFloat() - this.level.getRandom().nextFloat()) * 0.2F) * 0.7F, false);
         } else {
             this.detonate(this.position());
             this.discard();

@@ -130,13 +130,13 @@ public class AreaUtils {
         boolean isFull = state.getBlock() == WATER && state.getValue(LiquidBlock.LEVEL) == 0;
         if (isFull && state.canSurvive(world, pos) && world.isUnobstructed(state, pos, CollisionContext.empty())) {
             succeeded |= world.setBlockAndUpdate(pos, FROSTED_ICE.defaultBlockState());
-            world.scheduleTick(pos, FROSTED_ICE, MathHelper.nextInt(world.random, 60, 120));
+            world.scheduleTick(pos, FROSTED_ICE, MathHelper.nextInt(world.getRandom(), 60, 120));
         }
         // LAVA
         isFull = state.getBlock() == LAVA && state.getValue(LiquidBlock.LEVEL) == 0;
         if (isFull && state.canSurvive(world, pos) && world.isUnobstructed(state, pos, CollisionContext.empty())) {
             succeeded |= world.setBlockAndUpdate(pos, GLOSSED_MAGMA.get().defaultBlockState());
-            world.scheduleTick(pos, GLOSSED_MAGMA.get(), MathHelper.nextInt(world.random, 60, 120));
+            world.scheduleTick(pos, GLOSSED_MAGMA.get(), MathHelper.nextInt(world.getRandom(), 60, 120));
         }
         return succeeded;
     };
@@ -155,7 +155,7 @@ public class AreaUtils {
             succeeded |= world.setBlockAndUpdate(pos, SNOW.defaultBlockState());
 
             // TODO: This is just a quick testing hack to be used occassionally.
-            //            var duct = BuiltInRegistries.BLOCK.getValue(ResourceLocation.parse("thermal:fluid_duct_windowed"));
+            //            var duct = BuiltInRegistries.BLOCK.getValue(Identifier.parse("thermal:fluid_duct_windowed"));
             //            succeeded |= world.setBlockAndUpdate(pos, duct.defaultBlockState());
         }
         // FIRE
@@ -196,7 +196,7 @@ public class AreaUtils {
             if (isFull && state.canSurvive(world, pos) && world.isUnobstructed(state, pos, CollisionContext.empty())) {
                 succeeded |= world.setBlockAndUpdate(pos, frozenWater);
                 if (!permanentWater) {
-                    world.scheduleTick(pos, FROSTED_ICE, MathHelper.nextInt(world.random, 60, 120));
+                    world.scheduleTick(pos, FROSTED_ICE, MathHelper.nextInt(world.getRandom(), 60, 120));
                 }
             }
             // LAVA
@@ -204,7 +204,7 @@ public class AreaUtils {
             if (isFull && state.canSurvive(world, pos) && world.isUnobstructed(state, pos, CollisionContext.empty())) {
                 succeeded |= world.setBlockAndUpdate(pos, frozenLava);
                 if (!permanentLava) {
-                    world.scheduleTick(pos, GLOSSED_MAGMA.get(), MathHelper.nextInt(world.random, 60, 120));
+                    world.scheduleTick(pos, GLOSSED_MAGMA.get(), MathHelper.nextInt(world.getRandom(), 60, 120));
                 }
             }
         }
@@ -281,7 +281,7 @@ public class AreaUtils {
 
             Block below = level.getBlockState(pos.relative(Direction.DOWN)).getBlock();
             if (level.getBlockState(pos).isAir() && (below.equals(MYCELIUM) || below.equals(PODZOL))) {
-                return level.setBlockAndUpdate(pos, level.random.nextBoolean() ? BROWN_MUSHROOM.defaultBlockState() : RED_MUSHROOM.defaultBlockState());
+                return level.setBlockAndUpdate(pos, level.getRandom().nextBoolean() ? BROWN_MUSHROOM.defaultBlockState() : RED_MUSHROOM.defaultBlockState());
             }
             return false;
         }
@@ -303,7 +303,7 @@ public class AreaUtils {
                 }
                 double distance = iterPos.distSqr(origin);
                 if (distance < f2) {
-                    if (levelIn.random.nextDouble() < 0.5 - (distance / f2) && transformBlock(levelIn, iterPos, Direction.DOWN, entity)) {
+                    if (levelIn.getRandom().nextDouble() < 0.5 - (distance / f2) && transformBlock(levelIn, iterPos, Direction.DOWN, entity)) {
                         --max;
                     }
                 }
@@ -315,10 +315,10 @@ public class AreaUtils {
 
         BlockState state = world.getBlockState(pos);
         if (state.getBlock() instanceof BonemealableBlock growable) {
-            if (!world.isClientSide && growable.isValidBonemealTarget(world, pos, state) && growable.isBonemealSuccess(world, world.random, pos, state)) {
+            if (!world.isClientSide() && growable.isValidBonemealTarget(world, pos, state) && growable.isBonemealSuccess(world, world.getRandom(), pos, state)) {
                 // TODO: Remove try/catch when Mojang fixes base issue.
                 try {
-                    growable.performBonemeal((ServerLevel) world, world.random, pos, state);
+                    growable.performBonemeal((ServerLevel) world, world.getRandom(), pos, state);
                 } catch (Exception e) {
                     // Vanilla issue causes bamboo to crash if grown close to world height
                     if (!(growable instanceof BambooStalkBlock)) {
@@ -466,7 +466,7 @@ public class AreaUtils {
 
             for (BlockPos iterPos : BlockPos.betweenClosed(origin.offset(-f, -v, -f), origin.offset(f, v, f))) {
                 double distSqr = iterPos.distSqr(origin);
-                if (distSqr < f2 && (chance > 0.99999F || levelIn.random.nextDouble() < chance)) {
+                if (distSqr < f2 && (chance > 0.99999F || levelIn.getRandom().nextDouble() < chance)) {
                     transformBlock(levelIn, iterPos, Direction.DOWN, entity);
                 }
             }
@@ -487,7 +487,7 @@ public class AreaUtils {
                     return;
                 }
                 double distSqr = iterPos.distSqr(origin);
-                if (distSqr < f2 && (chance > 0.99999F || levelIn.random.nextDouble() < chance) && transformBlock(levelIn, iterPos, Direction.DOWN, entity)) {
+                if (distSqr < f2 && (chance > 0.99999F || levelIn.getRandom().nextDouble() < chance) && transformBlock(levelIn, iterPos, Direction.DOWN, entity)) {
                     --max;
                 }
             }
@@ -556,7 +556,7 @@ public class AreaUtils {
         BlockPos below = pos.below();
         BlockState state = levelIn.getBlockState(below);
         if (Block.isFaceFull(state.getCollisionShape(levelIn, below), Direction.UP)) {
-            return state.isFlammable(levelIn, pos, Direction.UP) || levelIn.random.nextDouble() < chance; // Random chance.
+            return state.isFlammable(levelIn, pos, Direction.UP) || levelIn.getRandom().nextDouble() < chance; // Random chance.
         }
         return false;
     }
@@ -623,7 +623,7 @@ public class AreaUtils {
                     if (isFull && state.canSurvive(level, blockpos) && level.isUnobstructed(state, blockpos, CollisionContext.empty())) {
                         level.setBlockAndUpdate(blockpos, state);
                         if (!permanent) {
-                            level.scheduleTick(blockpos, FROSTED_ICE, MathHelper.nextInt(level.random, 60, 120));
+                            level.scheduleTick(blockpos, FROSTED_ICE, MathHelper.nextInt(level.getRandom(), 60, 120));
                         }
                     }
                 }
@@ -646,7 +646,7 @@ public class AreaUtils {
                 if (isFull && state.canSurvive(levelIn, blockpos) && levelIn.isUnobstructed(state, blockpos, CollisionContext.empty())) {
                     levelIn.setBlockAndUpdate(blockpos, state);
                     if (!permanent) {
-                        levelIn.scheduleTick(blockpos, FROSTED_ICE, MathHelper.nextInt(levelIn.random, 60, 120));
+                        levelIn.scheduleTick(blockpos, FROSTED_ICE, MathHelper.nextInt(levelIn.getRandom(), 60, 120));
                     }
                 }
             }
@@ -675,7 +675,7 @@ public class AreaUtils {
                     if (isFull && state.canSurvive(levelIn, blockpos) && levelIn.isUnobstructed(state, blockpos, CollisionContext.empty())) {
                         levelIn.setBlockAndUpdate(blockpos, state);
                         if (!permanent) {
-                            levelIn.scheduleTick(blockpos, GLOSSED_MAGMA.get(), MathHelper.nextInt(levelIn.random, 60, 120));
+                            levelIn.scheduleTick(blockpos, GLOSSED_MAGMA.get(), MathHelper.nextInt(levelIn.getRandom(), 60, 120));
                         }
                     }
                 }
@@ -701,7 +701,7 @@ public class AreaUtils {
                 if (isFull && state.canSurvive(levelIn, blockpos) && levelIn.isUnobstructed(state, blockpos, CollisionContext.empty())) {
                     levelIn.setBlockAndUpdate(blockpos, state);
                     if (!permanent) {
-                        levelIn.scheduleTick(blockpos, GLOSSED_MAGMA.get(), MathHelper.nextInt(levelIn.random, 60, 120));
+                        levelIn.scheduleTick(blockpos, GLOSSED_MAGMA.get(), MathHelper.nextInt(levelIn.getRandom(), 60, 120));
                     }
                 }
             }
@@ -725,7 +725,7 @@ public class AreaUtils {
         BlockPos below = pos.below();
         BlockState state = levelIn.getBlockState(below);
         if (levelIn.canSeeSky(pos) && Block.isFaceFull(state.getCollisionShape(levelIn, below), Direction.UP)) {
-            return levelIn.random.nextDouble() < chance; // Random chance.
+            return levelIn.getRandom().nextDouble() < chance; // Random chance.
         }
         return false;
     }
@@ -864,7 +864,7 @@ public class AreaUtils {
         BlockState blockstate1 = levelIn.getBlockState(mutable);
         if (blockstate1.isAir()) {
             if (isValidMushroomPosition(levelIn, entity.blockPosition(), 1.0)) {
-                levelIn.setBlockAndUpdate(mutable, levelIn.random.nextBoolean() ? BROWN_MUSHROOM.defaultBlockState() : RED_MUSHROOM.defaultBlockState());
+                levelIn.setBlockAndUpdate(mutable, levelIn.getRandom().nextBoolean() ? BROWN_MUSHROOM.defaultBlockState() : RED_MUSHROOM.defaultBlockState());
                 ++grow;
             }
         }
@@ -878,7 +878,7 @@ public class AreaUtils {
                 blockstate1 = levelIn.getBlockState(mutable);
                 if (blockstate1.isAir()) {
                     if (isValidMushroomPosition(levelIn, iterPos, 0.5 - (distance / f2))) {
-                        levelIn.setBlockAndUpdate(mutable, levelIn.random.nextBoolean() ? BROWN_MUSHROOM.defaultBlockState() : RED_MUSHROOM.defaultBlockState());
+                        levelIn.setBlockAndUpdate(mutable, levelIn.getRandom().nextBoolean() ? BROWN_MUSHROOM.defaultBlockState() : RED_MUSHROOM.defaultBlockState());
                         ++grow;
                     }
                 }
@@ -889,7 +889,7 @@ public class AreaUtils {
     private static boolean isValidMushroomPosition(Level levelIn, BlockPos pos, double chance) {
 
         Block block = levelIn.getBlockState(pos).getBlock();
-        return levelIn.random.nextDouble() < chance && (block == MYCELIUM || block == PODZOL);
+        return levelIn.getRandom().nextDouble() < chance && (block == MYCELIUM || block == PODZOL);
     }
 
     public static void growPlants(Entity entity, Level levelIn, BlockPos pos, int radius) {
@@ -905,11 +905,11 @@ public class AreaUtils {
                 state = levelIn.getBlockState(iterPos);
                 if (state.getBlock() instanceof BonemealableBlock growable) {
                     if (growable.isValidBonemealTarget(levelIn, iterPos, state)) {
-                        if (!levelIn.isClientSide) {
-                            if (growable.isBonemealSuccess(levelIn, levelIn.random, iterPos, state)) {
+                        if (!levelIn.isClientSide()) {
+                            if (growable.isBonemealSuccess(levelIn, levelIn.getRandom(), iterPos, state)) {
                                 // TODO: Remove try/catch when Mojang fixes base issue.
                                 try {
-                                    growable.performBonemeal((ServerLevel) levelIn, levelIn.random, iterPos, state);
+                                    growable.performBonemeal((ServerLevel) levelIn, levelIn.getRandom(), iterPos, state);
                                 } catch (Exception e) {
                                     // Vanilla issue causes bamboo to crash if grown close to world height
                                     if (!(growable instanceof BambooStalkBlock)) {
@@ -936,11 +936,11 @@ public class AreaUtils {
         BlockState state = levelIn.getBlockState(entity.blockPosition());
         if (state.getBlock() instanceof BonemealableBlock growable) {
             if (growable.isValidBonemealTarget(levelIn, pos, state)) {
-                if (!levelIn.isClientSide) {
-                    if (growable.isBonemealSuccess(levelIn, levelIn.random, pos, state)) {
+                if (!levelIn.isClientSide()) {
+                    if (growable.isBonemealSuccess(levelIn, levelIn.getRandom(), pos, state)) {
                         // TODO: Remove try/catch when Mojang fixes base issue.
                         try {
-                            growable.performBonemeal((ServerLevel) levelIn, levelIn.random, pos, state);
+                            growable.performBonemeal((ServerLevel) levelIn, levelIn.getRandom(), pos, state);
                             ++grow;
                         } catch (Exception e) {
                             // Vanilla issue causes bamboo to crash if grown close to world height
@@ -961,11 +961,11 @@ public class AreaUtils {
                 state = levelIn.getBlockState(iterPos);
                 if (state.getBlock() instanceof BonemealableBlock growable) {
                     if (growable.isValidBonemealTarget(levelIn, iterPos, state)) {
-                        if (!levelIn.isClientSide) {
-                            if (growable.isBonemealSuccess(levelIn, levelIn.random, iterPos, state)) {
+                        if (!levelIn.isClientSide()) {
+                            if (growable.isBonemealSuccess(levelIn, levelIn.getRandom(), iterPos, state)) {
                                 // TODO: Remove try/catch when Mojang fixes base issue.
                                 try {
-                                    growable.performBonemeal((ServerLevel) levelIn, levelIn.random, iterPos, state);
+                                    growable.performBonemeal((ServerLevel) levelIn, levelIn.getRandom(), iterPos, state);
                                     ++grow;
                                 } catch (Exception e) {
                                     // Vanilla issue causes bamboo to crash if grown close to world height

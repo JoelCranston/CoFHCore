@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.function.Supplier;
 
@@ -22,9 +22,9 @@ import static net.minecraft.client.renderer.RenderStateShard.*;
 
 public class RenderTypes {
 
-    public static final ResourceLocation BLANK_TEXTURE = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "textures/render/blank.png");
-    public static final ResourceLocation LIN_GLOW_TEXTURE = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "textures/render/glow_linear.png");
-    public static final ResourceLocation RND_GLOW_TEXTURE = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "textures/render/glow_round.png");
+    public static final Identifier BLANK_TEXTURE = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "textures/render/blank.png");
+    public static final Identifier LIN_GLOW_TEXTURE = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "textures/render/glow_linear.png");
+    public static final Identifier RND_GLOW_TEXTURE = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "textures/render/glow_round.png");
 
     private static final DepthTestStateShard DISABLE_DEPTH = new DepthTestStateShard("none", 519) {
         @Override
@@ -79,7 +79,7 @@ public class RenderTypes {
                         .createCompositeState(false));
     }
 
-    public static RenderType translucent(ResourceLocation texture) {
+    public static RenderType translucent(Identifier texture) {
 
         return RenderType.create("cofh_core:translucent", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, false, true,
                 RenderType.CompositeState.builder()
@@ -92,7 +92,7 @@ public class RenderTypes {
                         .createCompositeState(false));
     }
 
-    public static RenderType translucentNoCull(ResourceLocation texture) {
+    public static RenderType translucentNoCull(Identifier texture) {
 
         return RenderType.create("cofh_core:translucent", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, false, true,
                 RenderType.CompositeState.builder()
@@ -106,7 +106,7 @@ public class RenderTypes {
                         .createCompositeState(false));
     }
 
-    public static RenderType translucentNoDepthWrite(ResourceLocation texture) {
+    public static RenderType translucentNoDepthWrite(Identifier texture) {
 
         return RenderType.create("cofh_core:translucent", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, false, true,
                 //RenderType.CompositeState.builder()

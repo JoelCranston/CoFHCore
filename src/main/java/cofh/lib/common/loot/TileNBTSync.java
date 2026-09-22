@@ -6,7 +6,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -33,7 +33,7 @@ public class TileNBTSync extends LootItemConditionalFunction {
         if (INSTANCE != null) {
             return;
         }
-        INSTANCE = Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, ResourceLocation.parse(ID_COFH_CORE + ":nbt_sync"), new LootItemFunctionType(CODEC));
+        INSTANCE = Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, Identifier.parse(ID_COFH_CORE + ":nbt_sync"), new LootItemFunctionType(CODEC));
     }
 
     protected TileNBTSync(List<LootItemCondition> conditionsIn) {

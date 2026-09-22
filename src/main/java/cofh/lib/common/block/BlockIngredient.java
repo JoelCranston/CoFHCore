@@ -6,7 +6,7 @@ import com.google.gson.*;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
@@ -145,7 +145,7 @@ public class BlockIngredient implements Predicate<BlockState> {
             if (jsonObject.has(RecipeJsonUtils.TAG)) {
                 throw new JsonParseException("A block ingredient entry is either a block tag or a block, not both");
             }
-            ResourceLocation resLoc = ResourceLocation.parse(GsonHelper.getAsString(jsonObject, RecipeJsonUtils.NAME));
+            Identifier resLoc = Identifier.parse(GsonHelper.getAsString(jsonObject, RecipeJsonUtils.NAME));
             if (!BuiltInRegistries.BLOCK.containsKey(resLoc)) {
                 throw new JsonSyntaxException("Unknown block '" + resLoc + "'");
             }
@@ -166,7 +166,7 @@ public class BlockIngredient implements Predicate<BlockState> {
             }
             return new BlockList(state, state.getProperties());
         } else if (jsonObject.has(RecipeJsonUtils.TAG)) {
-            return new TagList(BlockTags.create(ResourceLocation.parse(GsonHelper.getAsString(jsonObject, RecipeJsonUtils.TAG))));
+            return new TagList(BlockTags.create(Identifier.parse(GsonHelper.getAsString(jsonObject, RecipeJsonUtils.TAG))));
         } else {
             throw new JsonParseException("A block ingredient entry needs either a tag or a block");
         }

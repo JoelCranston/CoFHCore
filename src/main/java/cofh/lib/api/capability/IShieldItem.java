@@ -3,7 +3,7 @@ package cofh.lib.api.capability;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.phys.Vec3;
 
 import static net.minecraft.tags.DamageTypeTags.BYPASSES_SHIELD;

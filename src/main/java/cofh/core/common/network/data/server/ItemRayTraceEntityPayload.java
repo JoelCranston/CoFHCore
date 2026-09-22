@@ -5,7 +5,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
 
@@ -14,7 +14,7 @@ import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 public record ItemRayTraceEntityPayload(InteractionHand hand, Vec3 origin, int targetId, Vec3 offset,
                                         float power) implements CustomPacketPayload {
 
-    public static final Type<ItemRayTraceEntityPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "item_ray_trace_entity_packet"));
+    public static final Type<ItemRayTraceEntityPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ID_COFH_CORE, "item_ray_trace_entity_packet"));
 
     private static final StreamCodec<ByteBuf, InteractionHand> HAND_CODEC = ByteBufCodecs.idMapper(
             i -> InteractionHand.values()[i], InteractionHand::ordinal

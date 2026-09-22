@@ -4,7 +4,7 @@ import cofh.core.client.gui.IGuiAccess;
 import cofh.core.util.helpers.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.function.Supplier;
 
@@ -13,8 +13,8 @@ import static cofh.lib.util.Constants.TRUE;
 
 public class ElementSlot extends ElementBase {
 
-    protected ResourceLocation underlayTexture;
-    protected ResourceLocation overlayTexture;
+    protected Identifier underlayTexture;
+    protected Identifier overlayTexture;
 
     protected Supplier<Boolean> drawUnderlay = TRUE;
     protected Supplier<Boolean> drawOverlay = TRUE;
@@ -35,7 +35,7 @@ public class ElementSlot extends ElementBase {
             LOG.warn("Attempted to assign a NULL underlay texture.");
             return this;
         }
-        this.underlayTexture = ResourceLocation.parse(texture);
+        this.underlayTexture = Identifier.parse(texture);
         this.drawUnderlay = draw;
         return this;
     }
@@ -51,7 +51,7 @@ public class ElementSlot extends ElementBase {
             LOG.warn("Attempted to assign a NULL overlay texture.");
             return this;
         }
-        this.overlayTexture = ResourceLocation.parse(texture);
+        this.overlayTexture = Identifier.parse(texture);
         this.drawOverlay = draw;
         return this;
     }

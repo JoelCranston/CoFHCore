@@ -23,7 +23,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -91,12 +91,12 @@ public class Utils {
 
     public static boolean isClientWorld(Level world) {
 
-        return world.isClientSide;
+        return world.isClientSide();
     }
 
     public static boolean isServerWorld(Level world) {
 
-        return !world.isClientSide;
+        return !world.isClientSide();
     }
 
     public static boolean isFakePlayer(Entity entity) {
@@ -202,7 +202,7 @@ public class Utils {
         if (buf == null) {
             throw new IllegalArgumentException("Null packet buffer.");
         }
-        if (FMLEnvironment.dist.isClient()) {
+        if (FMLEnvironment.getDist().isClient()) {
             if (Minecraft.getInstance().level == null) {
                 throw new IllegalStateException("Client world is null.");
             }
@@ -230,7 +230,7 @@ public class Utils {
 
     public static DamageSource source(DamageSources sources, ResourceKey<DamageType> type, @Nullable Entity directEntity, @Nullable Entity causingEntity, Vec3 location) {
 
-        return new DamageSource(sources.damageTypes.getHolderOrThrow(type), directEntity, causingEntity, location);
+        return new DamageSource(sources.damageTypes.getOrThrow(type), directEntity, causingEntity, location);
     }
 
     public static Item.Properties itemProperties() {
@@ -395,14 +395,14 @@ public class Utils {
         float z2 = 0.5F;
 
         if (velocity) {
-            x2 = world.random.nextFloat() * 0.8F + 0.1F;
-            y2 = world.random.nextFloat() * 0.8F + 0.1F;
-            z2 = world.random.nextFloat() * 0.8F + 0.1F;
+            x2 = world.getRandom().nextFloat() * 0.8F + 0.1F;
+            y2 = world.getRandom().nextFloat() * 0.8F + 0.1F;
+            z2 = world.getRandom().nextFloat() * 0.8F + 0.1F;
         }
         ItemEntity entity = new ItemEntity(world, pos.x + x2, pos.y + y2, pos.z + z2, stack.copy());
 
         if (velocity) {
-            entity.setDeltaMovement(world.random.nextGaussian() * 0.05F, world.random.nextGaussian() * 0.05F + 0.2F, world.random.nextGaussian() * 0.05F);
+            entity.setDeltaMovement(world.getRandom().nextGaussian() * 0.05F, world.getRandom().nextGaussian() * 0.05F + 0.2F, world.getRandom().nextGaussian() * 0.05F);
         } else {
             entity.setDeltaMovement(-0.05, 0, 0);
         }
@@ -417,9 +417,9 @@ public class Utils {
             return false;
         }
         float f = 0.3F;
-        double x2 = world.random.nextFloat() * f + (1.0F - f) * 0.5D;
-        double y2 = world.random.nextFloat() * f + (1.0F - f) * 0.5D;
-        double z2 = world.random.nextFloat() * f + (1.0F - f) * 0.5D;
+        double x2 = world.getRandom().nextFloat() * f + (1.0F - f) * 0.5D;
+        double y2 = world.getRandom().nextFloat() * f + (1.0F - f) * 0.5D;
+        double z2 = world.getRandom().nextFloat() * f + (1.0F - f) * 0.5D;
         ItemEntity dropEntity = new ItemEntity(world, pos.getX() + x2, pos.getY() + y2, pos.getZ() + z2, stack);
         dropEntity.setPickUpDelay(10);
         world.addFreshEntity(dropEntity);
@@ -495,7 +495,7 @@ public class Utils {
 
     public static ResourceKey<Enchantment> getEnchantment(String modId, String enchantId) {
 
-        return ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.fromNamespaceAndPath(modId, enchantId));
+        return ResourceKey.create(Registries.ENCHANTMENT, Identifier.fromNamespaceAndPath(modId, enchantId));
     }
 
     /**
@@ -583,27 +583,27 @@ public class Utils {
     // endregion
 
     // region REGISTRY NAME
-    public static ResourceLocation getRegistryName(Block block) {
+    public static Identifier getRegistryName(Block block) {
 
         return BuiltInRegistries.BLOCK.getKey(block);
     }
 
-    public static ResourceLocation getRegistryName(Item item) {
+    public static Identifier getRegistryName(Item item) {
 
         return BuiltInRegistries.ITEM.getKey(item);
     }
 
-    public static ResourceLocation getRegistryName(Fluid fluid) {
+    public static Identifier getRegistryName(Fluid fluid) {
 
         return BuiltInRegistries.FLUID.getKey(fluid);
     }
 
-    public static ResourceLocation getRegistryName(EntityType entity) {
+    public static Identifier getRegistryName(EntityType entity) {
 
         return BuiltInRegistries.ENTITY_TYPE.getKey(entity);
     }
 
-    public static ResourceLocation getRegistryName(MobEffect effect) {
+    public static Identifier getRegistryName(MobEffect effect) {
 
         return BuiltInRegistries.MOB_EFFECT.getKey(effect);
     }
@@ -612,61 +612,61 @@ public class Utils {
     // region NAMESPACE
     public static String getModId(Block block) {
 
-        ResourceLocation loc = getRegistryName(block);
+        Identifier loc = getRegistryName(block);
         return loc == null ? "" : loc.getNamespace();
     }
 
     public static String getName(Block block) {
 
-        ResourceLocation loc = getRegistryName(block);
+        Identifier loc = getRegistryName(block);
         return loc == null ? "" : loc.getPath();
     }
 
     public static String getModId(Item item) {
 
-        ResourceLocation loc = getRegistryName(item);
+        Identifier loc = getRegistryName(item);
         return loc == null ? "" : loc.getNamespace();
     }
 
     public static String getModId(ItemStack stack) {
 
-        ResourceLocation loc = getRegistryName(stack.getItem());
+        Identifier loc = getRegistryName(stack.getItem());
         return loc == null ? "" : loc.getNamespace();
     }
 
     public static String getName(Item item) {
 
-        ResourceLocation loc = getRegistryName(item);
+        Identifier loc = getRegistryName(item);
         return loc == null ? "" : loc.getPath();
     }
 
     public static String getName(ItemStack stack) {
 
-        ResourceLocation loc = getRegistryName(stack.getItem());
+        Identifier loc = getRegistryName(stack.getItem());
         return loc == null ? "" : loc.getPath();
     }
 
     public static String getModId(Fluid fluid) {
 
-        ResourceLocation loc = getRegistryName(fluid);
+        Identifier loc = getRegistryName(fluid);
         return loc == null ? "" : loc.getNamespace();
     }
 
     public static String getModId(FluidStack stack) {
 
-        ResourceLocation loc = getRegistryName(stack.getFluid());
+        Identifier loc = getRegistryName(stack.getFluid());
         return loc == null ? "" : loc.getNamespace();
     }
 
     public static String getName(Fluid fluid) {
 
-        ResourceLocation loc = getRegistryName(fluid);
+        Identifier loc = getRegistryName(fluid);
         return loc == null ? "" : loc.getPath();
     }
 
     public static String getName(FluidStack stack) {
 
-        ResourceLocation loc = getRegistryName(stack.getFluid());
+        Identifier loc = getRegistryName(stack.getFluid());
         return loc == null ? "" : loc.getPath();
     }
     // endregion

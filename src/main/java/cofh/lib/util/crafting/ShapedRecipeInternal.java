@@ -10,7 +10,7 @@
 //import net.minecraft.core.NonNullList;
 //import net.minecraft.core.RegistryAccess;
 //import net.minecraft.core.registries.BuiltInRegistries;
-//import net.minecraft.resources.ResourceLocation;
+//import net.minecraft.resources.Identifier;
 //import net.minecraft.util.GsonHelper;
 //import net.minecraft.world.inventory.CraftingContainer;
 //import net.minecraft.world.item.Item;
@@ -38,12 +38,12 @@
 //    public final int height;
 //    public final NonNullList<Ingredient> recipeItems;
 //    public final ItemStack result;
-//    public final ResourceLocation id;
+//    public final Identifier id;
 //    public final String group;
 //    public final CraftingBookCategory category;
 //    public final boolean showNotification;
 //
-//    private ShapedRecipeInternal(ResourceLocation pId, String pGroup, CraftingBookCategory pCategory, int pWidth, int pHeight, NonNullList<Ingredient> pRecipeItems, ItemStack pResult, boolean pShowNotification) {
+//    private ShapedRecipeInternal(Identifier pId, String pGroup, CraftingBookCategory pCategory, int pWidth, int pHeight, NonNullList<Ingredient> pRecipeItems, ItemStack pResult, boolean pShowNotification) {
 //
 //        this.id = pId;
 //        this.group = pGroup;
@@ -55,12 +55,12 @@
 //        this.showNotification = pShowNotification;
 //    }
 //
-//    public ShapedRecipeInternal(ResourceLocation pId, String pGroup, CraftingBookCategory pCategory, int pWidth, int pHeight, NonNullList<Ingredient> pRecipeItems, ItemStack pResult) {
+//    public ShapedRecipeInternal(Identifier pId, String pGroup, CraftingBookCategory pCategory, int pWidth, int pHeight, NonNullList<Ingredient> pRecipeItems, ItemStack pResult) {
 //
 //        this(pId, pGroup, pCategory, pWidth, pHeight, pRecipeItems, pResult, false);
 //    }
 //
-//    public ResourceLocation getId() {
+//    public Identifier getId() {
 //
 //        return this.id;
 //    }
@@ -312,7 +312,7 @@
 //    public static Item itemFromJson(JsonObject pItemObject) {
 //
 //        String s = GsonHelper.getAsString(pItemObject, "item");
-//        Item item = BuiltInRegistries.ITEM.getOptional(ResourceLocation.tryParse(s)).orElseThrow(() -> {
+//        Item item = BuiltInRegistries.ITEM.getOptional(Identifier.tryParse(s)).orElseThrow(() -> {
 //            return new JsonSyntaxException("Unknown item '" + s + "'");
 //        });
 //        if (item == Items.AIR) {

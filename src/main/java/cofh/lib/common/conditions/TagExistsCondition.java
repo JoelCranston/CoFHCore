@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.common.conditions.ICondition;
@@ -14,20 +14,20 @@ public record TagExistsCondition(TagKey<Item> tag) implements ICondition {
     // 1.20.5: a condition registers its MapCodec, not a Codec (dispatch codecs need map codecs).
     public static final MapCodec<TagExistsCondition> CODEC = RecordCodecBuilder.mapCodec(
             builder -> builder.group(
-                            ResourceLocation.CODEC.xmap(loc -> TagKey.create(Registries.ITEM, loc), TagKey::location).fieldOf("tag").forGetter(TagExistsCondition::tag))
+                            Identifier.CODEC.xmap(loc -> TagKey.create(Registries.ITEM, loc), TagKey::location).fieldOf("tag").forGetter(TagExistsCondition::tag))
                     .apply(builder, TagExistsCondition::new));
 
     public TagExistsCondition(String location) {
 
-        this(ResourceLocation.parse(location));
+        this(Identifier.parse(location));
     }
 
     public TagExistsCondition(String namespace, String path) {
 
-        this(ResourceLocation.fromNamespaceAndPath(namespace, path));
+        this(Identifier.fromNamespaceAndPath(namespace, path));
     }
 
-    public TagExistsCondition(ResourceLocation tag) {
+    public TagExistsCondition(Identifier tag) {
 
         this(TagKey.create(Registries.ITEM, tag));
     }

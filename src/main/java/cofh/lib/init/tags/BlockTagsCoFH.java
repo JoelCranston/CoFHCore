@@ -1,6 +1,6 @@
 package cofh.lib.init.tags;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -70,7 +70,7 @@ public class BlockTagsCoFH {
     // region HELPERS
     private static TagKey<Block> commonTag(String name) {
 
-        return BlockTags.create(ResourceLocation.fromNamespaceAndPath("c", name));
+        return BlockTags.create(Identifier.fromNamespaceAndPath("c", name));
     }
     // endregion
 }

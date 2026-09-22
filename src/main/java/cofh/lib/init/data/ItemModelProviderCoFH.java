@@ -3,7 +3,7 @@ package cofh.lib.init.data;
 import cofh.lib.util.DeferredRegisterCoFH;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -107,12 +107,12 @@ public abstract class ItemModelProviderCoFH extends ItemModelProvider {
         return BuiltInRegistries.ITEM.getKey(item.get().asItem()).getPath();
     }
 
-    protected ResourceLocation itemTexture(Supplier<? extends ItemLike> item) {
+    protected Identifier itemTexture(Supplier<? extends ItemLike> item) {
 
         return modLoc("item/" + name(item));
     }
 
-    protected ResourceLocation itemTexture(Supplier<? extends ItemLike> item, String subfolder) {
+    protected Identifier itemTexture(Supplier<? extends ItemLike> item, String subfolder) {
 
         return modLoc("item/" + subfolder + "/" + name(item));
     }
@@ -137,7 +137,7 @@ public abstract class ItemModelProviderCoFH extends ItemModelProvider {
         return blockSprite(block, modLoc("block/" + name(block)));
     }
 
-    protected ItemModelBuilder blockSprite(Supplier<? extends Block> block, ResourceLocation texture) {
+    protected ItemModelBuilder blockSprite(Supplier<? extends Block> block, Identifier texture) {
 
         return generated(() -> block.get().asItem(), texture);
     }
@@ -152,7 +152,7 @@ public abstract class ItemModelProviderCoFH extends ItemModelProvider {
         return generated(item, itemTexture(item));
     }
 
-    protected ItemModelBuilder generated(Supplier<? extends ItemLike> item, ResourceLocation texture) {
+    protected ItemModelBuilder generated(Supplier<? extends ItemLike> item, Identifier texture) {
 
         return getBuilder(name(item)).parent(new UncheckedModelFile("minecraft:item/generated")).texture("layer0", texture);
     }
@@ -167,7 +167,7 @@ public abstract class ItemModelProviderCoFH extends ItemModelProvider {
         return handheld(item, itemTexture(item, subfolder));
     }
 
-    protected ItemModelBuilder handheld(Supplier<? extends ItemLike> item, ResourceLocation texture) {
+    protected ItemModelBuilder handheld(Supplier<? extends ItemLike> item, Identifier texture) {
 
         return withExistingParent(name(item), "minecraft:item/handheld").texture("layer0", texture);
     }

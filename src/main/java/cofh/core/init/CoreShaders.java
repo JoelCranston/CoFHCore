@@ -8,7 +8,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -27,7 +27,7 @@ public class CoreShaders {
     public static ShaderInstance PARTICLE_OVER;
     public static ShaderInstance PARTICLE_ADDITIVE_MULTIPLY;
     public static ShaderInstance PARTICLE_ADDITIVE_SCREEN;
-    public static final PostBuffer PIXELATE = new PostBuffer(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "pixelate")) {
+    public static final PostBuffer PIXELATE = new PostBuffer(Identifier.fromNamespaceAndPath(ID_COFH_CORE, "pixelate")) {
 
         @Override
         public boolean isEnabled() {
@@ -36,7 +36,7 @@ public class CoreShaders {
         }
 
         @Override
-        public RenderType getRenderType(ResourceLocation texture) {
+        public RenderType getRenderType(Identifier texture) {
 
             RenderType.CompositeState.CompositeStateBuilder builder = RenderType.CompositeState.builder()
                     .setShaderState(RENDERTYPE_TRANSLUCENT_SHADER)
@@ -60,7 +60,7 @@ public class CoreShaders {
 
     private static void registerShader(RegisterShadersEvent event, String id, VertexFormat format, Consumer<ShaderInstance> callback) throws IOException {
 
-        event.registerShader(new ShaderInstance(event.getResourceProvider(), ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, id), format), callback);
+        event.registerShader(new ShaderInstance(event.getResourceProvider(), Identifier.fromNamespaceAndPath(ID_COFH_CORE, id), format), callback);
     }
 
 }

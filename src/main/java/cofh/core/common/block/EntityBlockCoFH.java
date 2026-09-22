@@ -13,7 +13,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -69,40 +68,40 @@ public class EntityBlockCoFH extends Block implements EntityBlock, IDismantleabl
     // useWithoutItem delegates into it with an empty stack (the wrench check naturally no-ops on
     // ItemStack.EMPTY) so an empty-handed right click still gets identical behavior.
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 
         if (Utils.isClientWorld(worldIn)) {
-            return ItemInteractionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
         BlockEntity tile = worldIn.getBlockEntity(pos);
         if (tile instanceof BlockEntityCoFH cofhTile && !tile.isRemoved()) {
             if (!cofhTile.canPlayerChange(player) && SecurityHelper.hasSecurity(tile)) {
                 ProxyUtils.setOverlayMessage(player, Component.translatable("info.cofh.secure_warning", SecurityHelper.getOwnerName(tile)));
-                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                return InteractionResult.TRY_WITH_EMPTY_HAND;
             }
             if (Utils.isWrench(stack)) {
                 if (player.isSecondaryUseActive()) {
                     if (canDismantle(worldIn, pos, state, player)) {
                         dismantleBlock(worldIn, pos, state, hit, player, returnDismantleDrops());
-                        return ItemInteractionResult.SUCCESS;
+                        return InteractionResult.SUCCESS;
                     }
                 } else {
                     BlockState rotState = rotate(state, worldIn, pos, Rotation.CLOCKWISE_90);
                     if (rotState != state) {
                         worldIn.setBlockAndUpdate(pos, rotState);
-                        return ItemInteractionResult.SUCCESS;
+                        return InteractionResult.SUCCESS;
                     }
                 }
             }
             if (onBlockActivatedDelegate(worldIn, pos, state, player, handIn, hit)) {
-                return ItemInteractionResult.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
             if (cofhTile.canOpenGui()) {
                 player.openMenu((MenuProvider) tile, tile.getBlockPos());
-                return ItemInteractionResult.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
     @Override

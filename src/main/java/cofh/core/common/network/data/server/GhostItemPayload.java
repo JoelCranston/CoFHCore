@@ -4,14 +4,14 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 
 public record GhostItemPayload(int slotNumber, ItemStack stack, int count) implements CustomPacketPayload {
 
-    public static final Type<GhostItemPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "ghost_item_packet"));
+    public static final Type<GhostItemPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ID_COFH_CORE, "ghost_item_packet"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, GhostItemPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.INT, GhostItemPayload::slotNumber,

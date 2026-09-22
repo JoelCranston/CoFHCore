@@ -5,7 +5,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
@@ -57,11 +57,11 @@ public class FishingRodItemCoFH extends FishingRodItem implements ICoFHItem {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
+    public InteractionResult use(Level worldIn, Player playerIn, InteractionHand handIn) {
 
         ItemStack stack = playerIn.getItemInHand(handIn);
         if (playerIn.fishing != null) {
-            if (!worldIn.isClientSide) {
+            if (!worldIn.isClientSide()) {
                 int i = playerIn.fishing.retrieve(stack);
                 stack.hurtAndBreak(i, playerIn, LivingEntity.getSlotForHand(handIn));
             }
@@ -80,7 +80,7 @@ public class FishingRodItemCoFH extends FishingRodItem implements ICoFHItem {
             playerIn.awardStat(Stats.ITEM_USED.get(this));
         }
 
-        return InteractionResultHolder.success(stack);
+        return InteractionResult.SUCCESS;
     }
 
     @Override

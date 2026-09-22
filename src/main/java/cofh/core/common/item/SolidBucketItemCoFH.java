@@ -53,7 +53,7 @@ public class SolidBucketItemCoFH extends BlockItemCoFH {
     public boolean emptyContents(@Nullable Player player, Level level, BlockPos pos, @Nullable BlockHitResult hitResult) {
 
         if (level.isInWorldBounds(pos) && level.isEmptyBlock(pos)) {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 level.setBlock(pos, this.getBlock().defaultBlockState(), 3);
             }
             level.gameEvent(player, GameEvent.FLUID_PLACE, pos);

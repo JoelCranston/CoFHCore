@@ -36,7 +36,7 @@ public abstract class CustomParticleMobEffect extends MobEffectCoFH {
     @Override
     public boolean applyEffectTick(LivingEntity living, int amplifier) {
 
-        if (living.level.isClientSide && living.level.random.nextInt(getChance()) == 0) {
+        if (living.level.isClientSide() && living.level.getRandom().nextInt(getChance()) == 0) {
             living.level.addParticle(getParticle(), living.getRandomX(1.0D), living.getRandomY(), living.getRandomZ(1.0D), 0.0D, 0.0D, 0.0D);
         }
         return true;

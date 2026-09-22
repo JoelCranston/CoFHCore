@@ -6,7 +6,7 @@ import cofh.lib.api.capability.IAreaEffectHandler;
 import cofh.lib.api.capability.IShieldItem;
 import cofh.lib.common.energy.IRedstoneFluxStorage;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.EntityCapability;
 import net.neoforged.neoforge.capabilities.ItemCapability;
@@ -59,9 +59,9 @@ public final class CoreCapabilities {
 
     }
 
-    private static ResourceLocation create(String path) {
+    private static Identifier create(String path) {
 
-        return ResourceLocation.fromNamespaceAndPath("cofh", path);
+        return Identifier.fromNamespaceAndPath("cofh", path);
     }
 
     private CoreCapabilities() {

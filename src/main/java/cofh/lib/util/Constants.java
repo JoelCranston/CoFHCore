@@ -2,7 +2,7 @@ package cofh.lib.util;
 
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -73,27 +73,27 @@ public class Constants {
 
     public static final UUID EMPTY_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
-    // 1.21: an AttributeModifier is identified by a ResourceLocation, not a UUID plus a display
+    // 1.21: an AttributeModifier is identified by a Identifier, not a UUID plus a display
     // name (AttributeInstance#getModifier/removeModifier/hasModifier all take the id). The old
     // UUIDs are dropped - they identified nothing else - and each modifier gets a stable
     // cofh_core: id instead. Names kept so dependent repos need no rename.
-    public static final ResourceLocation UUID_ARMOR_TOUGHNESS = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "armor_toughness");
-    public static final ResourceLocation UUID_WEAPON_KNOCKBACK = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "weapon_knockback");
-    public static final ResourceLocation UUID_WEAPON_RANGE = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "weapon_range");
-    public static final ResourceLocation UUID_TOOL_REACH = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "tool_reach");
-    public static final ResourceLocation UUID_DUAL_WIELD_ATTACK_SPEED = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "dual_wield_attack_speed");
+    public static final Identifier UUID_ARMOR_TOUGHNESS = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "armor_toughness");
+    public static final Identifier UUID_WEAPON_KNOCKBACK = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "weapon_knockback");
+    public static final Identifier UUID_WEAPON_RANGE = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "weapon_range");
+    public static final Identifier UUID_TOOL_REACH = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "tool_reach");
+    public static final Identifier UUID_DUAL_WIELD_ATTACK_SPEED = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "dual_wield_attack_speed");
 
-    public static final ResourceLocation UUID_EFFECT_CHILLED_MOVEMENT_SPEED = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "effect_chilled_movement_speed");
-    public static final ResourceLocation UUID_EFFECT_CHILLED_ATTACK_SPEED = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "effect_chilled_attack_speed");
+    public static final Identifier UUID_EFFECT_CHILLED_MOVEMENT_SPEED = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "effect_chilled_movement_speed");
+    public static final Identifier UUID_EFFECT_CHILLED_ATTACK_SPEED = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "effect_chilled_attack_speed");
 
-    public static final ResourceLocation UUID_EFFECT_SHOCKED_ATTACK_DAMAGE = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "effect_shocked_attack_damage");
-    public static final ResourceLocation UUID_EFFECT_SUNDERED_ARMOR = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "effect_sundered_armor");
-    public static final ResourceLocation UUID_EFFECT_SUNDERED_ARMOR_TOUGHNESS = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "effect_sundered_armor_toughness");
+    public static final Identifier UUID_EFFECT_SHOCKED_ATTACK_DAMAGE = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "effect_shocked_attack_damage");
+    public static final Identifier UUID_EFFECT_SUNDERED_ARMOR = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "effect_sundered_armor");
+    public static final Identifier UUID_EFFECT_SUNDERED_ARMOR_TOUGHNESS = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "effect_sundered_armor_toughness");
 
-    public static final ResourceLocation UUID_ENCH_BULWARK_KNOCKBACK_RESISTANCE = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "ench_bulwark_knockback_resistance");
-    public static final ResourceLocation UUID_ENCH_PHALANX_MOVEMENT_SPEED = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "ench_phalanx_movement_speed");
-    public static final ResourceLocation UUID_ENCH_REACH_DISTANCE = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "ench_reach_distance");
-    public static final ResourceLocation UUID_ENCH_VITALITY_HEALTH = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "ench_vitality_health");
+    public static final Identifier UUID_ENCH_BULWARK_KNOCKBACK_RESISTANCE = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "ench_bulwark_knockback_resistance");
+    public static final Identifier UUID_ENCH_PHALANX_MOVEMENT_SPEED = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "ench_phalanx_movement_speed");
+    public static final Identifier UUID_ENCH_REACH_DISTANCE = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "ench_reach_distance");
+    public static final Identifier UUID_ENCH_VITALITY_HEALTH = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "ench_vitality_health");
 
     public static final int RGB_DURABILITY_FLUX = 0xD01010;
     public static final int RGB_DURABILITY_WATER = 0x4060FF;
@@ -105,8 +105,8 @@ public class Constants {
     // endregion
 
     // region FONTS
-    public static final ResourceLocation ENDER_FONT = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "ender");
-    public static final ResourceLocation INVIS_FONT = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "invis");
+    public static final Identifier ENDER_FONT = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "ender");
+    public static final Identifier INVIS_FONT = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "invis");
 
     public static final Style ENDER_STYLE = Style.EMPTY.withFont(ENDER_FONT);
     public static final Style INVIS_STYLE = Style.EMPTY.withFont(INVIS_FONT);

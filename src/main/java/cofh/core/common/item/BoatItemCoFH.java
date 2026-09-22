@@ -8,12 +8,12 @@ import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.boat.Boat;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
@@ -43,12 +43,12 @@ public class BoatItemCoFH extends ItemCoFH {
         DispenserBlock.registerBehavior(this, DISPENSER_BEHAVIOR);
     }
 
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
 
         ItemStack stack = player.getItemInHand(hand);
         HitResult hitresult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.ANY);
         if (hitresult.getType() == HitResult.Type.MISS) {
-            return InteractionResultHolder.pass(stack);
+            return InteractionResult.PASS;
         } else {
             Vec3 vec3 = player.getViewVector(1.0F);
             List<Entity> list = level.getEntities(player, player.getBoundingBox().expandTowards(vec3.scale(5.0D)).inflate(1.0D), ENTITY_PREDICATE);
@@ -57,16 +57,16 @@ public class BoatItemCoFH extends ItemCoFH {
                 for (Entity entity : list) {
                     AABB aabb = entity.getBoundingBox().inflate(entity.getPickRadius());
                     if (aabb.contains(vec31)) {
-                        return InteractionResultHolder.pass(stack);
+                        return InteractionResult.PASS;
                     }
                 }
             }
             if (hitresult.getType() == HitResult.Type.BLOCK) {
                 var boat = createBoat(stack, level, player.getYRot(), hitresult.getLocation().x, hitresult.getLocation().y, hitresult.getLocation().z);
                 if (!level.noCollision(boat, boat.getBoundingBox())) {
-                    return InteractionResultHolder.fail(stack);
+                    return InteractionResult.FAIL;
                 } else {
-                    if (!level.isClientSide) {
+                    if (!level.isClientSide()) {
                         level.addFreshEntity(boat);
                         level.gameEvent(player, GameEvent.ENTITY_PLACE, hitresult.getLocation());
                         if (!player.getAbilities().instabuild) {
@@ -74,10 +74,10 @@ public class BoatItemCoFH extends ItemCoFH {
                         }
                     }
                     player.awardStat(Stats.ITEM_USED.get(this));
-                    return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+                    return InteractionResult.SUCCESS;
                 }
             } else {
-                return InteractionResultHolder.pass(stack);
+                return InteractionResult.PASS;
             }
         }
     }

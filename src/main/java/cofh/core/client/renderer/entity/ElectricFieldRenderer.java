@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -22,7 +22,7 @@ import java.util.stream.IntStream;
 
 public class ElectricFieldRenderer extends EntityRenderer<ElectricField> implements ITranslucentRenderer {
 
-    public static final ResourceLocation[] TEXTURES = IntStream.range(0, 5).mapToObj(i -> ResourceLocation.fromNamespaceAndPath(ModIds.ID_COFH_CORE, "textures/particle/plasma_ball_" + i + ".png")).toArray(ResourceLocation[]::new);
+    public static final Identifier[] TEXTURES = IntStream.range(0, 5).mapToObj(i -> Identifier.fromNamespaceAndPath(ModIds.ID_COFH_CORE, "textures/particle/plasma_ball_" + i + ".png")).toArray(Identifier[]::new);
 
     public ElectricFieldRenderer(EntityRendererProvider.Context ctx) {
 
@@ -75,7 +75,7 @@ public class ElectricFieldRenderer extends EntityRenderer<ElectricField> impleme
     }
 
     @Override
-    public ResourceLocation getTextureLocation(ElectricField entity) {
+    public Identifier getTextureLocation(ElectricField entity) {
 
         return TEXTURES[entity.getTextureIndex(TEXTURES.length)];
     }

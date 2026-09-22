@@ -21,7 +21,7 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
@@ -49,10 +49,10 @@ public final class RenderHelper {
 
     public static final float RENDER_OFFSET = 1.0F / 512.0F;
     public static final int FULL_BRIGHT = 0x00F000F0;
-    public static final ResourceLocation MC_BLOCK_SHEET = ResourceLocation.parse("textures/atlas/blocks.png");
-    public static final ResourceLocation MC_FONT_DEFAULT = ResourceLocation.parse("textures/font/ascii.png");
-    public static final ResourceLocation MC_FONT_SGA = ResourceLocation.parse("textures/font/ascii_sga.png");
-    public static final ResourceLocation MC_ITEM_GLINT = ResourceLocation.parse("textures/misc/enchanted_item_glint.png");
+    public static final Identifier MC_BLOCK_SHEET = Identifier.parse("textures/atlas/blocks.png");
+    public static final Identifier MC_FONT_DEFAULT = Identifier.parse("textures/font/ascii.png");
+    public static final Identifier MC_FONT_SGA = Identifier.parse("textures/font/ascii_sga.png");
+    public static final Identifier MC_ITEM_GLINT = Identifier.parse("textures/misc/enchanted_item_glint.png");
     public static PoseStack particleStack = new PoseStack();
 
     // region ACCESSORS
@@ -369,10 +369,10 @@ public final class RenderHelper {
     // region TEXTURE GETTERS
     public static TextureAtlasSprite getTexture(String location) {
 
-        return textureMap().getSprite(ResourceLocation.parse(location));
+        return textureMap().getSprite(Identifier.parse(location));
     }
 
-    public static TextureAtlasSprite getTexture(ResourceLocation location) {
+    public static TextureAtlasSprite getTexture(Identifier location) {
 
         return textureMap().getSprite(location);
     }
@@ -389,10 +389,10 @@ public final class RenderHelper {
 
     public static boolean textureExists(String location) {
 
-        return textureExists(ResourceLocation.parse(location));
+        return textureExists(Identifier.parse(location));
     }
 
-    public static boolean textureExists(ResourceLocation location) {
+    public static boolean textureExists(Identifier location) {
 
         return getTexture(location) != getTexture(MissingTextureAtlasSprite.getLocation());
     }
@@ -542,7 +542,7 @@ public final class RenderHelper {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    public static void setShaderTexture0(ResourceLocation texture) {
+    public static void setShaderTexture0(Identifier texture) {
 
         RenderSystem.setShaderTexture(0, texture);
     }

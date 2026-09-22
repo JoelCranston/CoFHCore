@@ -279,7 +279,7 @@ public final class AreaEffectHelper {
         //        Predicate<BlockPos> match = Optional.ofNullable(BuiltInRegistries.BLOCK.tags()).flatMap(tags ->
         //                tags.getReverseTag(block).map(rev -> {
         //                    if (rev.containsTag(BlockTags.LOGS)) {
-        //                        return rev.getTagKeys().filter(key -> key.location().getPath().contains("_logs")).findAny().map(key -> exact.or(p -> world.getBlockState(p).is(key))).orElse(exact);
+        //                        return rev.getTagKeys().filter(key -> key.identifier().getPath().contains("_logs")).findAny().map(key -> exact.or(p -> world.getBlockState(p).is(key))).orElse(exact);
         //                    }
         //                    return exact;
         //                })

@@ -6,7 +6,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
@@ -84,7 +83,7 @@ public class FeastBlock extends DirectionalBlock4Way {
             } else {
                 player.getFoodData().eat(food);
                 for (FoodProperties.PossibleEffect possible : this.food.effects()) {
-                    if (!world.isClientSide && world.random.nextFloat() < possible.probability()) {
+                    if (!world.isClientSide() && world.getRandom().nextFloat() < possible.probability()) {
                         player.addEffect(possible.effect());
                     }
                 }
@@ -109,17 +108,17 @@ public class FeastBlock extends DirectionalBlock4Way {
     }
 
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 
-        if (worldIn.isClientSide) {
+        if (worldIn.isClientSide()) {
             if (this.serve(worldIn, pos, state, player).consumesAction()) {
-                return ItemInteractionResult.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
             if (stack.isEmpty()) {
-                return ItemInteractionResult.CONSUME;
+                return InteractionResult.CONSUME;
             }
         }
-        return this.serve(worldIn, pos, state, player) == InteractionResult.SUCCESS ? ItemInteractionResult.SUCCESS : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return this.serve(worldIn, pos, state, player) == InteractionResult.SUCCESS ? InteractionResult.SUCCESS : InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
     @Override

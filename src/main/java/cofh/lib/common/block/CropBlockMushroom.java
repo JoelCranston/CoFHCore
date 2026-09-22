@@ -81,7 +81,7 @@ public class CropBlockMushroom extends CropBlockCoFH {
     @Override
     protected int getBonemealAgeIncrease(Level worldIn) {
 
-        return Mth.nextInt(worldIn.random, 0, 2);
+        return Mth.nextInt(worldIn.getRandom(), 0, 2);
     }
 
     @Override

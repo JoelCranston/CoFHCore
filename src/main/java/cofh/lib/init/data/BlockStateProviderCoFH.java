@@ -2,7 +2,7 @@ package cofh.lib.init.data;
 
 import cofh.lib.util.Utils;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.*;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
@@ -26,24 +26,24 @@ public abstract class BlockStateProviderCoFH extends BlockStateProvider {
         return Utils.getName(block.get());
     }
 
-    protected ResourceLocation blockTexture(Supplier<? extends Block> block) {
+    protected Identifier blockTexture(Supplier<? extends Block> block) {
 
-        ResourceLocation base = Utils.getRegistryName(block.get());
-        return ResourceLocation.fromNamespaceAndPath(base.getNamespace(), ModelProvider.BLOCK_FOLDER + "/" + base.getPath());
+        Identifier base = Utils.getRegistryName(block.get());
+        return Identifier.fromNamespaceAndPath(base.getNamespace(), ModelProvider.BLOCK_FOLDER + "/" + base.getPath());
     }
 
-    protected ResourceLocation blockTexture(Supplier<? extends Block> block, String subfolder) {
+    protected Identifier blockTexture(Supplier<? extends Block> block, String subfolder) {
 
-        ResourceLocation base = Utils.getRegistryName(block.get());
-        return ResourceLocation.fromNamespaceAndPath(base.getNamespace(), ModelProvider.BLOCK_FOLDER + "/" + subfolder + "/" + base.getPath());
+        Identifier base = Utils.getRegistryName(block.get());
+        return Identifier.fromNamespaceAndPath(base.getNamespace(), ModelProvider.BLOCK_FOLDER + "/" + subfolder + "/" + base.getPath());
     }
 
-    protected ResourceLocation modBlockLoc(String texture) {
+    protected Identifier modBlockLoc(String texture) {
 
         return modLoc("block/" + texture);
     }
 
-    protected ResourceLocation modBlockLoc(String texture, String subfolder) {
+    protected Identifier modBlockLoc(String texture, String subfolder) {
 
         return modLoc("block/" + subfolder + "/" + texture);
     }

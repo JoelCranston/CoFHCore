@@ -55,7 +55,7 @@ public class CropBlockPerennial extends CropBlockCoFH {
     @Override
     protected int getBonemealAgeIncrease(Level worldIn) {
 
-        return Mth.nextInt(worldIn.random, 1, 3);
+        return Mth.nextInt(worldIn.getRandom(), 1, 3);
     }
 
 }

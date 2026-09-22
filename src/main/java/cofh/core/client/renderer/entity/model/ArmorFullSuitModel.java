@@ -6,7 +6,7 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.common.util.Lazy;
 
@@ -14,7 +14,7 @@ import static net.minecraft.client.model.geom.LayerDefinitions.OUTER_ARMOR_DEFOR
 
 public class ArmorFullSuitModel<T extends LivingEntity> extends HumanoidModel<T> {
 
-    public static final ModelLayerLocation ARMOR_FULL_SUIT_LAYER = new ModelLayerLocation(ResourceLocation.parse("cofh_core:armor_full_suit"), "outer_armor");
+    public static final ModelLayerLocation ARMOR_FULL_SUIT_LAYER = new ModelLayerLocation(Identifier.parse("cofh_core:armor_full_suit"), "outer_armor");
     public static final Lazy<HumanoidModel<LivingEntity>> INSTANCE = Lazy.of(() -> new HumanoidModel<>(Minecraft.getInstance().getEntityModels().bakeLayer(ARMOR_FULL_SUIT_LAYER)));
 
     public ArmorFullSuitModel(ModelPart root) {

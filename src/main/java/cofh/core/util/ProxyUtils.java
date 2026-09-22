@@ -7,7 +7,7 @@ import cofh.lib.api.block.entity.IAreaEffectTile;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.player.Player;
@@ -83,7 +83,7 @@ public class ProxyUtils {
         return CoFHCore.PROXY.addModel(item, model);
     }
 
-    public static Object getModel(ResourceLocation loc) {
+    public static Object getModel(Identifier loc) {
 
         return CoFHCore.PROXY.getModel(loc);
     }
@@ -93,7 +93,7 @@ public class ProxyUtils {
         CoFHCore.PROXY.addColorable(colorable);
     }
 
-    public static void registerItemModelProperty(Item item, ResourceLocation resourceLoc, IProxyItemPropertyGetter propertyGetter) {
+    public static void registerItemModelProperty(Item item, Identifier resourceLoc, IProxyItemPropertyGetter propertyGetter) {
 
         CoFHCore.PROXY.registerItemModelProperty(item, resourceLoc, propertyGetter);
     }

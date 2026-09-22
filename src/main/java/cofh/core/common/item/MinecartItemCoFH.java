@@ -8,7 +8,7 @@ import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -40,7 +40,7 @@ public class MinecartItemCoFH extends ItemCoFH {
             return InteractionResult.FAIL;
         }
         ItemStack stack = context.getItemInHand();
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             RailShape railshape = blockstate.getBlock() instanceof BaseRailBlock rail ? rail.getRailDirection(blockstate, level, blockpos, null) : RailShape.NORTH_SOUTH;
             double d0 = 0.0D;
             if (railshape.isAscending()) {
@@ -50,7 +50,7 @@ public class MinecartItemCoFH extends ItemCoFH {
             level.gameEvent(GameEvent.ENTITY_PLACE, blockpos, GameEvent.Context.of(context.getPlayer(), level.getBlockState(blockpos.below())));
         }
         stack.shrink(1);
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.sidedSuccess(level.isClientSide());
     }
 
     protected void createMinecart(ItemStack stack, Level level, double posX, double posY, double posZ) {

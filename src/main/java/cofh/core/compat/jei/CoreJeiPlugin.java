@@ -8,7 +8,7 @@ import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.registration.IAdvancedRegistration;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import static cofh.core.init.CoreFluids.POTION_FLUID;
 import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
@@ -37,9 +37,9 @@ public class CoreJeiPlugin implements IModPlugin {
     }
 
     @Override
-    public ResourceLocation getPluginUid() {
+    public Identifier getPluginUid() {
 
-        return ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "default");
+        return Identifier.fromNamespaceAndPath(ID_COFH_CORE, "default");
     }
 
 }

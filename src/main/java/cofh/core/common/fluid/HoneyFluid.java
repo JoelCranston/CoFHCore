@@ -1,7 +1,7 @@
 package cofh.core.common.fluid;
 
 import cofh.lib.common.fluid.FluidCoFH;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.common.SoundActions;
@@ -56,18 +56,18 @@ public class HoneyFluid extends FluidCoFH {
 
             consumer.accept(new IClientFluidTypeExtensions() {
 
-                private static final ResourceLocation
-                        STILL = ResourceLocation.parse("cofh_core:block/fluids/honey_still"),
-                        FLOW = ResourceLocation.parse("cofh_core:block/fluids/honey_flow");
+                private static final Identifier
+                        STILL = Identifier.parse("cofh_core:block/fluids/honey_still"),
+                        FLOW = Identifier.parse("cofh_core:block/fluids/honey_flow");
 
                 @Override
-                public ResourceLocation getStillTexture() {
+                public Identifier getStillTexture() {
 
                     return STILL;
                 }
 
                 @Override
-                public ResourceLocation getFlowingTexture() {
+                public Identifier getFlowingTexture() {
 
                     return FLOW;
                 }

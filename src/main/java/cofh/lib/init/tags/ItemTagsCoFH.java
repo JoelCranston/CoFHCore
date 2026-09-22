@@ -1,6 +1,6 @@
 package cofh.lib.init.tags;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -277,12 +277,12 @@ public class ItemTagsCoFH {
     // region HELPERS
     private static TagKey<Item> cofhTag(String name) {
 
-        return ItemTags.create(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, name));
+        return ItemTags.create(Identifier.fromNamespaceAndPath(ID_COFH_CORE, name));
     }
 
     private static TagKey<Item> commonTag(String name) {
 
-        return ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", name));
+        return ItemTags.create(Identifier.fromNamespaceAndPath("c", name));
     }
     // endregion
 }

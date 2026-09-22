@@ -10,7 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.renderer.item.ItemPropertyFunction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -20,7 +20,7 @@ import java.util.*;
 
 public class ProxyClient extends Proxy {
 
-    protected static final Map<ResourceLocation, Object> MODEL_MAP = new Object2ObjectOpenHashMap<>();
+    protected static final Map<Identifier, Object> MODEL_MAP = new Object2ObjectOpenHashMap<>();
     protected static final Set<ModelPropertyWrapper> ITEM_PROPERTY_GETTERS = new HashSet<>();
     protected static final Set<IAreaEffectTile> AREA_EFFECT_TILES = Collections.newSetFromMap(new WeakHashMap<>());
 
@@ -62,13 +62,13 @@ public class ProxyClient extends Proxy {
     }
 
     @Override
-    protected Object addModel(ResourceLocation loc, Object model) {
+    protected Object addModel(Identifier loc, Object model) {
 
         return MODEL_MAP.put(loc, model);
     }
 
     @Override
-    public Object getModel(ResourceLocation loc) {
+    public Object getModel(Identifier loc) {
 
         return MODEL_MAP.get(loc);
     }
@@ -80,7 +80,7 @@ public class ProxyClient extends Proxy {
     }
 
     @Override
-    public void registerItemModelProperty(Item item, ResourceLocation resourceLoc, IProxyItemPropertyGetter propertyGetter) {
+    public void registerItemModelProperty(Item item, Identifier resourceLoc, IProxyItemPropertyGetter propertyGetter) {
 
         ITEM_PROPERTY_GETTERS.add(new ModelPropertyWrapper(item, resourceLoc, propertyGetter));
     }
@@ -114,10 +114,10 @@ public class ProxyClient extends Proxy {
     protected static class ModelPropertyWrapper {
 
         Item item;
-        ResourceLocation resourceLoc;
+        Identifier resourceLoc;
         ItemPropertyFunction propertyGetter;
 
-        ModelPropertyWrapper(Item item, ResourceLocation resourceLoc, IProxyItemPropertyGetter propertyGetter) {
+        ModelPropertyWrapper(Item item, Identifier resourceLoc, IProxyItemPropertyGetter propertyGetter) {
 
             this.item = item;
             this.resourceLoc = resourceLoc;

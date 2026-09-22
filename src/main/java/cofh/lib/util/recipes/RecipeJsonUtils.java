@@ -10,7 +10,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -195,7 +195,7 @@ public abstract class RecipeJsonUtils {
         int count = 1;
 
         if (element.isJsonPrimitive()) {
-            item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(element.getAsString()));
+            item = BuiltInRegistries.ITEM.get(Identifier.parse(element.getAsString()));
             return item == null ? ItemStack.EMPTY : new ItemStack(item);
         } else {
             JsonObject itemObject = element.getAsJsonObject();
@@ -209,7 +209,7 @@ public abstract class RecipeJsonUtils {
 
             /* ITEM */
             if (itemObject.has(ITEM)) {
-                item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemObject.get(ITEM).getAsString()));
+                item = BuiltInRegistries.ITEM.get(Identifier.parse(itemObject.get(ITEM).getAsString()));
             }
             if (item == null) {
                 return ItemStack.EMPTY;
@@ -246,7 +246,7 @@ public abstract class RecipeJsonUtils {
         int amount = BUCKET_VOLUME;
 
         if (element.isJsonPrimitive()) {
-            fluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(element.getAsString()));
+            fluid = BuiltInRegistries.FLUID.get(Identifier.parse(element.getAsString()));
             return fluid == null ? FluidStack.EMPTY : new FluidStack(fluid, amount);
         } else {
             JsonObject fluidObject = element.getAsJsonObject();
@@ -260,7 +260,7 @@ public abstract class RecipeJsonUtils {
 
             /* FLUID */
             if (fluidObject.has(FLUID)) {
-                fluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(fluidObject.get(FLUID).getAsString()));
+                fluid = BuiltInRegistries.FLUID.get(Identifier.parse(fluidObject.get(FLUID).getAsString()));
             }
             if (fluid == null) {
                 return FluidStack.EMPTY;
@@ -308,7 +308,7 @@ public abstract class RecipeJsonUtils {
         }
         Block block;
 
-        block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(element.getAsString()));
+        block = BuiltInRegistries.BLOCK.get(Identifier.parse(element.getAsString()));
         return block == null ? Blocks.AIR : block;
     }
 

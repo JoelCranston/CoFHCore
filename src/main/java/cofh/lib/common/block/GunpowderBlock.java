@@ -4,7 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.ColorRGBA;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -39,7 +39,7 @@ public class GunpowderBlock extends ColoredFallingBlock {
     // Item-dependent (checks the held item for flint & steel / fire charge) - moves wholesale to
     // useItemOn, which now gets the stack directly.
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 
         Item item = stack.getItem();
         if (item != Items.FLINT_AND_STEEL && item != Items.FIRE_CHARGE) {
@@ -54,7 +54,7 @@ public class GunpowderBlock extends ColoredFallingBlock {
                     stack.shrink(1);
                 }
             }
-            return ItemInteractionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
     }
 
@@ -67,7 +67,7 @@ public class GunpowderBlock extends ColoredFallingBlock {
     @Override
     public void wasExploded(Level world, BlockPos pos, Explosion explosionIn) {
 
-        if (!world.isClientSide) {
+        if (!world.isClientSide()) {
             explode(world, pos, explosionIn.getIndirectSourceEntity());
         }
     }
@@ -75,7 +75,7 @@ public class GunpowderBlock extends ColoredFallingBlock {
     @Override
     public void onProjectileHit(Level worldIn, BlockState state, BlockHitResult hit, Projectile projectile) {
 
-        if (!worldIn.isClientSide) {
+        if (!worldIn.isClientSide()) {
             Entity entity = projectile.getOwner();
             if (projectile.isOnFire()) {
                 BlockPos blockpos = hit.getBlockPos();
@@ -88,7 +88,7 @@ public class GunpowderBlock extends ColoredFallingBlock {
     // region HELPERS
     private static void explode(Level world, BlockPos pos, @Nullable LivingEntity igniter) {
 
-        if (!world.isClientSide) {
+        if (!world.isClientSide()) {
             world.explode(igniter, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, EXPLOSION_STRENGTH, Level.ExplosionInteraction.BLOCK);
         }
     }
