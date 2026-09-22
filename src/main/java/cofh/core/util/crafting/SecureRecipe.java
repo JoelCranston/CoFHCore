@@ -3,8 +3,8 @@ package cofh.core.util.crafting;
 import cofh.lib.api.control.ISecurable.AccessMode;
 import cofh.lib.init.tags.ItemTagsCoFH;
 import cofh.lib.util.helpers.SecurityHelper;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
@@ -22,7 +22,7 @@ public class SecureRecipe extends CustomRecipe {
     }
 
     @Override
-    public boolean matches(CraftingContainer inv, Level worldIn) {
+    public boolean matches(CraftingInput inv, Level worldIn) {
 
         Ingredient ingredientSecure = Ingredient.of(ItemTagsCoFH.LOCKS);
         Ingredient ingredientSecurable = Ingredient.of(ItemTagsCoFH.SECURABLE);
@@ -31,7 +31,7 @@ public class SecureRecipe extends CustomRecipe {
         boolean lockItem = false;
         boolean securableItem = false;
 
-        for (int i = 0; i < inv.getContainerSize(); ++i) {
+        for (int i = 0; i < inv.size(); ++i) {
             ItemStack stack = inv.getItem(i);
             if (!stack.isEmpty()) {
                 if (ingredientSecure.test(stack)) {
@@ -45,12 +45,12 @@ public class SecureRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer inv, RegistryAccess pRegistryAccess) {
+    public ItemStack assemble(CraftingInput inv, HolderLookup.Provider registries) {
 
         Ingredient ingredientSecurable = Ingredient.of(ItemTagsCoFH.SECURABLE);
 
         ItemStack result = ItemStack.EMPTY;
-        for (int i = 0; i < inv.getContainerSize(); ++i) {
+        for (int i = 0; i < inv.size(); ++i) {
             ItemStack stack = inv.getItem(i);
             if (!stack.isEmpty()) {
                 if (ingredientSecurable.test(stack)) {

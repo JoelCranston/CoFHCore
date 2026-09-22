@@ -30,7 +30,7 @@ public class StorageClearPacket {
             }
             BlockEntity tile = world.getBlockEntity(payload.pos());
             if (tile instanceof ITileCallback callback) {
-                switch (StorageType.values()[payload.type()]) {
+                switch (StorageType.values()[payload.storageType()]) {
                     case ENERGY -> callback.clearEnergy(payload.index());
                     case FLUID -> callback.clearTank(payload.index());
                     case ITEM -> callback.clearSlot(payload.index());

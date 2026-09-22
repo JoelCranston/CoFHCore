@@ -23,7 +23,7 @@ public class FalseCopySlotGhostHandler implements IGhostIngredientHandler<Contai
     public <I> List<Target<I>> getTargetsTyped(ContainerScreenCoFH gui, ITypedIngredient<I> ingredient, boolean doStart) {
 
         ItemStack ingStack = ItemStack.EMPTY;
-        if (ingredient instanceof FluidStack fluid && fluid.getFluid().getBucket() != Items.AIR) {
+        if (ingredient.getIngredient() instanceof FluidStack fluid && fluid.getFluid().getBucket() != Items.AIR) {
             ingStack = cloneStack(fluid.getFluid().getBucket());
         } else if (ingredient.getIngredient() instanceof ItemStack item) {
             ingStack = cloneStack(item);

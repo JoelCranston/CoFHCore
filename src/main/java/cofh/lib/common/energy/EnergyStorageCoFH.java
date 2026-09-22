@@ -2,6 +2,7 @@ package cofh.lib.common.energy;
 
 import cofh.lib.api.IResourceStorage;
 import cofh.lib.util.helpers.MathHelper;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.neoforged.neoforge.common.util.INBTSerializable;
@@ -184,13 +185,13 @@ public class EnergyStorageCoFH implements IRedstoneFluxStorage, IResourceStorage
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
 
         return write(new CompoundTag());
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
 
         read(nbt);
     }

@@ -38,7 +38,7 @@ public class FilterableGuiTogglePacket {
 
             Level world = player.level;
 
-            FilterHolderType type = FilterHolderType.from(payload.type());
+            FilterHolderType type = FilterHolderType.from(payload.toggleType());
             int entityId = payload.entityId();
             BlockPos pos = payload.pos();
             int mode = payload.mode();
