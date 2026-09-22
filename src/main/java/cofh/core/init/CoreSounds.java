@@ -13,7 +13,7 @@ public class CoreSounds {
 
     public static void registerSound(String soundID) {
 
-        // SOUND_EVENTS.register(soundID, () -> new SoundEvent(ResourceLocation.parse(soundID)));
+        // SOUND_EVENTS.register(soundID, () -> new SoundEvent(new ResourceLocation(soundID)));
     }
 
 }

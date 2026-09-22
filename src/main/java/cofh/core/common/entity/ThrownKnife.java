@@ -10,12 +10,12 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -41,8 +41,6 @@ public class ThrownKnife extends AbstractArrow {
     protected static final EntityDataAccessor<ItemStack> DATA_ITEM_STACK = SynchedEntityData.defineId(ThrownKnife.class, EntityDataSerializers.ITEM_STACK);
     protected int hitTime = -1;
 
-    // 1.21: an arrow also records the weapon it was fired from (used for enchantment effects and
-    // for "shot from a crossbow"); a thrown knife is its own weapon, so it passes the same stack.
     public ThrownKnife(EntityType<? extends AbstractArrow> type, Level worldIn) {
 
         super(type, worldIn);
@@ -144,8 +142,6 @@ public class ThrownKnife extends AbstractArrow {
             float damage = ((KnifeItem) stack.getItem()).getDamage(stack);
 
             damage = (float) MathHelper.clamp(velocity * damage, 0.0D, damage * 3);
-            // 1.21: the weapon's damage enchantments are applied through modifyDamage against the
-            // real DamageSource rather than looked up per mob type.
             DamageSource damageSource = this.damageSource();
             if (level() instanceof ServerLevel serverLevel) {
                 damage = EnchantmentHelper.modifyDamage(serverLevel, stack, target, damageSource, damage);
@@ -160,8 +156,6 @@ public class ThrownKnife extends AbstractArrow {
                 }
                 if (target instanceof LivingEntity livingTarget) {
                     if (owner instanceof LivingEntity) {
-                        // The two separate post-hurt/post-damage hooks became one, applied with
-                        // the item that caused the damage.
                         if (level() instanceof ServerLevel serverLevel) {
                             EnchantmentHelper.doPostAttackEffectsWithItemSource(serverLevel, livingTarget, damageSource, stack);
                         }

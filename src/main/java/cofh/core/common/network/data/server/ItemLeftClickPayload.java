@@ -1,5 +1,6 @@
 package cofh.core.common.network.data.server;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -12,7 +13,7 @@ public class ItemLeftClickPayload implements CustomPacketPayload {
 
     public static final ItemLeftClickPayload INSTANCE = new ItemLeftClickPayload();
 
-    public static final StreamCodec<io.netty.buffer.ByteBuf, ItemLeftClickPayload> STREAM_CODEC = StreamCodec.unit(INSTANCE);
+    public static final StreamCodec<ByteBuf, ItemLeftClickPayload> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
     public ItemLeftClickPayload() {
 

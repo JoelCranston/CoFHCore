@@ -4,6 +4,7 @@ import cofh.core.common.entity.ThrownKnife;
 import cofh.lib.common.item.SwordItemCoFH;
 import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Position;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -15,7 +16,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.BowItem;
-import net.minecraft.core.Holder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileItem;
 import net.minecraft.world.item.Tier;
@@ -34,8 +34,6 @@ public class KnifeItem extends SwordItemCoFH implements ProjectileItem {
 
         super(tier, attackDamageIn, attackSpeedIn, builder);
 
-        // Custom per-item dispense-behavior subclasses are gone - ProjectileItem (implemented
-        // below) plus this registration call is the modern equivalent (see ArrowItemCoFH).
         DispenserBlock.registerProjectileBehavior(this);
     }
 
@@ -44,9 +42,6 @@ public class KnifeItem extends SwordItemCoFH implements ProjectileItem {
         this(tier, DEFAULT_ATTACK_DAMAGE, DEFAULT_ATTACK_SPEED, builder);
     }
 
-    // 1.21: what an enchantment can go on is datapack data (an enchantment's supported_items
-    // tag). NeoForge keeps a per-item override for the extra cases; Loyalty is allowed here the
-    // way it was before, on top of whatever the data says.
     @Override
     public boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
 

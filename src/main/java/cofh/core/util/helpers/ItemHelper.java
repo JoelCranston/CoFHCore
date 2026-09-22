@@ -97,8 +97,6 @@ public final class ItemHelper {
     // endregion
 
     // region NBT TAGS
-    // "Tag" here always meant the mod-attached custom NBT blob, not vanilla's structured item
-    // data - that's DataComponents.CUSTOM_DATA now (ItemStack#hasTag/getTag/setTag are gone).
     public static ItemStack copyTag(ItemStack container, ItemStack other) {
 
         if (!other.isEmpty() && other.has(DataComponents.CUSTOM_DATA)) {
@@ -108,8 +106,7 @@ public final class ItemHelper {
     }
 
     /**
-     * The mod-attached NBT blob, as a copy. {@link CustomData} is immutable and hands out copies -
-     * mutating what this returns does not touch the stack. Empty rather than null when absent.
+     * Returns a copy; changes must be written back with {@link #setCustomData} or {@link #mutateCustomData}.
      */
     public static CompoundTag getCustomData(ItemStack stack) {
 
@@ -130,19 +127,11 @@ public final class ItemHelper {
         }
     }
 
-    /**
-     * Read-modify-write of the mod-attached blob; the replacement for the old
-     * {@code stack.getOrCreateTag().putX(...)} pattern, which mutated a live tag in place.
-     */
     public static void mutateCustomData(ItemStack stack, Consumer<CompoundTag> mutator) {
 
         CustomData.update(DataComponents.CUSTOM_DATA, stack, mutator);
     }
 
-    /**
-     * A sub-compound of the mod-attached blob, as a copy - the old {@code getTagElement}. Empty
-     * rather than null when absent, so callers can read without a null check.
-     */
     public static CompoundTag getCustomSubTag(ItemStack stack, String key) {
 
         return getCustomData(stack).getCompound(key);
@@ -153,18 +142,11 @@ public final class ItemHelper {
         return getCustomData(stack).contains(key, Tag.TAG_COMPOUND);
     }
 
-    /**
-     * Writes a sub-compound into the mod-attached blob - the old {@code addTagElement}.
-     */
     public static void setCustomSubTag(ItemStack stack, String key, Tag value) {
 
         mutateCustomData(stack, tag -> tag.put(key, value));
     }
 
-    /**
-     * The block entity data vanilla itself writes to a stack; its own component since 1.20.5,
-     * not part of the mod-attached blob.
-     */
     public static CompoundTag getBlockEntityData(ItemStack stack) {
 
         return stack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).copyTag();

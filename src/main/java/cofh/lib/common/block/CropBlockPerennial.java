@@ -4,7 +4,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
-
 import static cofh.lib.util.constants.BlockStatePropertiesCoFH.AGE_0_10;
 
 public class CropBlockPerennial extends CropBlockCoFH {

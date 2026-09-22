@@ -1,5 +1,6 @@
 package cofh.core.common.network.data.client;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -11,7 +12,7 @@ public record OverlayMessagePayload(String message) implements CustomPacketPaylo
 
     public static final Type<OverlayMessagePayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "overlay_message_packet"));
 
-    public static final StreamCodec<io.netty.buffer.ByteBuf, OverlayMessagePayload> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<ByteBuf, OverlayMessagePayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, OverlayMessagePayload::message,
             OverlayMessagePayload::new
     );

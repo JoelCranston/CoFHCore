@@ -2,16 +2,14 @@ package cofh.core.common.block.entity;
 
 import cofh.core.util.control.ISecurableTile;
 import cofh.core.util.control.SecurityControlModule;
-import net.minecraft.core.BlockPos;
 import cofh.core.util.helpers.ItemHelper;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-
-import static cofh.lib.util.constants.NBTTags.TAG_BLOCK_ENTITY;
 
 public class SecurableBlockEntity extends BlockEntityCoFH implements ISecurableTile {
 
@@ -34,8 +32,6 @@ public class SecurableBlockEntity extends BlockEntityCoFH implements ISecurableT
     }
 
     // region NBT
-    // 1.20.5: BlockEntity#load is loadAdditional and both halves take the registry lookup
-    // (components can reference registries).
     @Override
     protected void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
 

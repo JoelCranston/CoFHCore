@@ -9,12 +9,11 @@ import cofh.lib.api.item.ICoFHItem;
 import cofh.lib.util.Utils;
 import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -34,10 +33,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import javax.annotation.Nullable;
 import java.util.List;
-
-import static cofh.lib.util.constants.NBTTags.TAG_AMMO;
 
 public class CrossbowItemCoFH extends CrossbowItem implements ICoFHItem {
 
@@ -205,9 +201,6 @@ public class CrossbowItemCoFH extends CrossbowItem implements ICoFHItem {
         return false;
     }
 
-    // 1.20.5+: a crossbow's ammunition is the CHARGED_PROJECTILES component, which is also what
-    // isCharged() reads - the separate "AMMO" NBT tag and CrossbowItem#setCharged are both gone,
-    // and "loaded" is simply "the component is non-empty".
     public boolean loadAmmo(Player player, ItemStack crossbow, ItemStack ammo) {
 
         crossbow.set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.of(ammo.copy()));
@@ -225,6 +218,7 @@ public class CrossbowItemCoFH extends CrossbowItem implements ICoFHItem {
         crossbow.remove(DataComponents.CHARGED_PROJECTILES);
     }
 
+    // Overrideable forms of isCharged() and setCharged() in CrossbowItem.
     public void setLoaded(ItemStack crossbow, boolean loaded) {
 
         if (!loaded) {
@@ -280,9 +274,6 @@ public class CrossbowItemCoFH extends CrossbowItem implements ICoFHItem {
 
         arrow.setCritArrow(true);
         arrow.setSoundEvent(SoundEvents.CROSSBOW_HIT);
-        // "shot from a crossbow" is derived from the weapon the arrow remembers, and piercing is
-        // an enchantment effect applied through the weapon - setShotFromCrossbow/setPierceLevel
-        // are both gone.
         arrow.firedFromWeapon = crossbow.copy();
         if (arrow.level() instanceof ServerLevel serverLevel) {
             EnchantmentHelper.onProjectileSpawned(serverLevel, crossbow, arrow, item -> {});

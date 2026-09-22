@@ -61,13 +61,6 @@ public class EntityBlockCoFH extends Block implements EntityBlock, IDismantleabl
         return ITickableTile.createTicker(level, actualType, blockEntityType.get(), tileClass);
     }
 
-    // Block#use split upstream into useWithoutItem(no hand/stack)/useItemOn(has both). This
-    // method's logic is a mix of both (the wrench check needs the held item; everything else
-    // doesn't), and useItemOn is tried first with a real fallback to useWithoutItem only on
-    // PASS_TO_DEFAULT_BLOCK_INTERACTION - so all of it lives in useItemOn (which now gets the
-    // stack directly instead of re-fetching via player.getItemInHand(handIn)), and
-    // useWithoutItem delegates into it with an empty stack (the wrench check naturally no-ops on
-    // ItemStack.EMPTY) so an empty-handed right click still gets identical behavior.
     @Override
     public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 

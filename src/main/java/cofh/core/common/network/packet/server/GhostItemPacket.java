@@ -9,8 +9,6 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.Optional;
-
 import static cofh.core.util.helpers.ItemHelper.cloneStack;
 
 public class GhostItemPacket {

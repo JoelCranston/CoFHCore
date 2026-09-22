@@ -2,25 +2,22 @@ package cofh.lib.init.data.loot;
 
 import cofh.lib.common.loot.TileNBTSync;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
-import net.minecraft.advancements.critereon.EnchantmentPredicate;
-import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
-import net.minecraft.data.loot.BlockLootSubProvider;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.data.loot.BlockLootSubProvider;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.storage.loot.ContainerComponentManipulators;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.ContainerComponentManipulators;
 import net.minecraft.world.level.storage.loot.entries.AlternativesEntry;
 import net.minecraft.world.level.storage.loot.entries.DynamicLoot;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
@@ -28,7 +25,6 @@ import net.minecraft.world.level.storage.loot.functions.*;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraft.world.level.storage.loot.predicates.MatchTool;
 import net.minecraft.world.level.storage.loot.providers.nbt.ContextNbtProvider;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
@@ -41,8 +37,6 @@ public abstract class BlockLootSubProviderCoFH extends BlockLootSubProvider {
 
     private final Set<Block> knownBlocks = new ReferenceOpenHashSet<>();
 
-    // 1.21: the provider needs the registries (enchantments are datapack objects now), so every
-    // subclass passes them down - the no-arg form cannot work any more.
     protected BlockLootSubProviderCoFH(HolderLookup.Provider registries) {
 
         super(Collections.emptySet(), FeatureFlags.VANILLA_SET, registries);
@@ -72,16 +66,12 @@ public abstract class BlockLootSubProviderCoFH extends BlockLootSubProvider {
         add(block, getSyncDropTable(block));
     }
 
-    /**
-     * Fortune as a {@link Holder}: 1.21 loot functions take holders, and {@code Enchantments.*}
-     * are {@link net.minecraft.resources.ResourceKey}s. FORTUNE was renamed to FORTUNE.
-     */
+    // region TABLE HELPERS
     protected Holder<Enchantment> fortune() {
 
         return this.registries.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE);
     }
 
-    // region TABLE HELPERS
     protected LootTable.Builder getSilkTouchTable(String name, Block block, Item lootItem, float min, float max, int bonus) {
 
         LootPool.Builder builder = LootPool.lootPool()
@@ -156,11 +146,7 @@ public abstract class BlockLootSubProviderCoFH extends BlockLootSubProvider {
                 .setRolls(ConstantValue.exactly(1))
                 .add(LootItem.lootTableItem(block)
                         .apply(CopyNameFunction.copyName(CopyNameFunction.NameSource.BLOCK_ENTITY))
-                        // 1.20.5: CopyNbtFunction is CopyCustomDataFunction (a stack's mod NBT is
-                        // the custom_data component), and the destination paths no longer go
-                        // through a "BlockEntityTag" wrapper - block entity data is its own
-                        // component, which copy_components handles; what stays here is the plain
-                        // custom data this mod writes.
+                        // Copies into custom data, not block entity data; no BlockEntityTag prefix.
                         .apply(CopyCustomDataFunction.copyData(ContextNbtProvider.BLOCK_ENTITY)
                                 .copy("Info", "Info", CopyCustomDataFunction.MergeStrategy.REPLACE)
                                 .copy("Items", "Items", CopyCustomDataFunction.MergeStrategy.REPLACE)

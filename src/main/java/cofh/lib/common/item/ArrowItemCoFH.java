@@ -10,8 +10,9 @@ import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import net.minecraft.world.level.block.DispenserBlock;
+
+import javax.annotation.Nullable;
 
 import static cofh.lib.util.Utils.getItemEnchantmentLevel;
 
@@ -25,9 +26,6 @@ public class ArrowItemCoFH extends ArrowItem implements ICoFHItem {
         super(builder);
         this.factory = factory;
 
-        // The custom per-item ProjectileDispenseBehavior subclass pattern is gone - dispensing is
-        // now driven by the ProjectileItem interface (which ArrowItem already implements) via
-        // asProjectile(...) below; registerProjectileBehavior wires that up for this item.
         DispenserBlock.registerProjectileBehavior(this);
     }
 
@@ -43,8 +41,6 @@ public class ArrowItemCoFH extends ArrowItem implements ICoFHItem {
         return factory.createArrow(worldIn, shooter);
     }
 
-    // Position-based spawn for dispensers (no shooter entity) - replaces the old dispenser
-    // behavior's getProjectile(Level, Position, ItemStack) override.
     @Override
     public Projectile asProjectile(Level level, Position position, ItemStack stack, Direction direction) {
 

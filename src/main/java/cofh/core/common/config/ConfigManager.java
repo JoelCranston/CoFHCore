@@ -17,15 +17,7 @@ public class ConfigManager {
     protected List<IBaseConfig> serverSubConfigs = new ArrayList<>();
     protected List<IBaseConfig> clientSubConfigs = new ArrayList<>();
 
-    // 1.21.1: ModLoadingContext#registerConfig was removed (NeoForge 21.0 "Deprecations") - a mod
-    // registers its configs through its own ModContainer, which the mod constructor is handed.
     protected ModContainer container;
-
-    // The common spec used to be file-loaded here by hand, ahead of FML, so values could be read
-    // during registration. 1.21.1 removed that option: ModConfigSpec#setConfig is gone and its
-    // replacement, IConfigSpec#acceptConfig(ILoadedConfig), takes a sealed type only FML can
-    // construct. FML loads registered configs itself before the lifecycle events, and nothing in
-    // this family reads a config value during registration, so the hack is simply dropped.
 
     protected boolean commonInit = false;
     protected boolean clientInit = false;
@@ -158,8 +150,7 @@ public class ConfigManager {
     }
 
     // region CONFIGURATION
-    // Only Loading and Reloading - a value cannot be read during Unloading ("Cannot get config
-    // value before config is loaded"), and the spec is going away anyway.
+    // Not Unloading: reading a value then throws.
     @SubscribeEvent
     public void configLoad(ModConfigEvent.Loading event) {
 

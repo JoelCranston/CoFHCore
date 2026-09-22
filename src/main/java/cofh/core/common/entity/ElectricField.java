@@ -97,8 +97,6 @@ public class ElectricField extends AbstractFieldSpell {
             Entity target = result.getEntity();
             target.hurt(source, power * 4.0F);
             if (target instanceof LivingEntity living && rand.nextFloat() < power * 0.4F) {
-                // DeferredHolder<MobEffect, MobEffect> already implements Holder<MobEffect> - pass
-                // it directly rather than .get() (MobEffectInstance's ctor wants the Holder now).
                 living.addEffect(new MobEffectInstance(CoreMobEffects.SHOCKED, 80, 0, true, false, true));
             }
         });

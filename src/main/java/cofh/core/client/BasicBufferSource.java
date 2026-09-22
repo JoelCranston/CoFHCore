@@ -9,8 +9,6 @@ import net.minecraft.client.renderer.RenderType;
 
 public class BasicBufferSource implements MultiBufferSource {
 
-    // 1.21: a BufferBuilder is created per batch around a reusable ByteBufferBuilder (it can no
-    // longer be re-begun), and a batch is finished by handing its built MeshData to the type.
     protected final ByteBufferBuilder buffer;
     protected final int size;
     protected BufferBuilder builder = null;

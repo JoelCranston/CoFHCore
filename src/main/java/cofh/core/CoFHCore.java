@@ -21,7 +21,6 @@ import cofh.lib.common.loot.TileNBTSync;
 import cofh.lib.util.DeferredRegisterCoFH;
 import cofh.lib.util.Utils;
 import cofh.lib.util.crafting.CoreIngredientTypes;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -203,9 +202,6 @@ public class CoFHCore {
                     if (msg.method().equalsIgnoreCase(IMCMethods.ADD_BOW_COMPATIBILITY) && msg.messageSupplier().get() instanceof Item bow) {
                         ArcheryHelper.addValidBow(bow);
                     } else if (msg.method().equalsIgnoreCase(IMCMethods.ADD_HOLDING_COMPATIBILITY) && msg.messageSupplier().get() instanceof Item container) {
-                        // 1.21: what Holding can be applied to is the cofh_core:enchantable/holding
-                        // item tag, which a mod joins from its own data pack - this cannot be done
-                        // from code at IMC time any more.
                         LOG.warn("{} asked to make {} Holding-compatible over IMC. Add the item to the cofh_core:enchantable/holding item tag instead.",
                                 msg.senderModId(), Utils.getRegistryName(container));
                     }

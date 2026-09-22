@@ -1,11 +1,11 @@
 package cofh.lib.util.helpers;
 
+import cofh.core.util.helpers.ItemHelper;
 import cofh.lib.api.control.ISecurable;
 import cofh.lib.api.control.ISecurable.AccessMode;
 import com.google.common.base.Strings;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
-import cofh.core.util.helpers.ItemHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.OldUsersConverter;

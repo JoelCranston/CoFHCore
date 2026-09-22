@@ -39,9 +39,6 @@ public class RailBlockCoFH extends RailBlock implements IDismantleable, IWrencha
         return maxSpeed;
     }
 
-    // Block#use (item-dependent here - it's a wrench check) split upstream into
-    // useWithoutItem/useItemOn; this logic only ever cared about the held item, so it moves to
-    // useItemOn wholesale.
     @Override
     public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 

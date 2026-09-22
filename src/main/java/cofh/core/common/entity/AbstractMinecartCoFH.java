@@ -3,14 +3,13 @@ package cofh.core.common.entity;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 
@@ -20,7 +19,6 @@ import static cofh.core.util.references.CoreIDs.ID_HOLDING;
 import static cofh.lib.util.Utils.getEnchantment;
 import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 import static cofh.lib.util.constants.NBTTags.TAG_ENCHANTMENTS;
-import static net.minecraft.nbt.Tag.TAG_COMPOUND;
 
 public abstract class AbstractMinecartCoFH extends AbstractMinecart {
 

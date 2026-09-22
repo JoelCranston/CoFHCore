@@ -6,8 +6,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -21,23 +19,22 @@ import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.common.MutableDataComponentHolder;
 import net.neoforged.neoforge.common.SoundActions;
 import net.neoforged.neoforge.fluids.BaseFlowingFluid;
-import net.neoforged.neoforge.common.MutableDataComponentHolder;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static cofh.core.CoFHCore.FLUIDS;
 import static cofh.core.CoFHCore.FLUID_TYPES;
 import static cofh.core.util.references.CoreIDs.ID_FLUID_POTION;
-import static cofh.lib.util.constants.NBTTags.TAG_POTION;
 
 public class PotionFluid extends FluidCoFH {
 
@@ -84,7 +81,6 @@ public class PotionFluid extends FluidCoFH {
             if (potion.isEmpty() || potion.get().is(Potions.WATER)) {
                 return super.getDescription(stack);
             }
-            // Potion.getName(Optional<Holder>, prefix) builds the whole key, suffix included.
             return Component.translatable(Potion.getName(potion, Items.POTION.getDescriptionId() + ".effect."));
         }
 
@@ -130,7 +126,6 @@ public class PotionFluid extends FluidCoFH {
     public static int getPotionColor(FluidStack stack) {
 
         PotionContents contents = FluidHelper.getPotionContents(stack);
-        // getColor() already prefers an explicit customColor over the effects' blend.
         return contents.potion().isEmpty() && contents.customEffects().isEmpty() ? DEFAULT_COLOR : contents.getColor();
     }
 
@@ -193,8 +188,6 @@ public class PotionFluid extends FluidCoFH {
         Item item = stack.getItem();
 
         if (item.equals(Items.POTION)) {
-            // The whole potion is one component now, so the conversion is a straight copy - no
-            // more picking the potion id, custom effects and custom colour apart by hand.
             PotionContents contents = stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
             if (contents.potion().isEmpty() && contents.customEffects().isEmpty()) {
                 return FluidStack.EMPTY;
@@ -216,10 +209,7 @@ public class PotionFluid extends FluidCoFH {
         copyDisplay(fluid, stack);
         return stack;
     }
-    /**
-     * The old conversion copied the "display" and "HideFlags" NBT keys across; those are the
-     * CUSTOM_NAME and TOOLTIP_DISPLAY components now.
-     */
+
     private static void copyDisplay(DataComponentHolder from, MutableDataComponentHolder to) {
 
         copyComponent(from, to, DataComponents.CUSTOM_NAME);
@@ -254,7 +244,7 @@ public class PotionFluid extends FluidCoFH {
     //
     //        public Rarity getRarity(FluidStack stack) {
     //
-    //            return FluidHelper.getPotionContents(stack).hasEffects() ? Rarity.UNCOMMON : Rarity.COMMON;
+    //            return FluidHelper.getPotionFromFluidTag(stack.getTag()).getEffects().isEmpty() ? Rarity.COMMON : Rarity.UNCOMMON;
     //        }
     //
     //        @Override

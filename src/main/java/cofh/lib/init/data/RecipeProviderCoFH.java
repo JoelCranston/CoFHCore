@@ -26,7 +26,6 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
 
     protected boolean advancements = false;
 
-    // 1.21: RecipeProvider takes the registry future too (ingredients resolve tags).
     public RecipeProviderCoFH(PackOutput output, CompletableFuture<HolderLookup.Provider> registries, String modid) {
 
         super(output, registries);

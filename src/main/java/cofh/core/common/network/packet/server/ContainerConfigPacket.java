@@ -8,8 +8,6 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.Optional;
-
 public class ContainerConfigPacket {
 
     public static final ContainerConfigPacket INSTANCE = new ContainerConfigPacket();

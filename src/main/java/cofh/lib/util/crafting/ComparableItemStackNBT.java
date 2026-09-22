@@ -1,7 +1,7 @@
 package cofh.lib.util.crafting;
 
-import net.minecraft.nbt.CompoundTag;
 import cofh.core.util.helpers.ItemHelper;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 
 /**

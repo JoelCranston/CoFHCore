@@ -55,9 +55,6 @@ public abstract class AbstractFieldSpell extends AbstractAoESpell implements IEn
         refreshDimensions();
     }
 
-    // getEyeHeight(Pose, EntityDimensions) was removed upstream - Entity#getEyeHeight(Pose) is
-    // final now and just reads EntityDimensions#eyeHeight() off whatever getDimensions(Pose)
-    // returns, so the 0.45F eye-height factor moves into the EntityDimensions built here instead.
     @Override
     public EntityDimensions getDimensions(Pose pose) {
 

@@ -3,17 +3,16 @@ package cofh.lib.common.fluid;
 import com.google.common.collect.Lists;
 import com.google.gson.*;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
@@ -70,7 +69,6 @@ public class FluidIngredient implements Predicate<FluidStack> {
                 if (stack.getFluid() != Fluids.EMPTY) {
                     stack.setAmount(amount);
                     if (tag != null && !tag.isEmpty()) {
-                        // FluidStack#setTag is gone; a fluid's mod-attached NBT is CUSTOM_DATA now.
                         stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
                     }
                 }
@@ -98,8 +96,6 @@ public class FluidIngredient implements Predicate<FluidStack> {
         }
     }
 
-    // FluidStack's only wire format is its StreamCodec now, which needs the registry-aware
-    // buffer - FriendlyByteBuf's writeFluidStack/readFluidStack extensions are gone.
     public final void toNetwork(RegistryFriendlyByteBuf buffer) {
 
         this.dissolve();

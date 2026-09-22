@@ -10,10 +10,6 @@ import java.util.function.Supplier;
 
 public class ItemTierCoFH implements Tier {
 
-    // level/getLevel() is no longer part of Tier upstream - mining eligibility is purely
-    // tag-based now (getIncorrectBlocksForDrops()). Kept as a plain (non-override) field/getter
-    // since FishingRodItemCoFH still derives a luck modifier from it, but callers now must supply
-    // the incorrect-blocks tag directly rather than a numeric level.
     private final int level;
     private final int uses;
     private final float speed;

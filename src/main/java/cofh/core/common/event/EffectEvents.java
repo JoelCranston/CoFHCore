@@ -1,6 +1,5 @@
 package cofh.core.common.event;
 
-import cofh.lib.common.effect.CustomParticleMobEffect;
 import cofh.lib.common.effect.MobEffectCoFH;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -15,10 +14,6 @@ import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerXpEvent;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.function.Predicate;
 
 import static cofh.core.init.CoreMobEffects.*;
 import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
@@ -81,11 +76,6 @@ public class EffectEvents {
             }
         }
     }
-
-    // handlePotionColorEvent is gone: NeoForge removed PotionColorCalculationEvent in 21.0.
-    // Its job - keeping CoFH's self-rendering effects out of the vanilla swirl colour and
-    // hiding the swirl when they are the only effects present - is now done per effect by
-    // CustomParticleMobEffect#createParticleOptions returning null.
 
     @SubscribeEvent (priority = EventPriority.LOWEST)
     public static void handlePotionAddEvent(MobEffectEvent.Added event) {

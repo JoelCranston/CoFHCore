@@ -1,9 +1,9 @@
 package cofh.lib.api.item;
 
 import cofh.core.common.item.IMultiModeItem;
+import cofh.core.util.helpers.ItemHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
-import cofh.core.util.helpers.ItemHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;

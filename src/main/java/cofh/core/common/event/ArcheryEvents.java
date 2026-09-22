@@ -14,8 +14,8 @@ import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.player.ArrowLooseEvent;
 import net.neoforged.neoforge.event.entity.player.ArrowNockEvent;
 
@@ -83,8 +83,6 @@ public class ArcheryEvents {
     @SubscribeEvent (priority = EventPriority.HIGH)
     public static void handleLivingHurtEvent(LivingDamageEvent.Pre event) {
 
-        // LivingDamageEvent.Pre is not cancelable - armour and shield durability have already
-        // been applied by the time it fires; reducing the amount to 0 is the way to "cancel".
         Entity entity = event.getEntity();
         DamageSource source = event.getSource();
         Entity attacker = event.getSource().getEntity();

@@ -33,8 +33,7 @@ public class BiColorParticleOptions extends ColorParticleOptions {
         this(type, 1.0F, 1.0F, 0.0F);
     }
 
-    // Named distinctly from ColorParticleOptions#codec/streamCodec - see the same note on
-    // CylindricalParticleOptions for why (static erasure "name clash" across the hierarchy).
+    // Not codec/streamCodec: a static method of the same erasure would clash with ColorParticleOptions'.
     public static MapCodec<BiColorParticleOptions> biColorCodec(ParticleType<BiColorParticleOptions> type) {
 
         return RecordCodecBuilder.mapCodec(builder -> builder.group(

@@ -40,11 +40,7 @@ public class CoreEnchantConfig implements IBaseConfig {
     @Override
     public void refresh() {
 
-        // 1.21: an enchantment is datapack-defined, so nothing about it can be set from code.
-        // "Enable" is honoured centrally instead - Utils' level lookups report 0 for a disabled
-        // enchantment, which is what the flag did. "Treasure" is the minecraft:treasure
-        // enchantment tag now and is a datapack decision; the option is left in place but only a
-        // data pack can act on it.
+        // Treasure is the minecraft:treasure enchantment tag, so only a data pack can act on it.
         Utils.setEnchantmentEnabled(CoreEnchantments.HOLDING, enableHolding.get());
     }
 

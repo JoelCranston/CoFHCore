@@ -15,6 +15,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -25,12 +26,9 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
@@ -60,11 +58,9 @@ import java.util.stream.Collectors;
 
 import static cofh.core.init.CoreMobEffects.TRUE_INVISIBILITY;
 import static cofh.lib.util.Constants.INVIS_STYLE;
-import static cofh.lib.util.constants.NBTTags.TAG_STORED_ENCHANTMENTS;
 import static cofh.lib.util.helpers.StringHelper.*;
 import static net.minecraft.ChatFormatting.DARK_GRAY;
 import static net.minecraft.ChatFormatting.GRAY;
-import static net.minecraft.nbt.Tag.TAG_COMPOUND;
 
 @EventBusSubscriber (value = Dist.CLIENT, modid = ModIds.ID_COFH_CORE)
 public class CoreClientEvents {
@@ -108,8 +104,6 @@ public class CoreClientEvents {
             }
         }
         if (CoreClientConfig.enableEnchantmentDescriptions.get()) {
-            // 1.21: stored enchantments are a component, and an Enchantment no longer knows its
-            // own id - the holder's key supplies the "enchantment.<ns>.<path>" description id.
             ItemEnchantments stored = stack.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY);
             if (stored.size() == 1) {
                 Holder<Enchantment> ench = stored.keySet().iterator().next();
@@ -236,8 +230,6 @@ public class CoreClientEvents {
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 Queue<CoFHParticle> particles = delayedRenderParticles.get(renderType);
 
-                // 1.21: begin() takes the Tesselator and hands back the BufferBuilder to write
-                // into; there is no end() - the built mesh is uploaded directly.
                 BufferBuilder particleBuffer = renderType.begin(tesselator, manager);
                 while (!particles.isEmpty()) {
                     particles.poll().render(stack, buffer, particleBuffer, partialTick);

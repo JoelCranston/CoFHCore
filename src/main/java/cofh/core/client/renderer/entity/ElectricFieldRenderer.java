@@ -58,10 +58,10 @@ public class ElectricFieldRenderer extends EntityRenderer<ElectricField> impleme
         float ny = normal.y();
         float nz = normal.z();
 
-        consumer.addVertex((float) (x + a), (float) (y + b), (float) (z)).setColor(0xFF, 0xFF, 0xFF, 0xFF).setUv(1, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(nx, ny, nz);
-        consumer.addVertex((float) (x - b), (float) (y + a), (float) (z)).setColor(0xFF, 0xFF, 0xFF, 0xFF).setUv(0, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(nx, ny, nz);
-        consumer.addVertex((float) (x - a), (float) (y - b), (float) (z)).setColor(0xFF, 0xFF, 0xFF, 0xFF).setUv(0, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(nx, ny, nz);
-        consumer.addVertex((float) (x + b), (float) (y - a), (float) (z)).setColor(0xFF, 0xFF, 0xFF, 0xFF).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(nx, ny, nz);
+        consumer.addVertex(x + a, y + b, z).setColor(0xFF, 0xFF, 0xFF, 0xFF).setUv(1, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(nx, ny, nz);
+        consumer.addVertex(x - b, y + a, z).setColor(0xFF, 0xFF, 0xFF, 0xFF).setUv(0, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(nx, ny, nz);
+        consumer.addVertex(x - a, y - b, z).setColor(0xFF, 0xFF, 0xFF, 0xFF).setUv(0, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(nx, ny, nz);
+        consumer.addVertex(x + b, y - a, z).setColor(0xFF, 0xFF, 0xFF, 0xFF).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(nx, ny, nz);
 
         stack.popPose();
 

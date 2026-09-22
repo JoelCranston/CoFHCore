@@ -12,8 +12,6 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.Optional;
-
 public class ItemRayTraceEntityPacket {
 
     public static final ItemRayTraceEntityPacket INSTANCE = new ItemRayTraceEntityPacket();

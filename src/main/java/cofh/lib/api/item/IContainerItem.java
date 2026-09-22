@@ -1,10 +1,10 @@
 package cofh.lib.api.item;
 
 import cofh.core.common.item.IAugmentableItem;
+import cofh.core.util.helpers.ItemHelper;
 import cofh.lib.api.ContainerType;
 import cofh.lib.util.Utils;
 import net.minecraft.nbt.CompoundTag;
-import cofh.core.util.helpers.ItemHelper;
 import net.minecraft.world.item.ItemStack;
 
 import static cofh.core.util.helpers.AugmentableHelper.getAttributeMod;

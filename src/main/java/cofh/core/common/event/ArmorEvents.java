@@ -2,22 +2,20 @@ package cofh.core.common.event;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.core.Holder;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 
 import java.util.Set;
@@ -92,7 +90,6 @@ public class ArmorEvents {
             if (HAZARD_EFFECTS.contains(effect.getEffect())) {
                 if (entity.getRandom().nextDouble() < hazRes) {
                     attemptDamagePlayerArmor(entity, (1 + effect.getAmplifier()) * effect.getDuration() / 40F);
-                    // MobEffectEvent.Applicable has its own Result enum since Event.Result went away.
                     event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
                 }
             }
@@ -118,14 +115,8 @@ public class ArmorEvents {
     //        }
     //    }
 
-    private static final EquipmentSlot[] ARMOR_SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
-
     // region HELPERS
-    /**
-     * 1.21: Inventory#hurtArmor is gone and LivingEntity#hurtArmor is protected, so the armour is
-     * damaged directly - which is what the vanilla method does internally, a quarter of the
-     * damage (at least 1) to each worn piece.
-     */
+    // LivingEntity#hurtArmor is protected; this matches it, a quarter of the damage to each piece.
     private static void attemptDamagePlayerArmor(LivingEntity entity, float amount) {
 
         if (entity instanceof Player player && 100 * entity.level().random.nextFloat() < amount) {
@@ -181,6 +172,8 @@ public class ArmorEvents {
 
         STING_RESISTANCE_MAP.put(armor, resistance);
     }
+
+    private static final EquipmentSlot[] ARMOR_SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
     private static final Object2ObjectOpenHashMap<Item, Double> FALL_RESISTANCE_MAP = new Object2ObjectOpenHashMap<>();
 

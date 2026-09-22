@@ -115,8 +115,6 @@ public final class StringHelper {
     //        return chat;
     //    }
 
-    // Component (de)serialization needs the registries since 1.20.5 - a component can reference
-    // registry objects - so these take the lookup from the running world.
     public static String toJSON(Component chatComponent) {
 
         return Component.Serializer.toJson(chatComponent, ProxyUtils.registryAccess());

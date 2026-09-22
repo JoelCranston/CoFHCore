@@ -4,7 +4,6 @@ import cofh.core.util.crafting.SecureRecipe;
 import cofh.core.util.crafting.ShapedPotionNBTRecipe;
 import cofh.lib.common.conditions.FlagSetCondition;
 import cofh.lib.common.conditions.TagExistsCondition;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;

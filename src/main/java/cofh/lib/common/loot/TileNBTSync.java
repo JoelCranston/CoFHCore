@@ -1,7 +1,6 @@
 package cofh.lib.common.loot;
 
 import cofh.lib.api.block.entity.ITileCallback;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;

@@ -8,8 +8,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.Optional;
-
 public class StorageClearPacket {
 
     public static final StorageClearPacket INSTANCE = new StorageClearPacket();

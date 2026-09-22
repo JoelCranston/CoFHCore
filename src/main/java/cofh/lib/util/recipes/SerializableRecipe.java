@@ -12,12 +12,6 @@ import net.minecraft.world.level.Level;
  * This class really just serves as a way to ride on Mojang's automated recipe syncing and datapack functionality.
  * It's part of a shim layer, nothing more.
  */
-/**
- * 1.21: a Recipe's generic is a {@link net.minecraft.world.item.crafting.RecipeInput}, not a
- * Container, and persistence takes a HolderLookup.Provider. This shim never actually crafts -
- * it only rides Mojang's recipe syncing and datapack loading - so the input type is the
- * do-nothing {@link RecipeInput} form.
- */
 public abstract class SerializableRecipe implements Recipe<RecipeInput> {
 
     // region IRecipe
@@ -28,7 +22,7 @@ public abstract class SerializableRecipe implements Recipe<RecipeInput> {
     }
 
     @Override
-    public ItemStack assemble(RecipeInput inv, HolderLookup.Provider registries) {
+    public ItemStack assemble(RecipeInput inv, HolderLookup.Provider pRegistryAccess) {
 
         return ItemStack.EMPTY;
     }
@@ -40,7 +34,7 @@ public abstract class SerializableRecipe implements Recipe<RecipeInput> {
     }
 
     @Override
-    public ItemStack getResultItem(HolderLookup.Provider registries) {
+    public ItemStack getResultItem(HolderLookup.Provider pRegistryAccess) {
 
         return ItemStack.EMPTY;
     }

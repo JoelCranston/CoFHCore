@@ -64,7 +64,6 @@ public class RayTracer {
 
     public static double getBlockReachDistance(Player player) {
 
-        // Reach is an attribute since 1.20.5; the accessor is blockInteractionRange().
         return player.blockInteractionRange();
     }
 

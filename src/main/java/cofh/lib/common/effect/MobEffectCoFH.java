@@ -31,6 +31,7 @@ public class MobEffectCoFH extends MobEffect {
 
     @Override
     public boolean applyEffectTick(LivingEntity entity, int amplifier) {
+
         return true;
     }
 

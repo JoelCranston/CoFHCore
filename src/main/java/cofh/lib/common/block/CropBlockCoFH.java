@@ -26,7 +26,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.common.CommonHooks;
 
-
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -123,9 +122,6 @@ public class CropBlockCoFH extends CropBlock implements IHarvestable {
         }
     }
 
-    // Block#use split upstream into useWithoutItem/useItemOn - this logic never looked at the
-    // held item itself, just which hand, and useWithoutItem carries no hand at all now (there's
-    // no per-hand dispatch left to replicate), so the old MAIN_HAND-only restriction is dropped.
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level worldIn, BlockPos pos, Player player, BlockHitResult hit) {
 
@@ -255,10 +251,6 @@ public class CropBlockCoFH extends CropBlock implements IHarvestable {
     // endregion
 
     // region PLANT TYPE
-    /**
-     * IPlantable is gone (NeoForge 21.0); a soil block is handed the plant's BlockState and
-     * decides for itself. CoFH's soils read this back off the block.
-     */
     public CropType getCropType() {
 
         return type;
