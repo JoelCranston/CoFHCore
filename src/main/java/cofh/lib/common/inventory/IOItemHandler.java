@@ -26,6 +26,18 @@ public class IOItemHandler extends SimpleItemHandler {
         this.allowExtract = allowExtract;
     }
 
+    @Override
+    protected boolean canInsert(int slot) {
+
+        return allowInsert.get();
+    }
+
+    @Override
+    protected boolean canExtract(int slot) {
+
+        return allowExtract.get();
+    }
+
     @Nonnull
     @Override
     public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {

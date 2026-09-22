@@ -9,6 +9,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.IFluidTank;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.TransferPreconditions;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 import javax.annotation.Nonnull;
 import java.util.function.Predicate;
@@ -23,7 +28,7 @@ import static cofh.lib.util.helpers.StringHelper.localize;
  *
  * @author King Lemming
  */
-public class FluidStorageCoFH implements IFluidHandler, IFluidStackHolder, IResourceStorage {
+public class FluidStorageCoFH implements IFluidHandler, ResourceHandler<FluidResource>, IFluidStackHolder, IResourceStorage {
 
     protected static Predicate<FluidStack> DEFAULT_VALIDATOR = e -> true;
 
@@ -37,6 +42,21 @@ public class FluidStorageCoFH implements IFluidHandler, IFluidStackHolder, IReso
     @Nonnull
     protected FluidStack fluid = FluidStack.EMPTY;
     protected int capacity;
+
+    protected final SnapshotJournal<FluidStack> journal = new SnapshotJournal<>() {
+
+        @Override
+        protected FluidStack createSnapshot() {
+
+            return fluid.copy();
+        }
+
+        @Override
+        protected void revertToSnapshot(FluidStack snapshot) {
+
+            fluid = snapshot;
+        }
+    };
 
     public FluidStorageCoFH(int capacity) {
 
@@ -114,6 +134,11 @@ public class FluidStorageCoFH implements IFluidHandler, IFluidStackHolder, IReso
         }
     }
 
+    public void updateSnapshots(TransactionContext transaction) {
+
+        journal.updateSnapshots(transaction);
+    }
+
     // region NBT
     public FluidStorageCoFH read(HolderLookup.Provider provider, CompoundTag nbt) {
 
@@ -177,7 +202,7 @@ public class FluidStorageCoFH implements IFluidHandler, IFluidStackHolder, IReso
             if (fluid.isEmpty()) {
                 return Math.min(capacity, resource.getAmount());
             }
-            if (!fluid.isFluidEqual(resource)) {
+            if (!FluidStack.isSameFluidSameComponents(fluid, resource)) {
                 return 0;
             }
             return Math.min(capacity - fluid.getAmount(), resource.getAmount());
@@ -186,7 +211,7 @@ public class FluidStorageCoFH implements IFluidHandler, IFluidStackHolder, IReso
             setFluidStack(resource.copyWithAmount(Math.min(capacity, resource.getAmount())));
             return fluid.getAmount();
         }
-        if (!fluid.isFluidEqual(resource)) {
+        if (!FluidStack.isSameFluidSameComponents(fluid, resource)) {
             return 0;
         }
         int filled = capacity - fluid.getAmount();
@@ -204,7 +229,7 @@ public class FluidStorageCoFH implements IFluidHandler, IFluidStackHolder, IReso
     @Override
     public FluidStack drain(FluidStack resource, FluidAction action) {
 
-        if (resource.isEmpty() || !resource.isFluidEqual(fluid)) {
+        if (resource.isEmpty() || !FluidStack.isSameFluidSameComponents(resource, fluid)) {
             return FluidStack.EMPTY;
         }
         return drain(resource.getAmount(), action);
@@ -241,6 +266,60 @@ public class FluidStorageCoFH implements IFluidHandler, IFluidStackHolder, IReso
     public boolean isFluidValid(int tank, @Nonnull FluidStack stack) {
 
         return isFluidValid(stack);
+    }
+    // endregion
+
+    // region ResourceHandler
+    @Override
+    public int size() {
+
+        return 1;
+    }
+
+    @Override
+    public FluidResource getResource(int index) {
+
+        return FluidResource.of(fluid);
+    }
+
+    @Override
+    public long getAmountAsLong(int index) {
+
+        return fluid.getAmount();
+    }
+
+    @Override
+    public long getCapacityAsLong(int index, FluidResource resource) {
+
+        return capacity;
+    }
+
+    @Override
+    public boolean isValid(int index, FluidResource resource) {
+
+        return !resource.isEmpty() && isFluidValid(resource.toStack(1));
+    }
+
+    @Override
+    public int insert(int index, FluidResource resource, int amount, TransactionContext transaction) {
+
+        TransferPreconditions.checkNonEmptyNonNegative(resource, amount);
+        if (index != 0 || amount == 0) {
+            return 0;
+        }
+        updateSnapshots(transaction);
+        return fill(resource.toStack(amount), FluidAction.EXECUTE);
+    }
+
+    @Override
+    public int extract(int index, FluidResource resource, int amount, TransactionContext transaction) {
+
+        TransferPreconditions.checkNonEmptyNonNegative(resource, amount);
+        if (index != 0 || amount == 0 || !resource.matches(fluid)) {
+            return 0;
+        }
+        updateSnapshots(transaction);
+        return drain(amount, FluidAction.EXECUTE).getAmount();
     }
     // endregion
 

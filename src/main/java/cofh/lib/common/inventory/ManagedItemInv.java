@@ -3,7 +3,6 @@ package cofh.lib.common.inventory;
 import cofh.lib.api.IStorageCallback;
 import cofh.lib.api.StorageGroup;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,11 +16,11 @@ public class ManagedItemInv extends SimpleItemInv {
     protected List<ItemStorageCoFH> outputSlots = new ArrayList<>();
     protected List<ItemStorageCoFH> internalSlots = new ArrayList<>();
 
-    protected IItemHandler inputHandler;
-    protected IItemHandler outputHandler;
-    protected IItemHandler ioHandler;
-    protected IItemHandler accessibleHandler;
-    protected IItemHandler internalHandler;
+    protected SimpleItemHandler inputHandler;
+    protected SimpleItemHandler outputHandler;
+    protected SimpleItemHandler ioHandler;
+    protected SimpleItemHandler accessibleHandler;
+    protected SimpleItemHandler internalHandler;
 
     public ManagedItemInv(IStorageCallback callback) {
 
@@ -118,7 +117,7 @@ public class ManagedItemInv extends SimpleItemInv {
     }
 
     @Override
-    public IItemHandler getHandler(StorageGroup group) {
+    public SimpleItemHandler getHandler(StorageGroup group) {
 
         if (allHandler == null) {
             initHandlers();

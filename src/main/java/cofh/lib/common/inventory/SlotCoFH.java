@@ -54,7 +54,7 @@ public class SlotCoFH extends Slot {
     @Override
     public boolean mayPlace(ItemStack stack) {
 
-        return container.canPlaceItem(slot, stack);
+        return container.canPlaceItem(getContainerSlot(), stack);
     }
 
     @Override

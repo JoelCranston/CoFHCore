@@ -6,7 +6,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,7 +23,7 @@ public class SimpleTankInv extends SimpleFluidHandler {
 
     protected String tag;
 
-    protected IFluidHandler allHandler;
+    protected SimpleFluidHandler allHandler;
 
     public SimpleTankInv(@Nullable ITileCallback tile) {
 
@@ -110,7 +109,7 @@ public class SimpleTankInv extends SimpleFluidHandler {
     }
     // endregion
 
-    public IFluidHandler getHandler(StorageGroup group) {
+    public SimpleFluidHandler getHandler(StorageGroup group) {
 
         if (allHandler == null) {
             ((ArrayList<FluidStorageCoFH>) tanks).trimToSize();

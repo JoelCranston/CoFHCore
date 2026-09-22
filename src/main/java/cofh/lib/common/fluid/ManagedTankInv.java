@@ -2,7 +2,6 @@ package cofh.lib.common.fluid;
 
 import cofh.lib.api.StorageGroup;
 import cofh.lib.api.block.entity.ITileCallback;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,11 +13,11 @@ public class ManagedTankInv extends SimpleTankInv {
     protected List<FluidStorageCoFH> outputTanks = new ArrayList<>();
     protected List<FluidStorageCoFH> internalTanks = new ArrayList<>();
 
-    protected IFluidHandler inputHandler;
-    protected IFluidHandler outputHandler;
-    protected IFluidHandler ioHandler;
-    protected IFluidHandler accessibleHandler;
-    protected IFluidHandler internalHandler;
+    protected SimpleFluidHandler inputHandler;
+    protected SimpleFluidHandler outputHandler;
+    protected SimpleFluidHandler ioHandler;
+    protected SimpleFluidHandler accessibleHandler;
+    protected SimpleFluidHandler internalHandler;
 
     public ManagedTankInv(ITileCallback tile) {
 
@@ -99,7 +98,7 @@ public class ManagedTankInv extends SimpleTankInv {
         return internalTanks;
     }
 
-    public IFluidHandler getHandler(StorageGroup group) {
+    public SimpleFluidHandler getHandler(StorageGroup group) {
 
         if (allHandler == null) {
             initHandlers();

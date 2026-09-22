@@ -2,7 +2,7 @@
 
 Phase A (1.21.1) is **code-complete**: all four repos build clean and boot headless on
 NeoForge 21.1.251, and `runData` now runs in all four. Phase B (26.1.2) is under way on the
-`26.1.2` branch: B.0-B.3 done, **1364 errors** left in CoFHCore. See
+`26.1.2` branch: B.0-B.4 done in CoFHCore, **1326 errors** left. See
 [api-notes-1.21.1.md](api-notes-1.21.1.md) / [api-notes-26.1.2.md](api-notes-26.1.2.md) for
 confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 
@@ -37,9 +37,10 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 | B.0 build bump + forced AT sweep (B.9's AT half) | `6eb201f` | 2445 / 318 files (baseline) |
 | B.1 mechanical renames | `6f0c7a7`, stragglers `e7896aa` | 1537 |
 | B.2 registration | `f02ba1b` | (included above) |
-| B.3 persistence — bridged at `BlockEntityCoFH`, entities native, `SavedDataType`, tag getters | (this commit) | 1364 |
-| **B.4 transfer API** (XL) — CoFHCore storage stack, then every capability site | next | |
-| B.5 items/tools/armour · B.6 recipes · B.7 client (XL) · B.8 resources · B.9 mixins · B.10 dependents | | |
+| B.3 persistence — bridged at `BlockEntityCoFH`, entities native, `SavedDataType`, tag getters | `8bd2f62` | 1364 |
+| B.4 transfer API — CoFH handlers also implement the new interfaces (per-storage journals), query sites wrap with `.of()` | (this commit) | 1326 |
+| **B.5 items/tools/armour** | next | |
+| B.6 recipes · B.7 client (XL) · B.8 resources · B.9 mixins · B.10 dependents | | |
 
 [port-plan.md](port-plan.md) §6 has each category's contents. Carry-overs into Phase B:
 
@@ -57,6 +58,11 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
   if they extend `BlockEntityCoFH` (check TD's `DuctBlockEntity`); their entities convert natively;
   TD drops `INBTSerializable` from its grid classes and moves `GridContainer` to `SavedDataType`.
   Friend lists and grid data won't carry over from 1.21.1 worlds (the saved-data file paths moved).
+- **B.10 inherits from B.4**: capability registration moves to `Capabilities.Item/Fluid/Energy.BLOCK`,
+  and `AugmentableBlockEntity`'s cached `itemCap`/`fluidCap`/`energyCap` fields narrow to the CoFH
+  handler types. Also call `invalidateCapabilities()` after side-config changes and wrench
+  rotation. B.4 is **unverified at runtime**: test a machine with a pipe mod or a GameTest,
+  including an aborted simulation.
 - **B.8: regenerate, don't hand-migrate.** The `26.1.2` branch predates the 1.21.1 `runData`
   commits, so its `src/main/generated` still has the stale 1.20 layout. On 26.1 the data run is
   `clientData()`, which the 26.1.2 `build.gradle` already declares. ThermalExpansion's

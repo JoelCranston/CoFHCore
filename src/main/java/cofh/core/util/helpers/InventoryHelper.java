@@ -224,15 +224,15 @@ public final class InventoryHelper {
 
     public static boolean hasItemHandlerCap(BlockEntity tile, Direction face) {
 
-        return tile != null && tile.getLevel() != null && tile.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, tile.getBlockPos(), tile.getBlockState(), tile, face) != null || tile instanceof Container;
+        return tile != null && tile.getLevel() != null && tile.getLevel().getCapability(Capabilities.Item.BLOCK, tile.getBlockPos(), tile.getBlockState(), tile, face) != null || tile instanceof Container;
     }
 
     public static IItemHandler getItemHandlerCap(BlockEntity tile, Direction face) {
 
-        var handler = tile.getLevel() != null ? tile.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, tile.getBlockPos(), tile.getBlockState(), tile, face) : null;
+        var handler = tile.getLevel() != null ? tile.getLevel().getCapability(Capabilities.Item.BLOCK, tile.getBlockPos(), tile.getBlockState(), tile, face) : null;
 
         if (handler != null) {
-            return handler;
+            return IItemHandler.of(handler);
         } else if (tile instanceof WorldlyContainer && face != null) {
             return new SidedInvWrapper(((WorldlyContainer) tile), face);
         } else if (tile instanceof Container) {

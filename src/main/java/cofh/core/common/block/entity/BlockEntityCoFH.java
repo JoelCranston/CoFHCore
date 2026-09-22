@@ -29,6 +29,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
 
 import javax.annotation.Nullable;
 
@@ -100,7 +102,7 @@ public class BlockEntityCoFH extends BlockEntity implements ITileCallback, IPack
 
         if (this.level != null) {
             if (this.level.hasChunkAt(this.worldPosition)) {
-                this.level.getChunkAt(this.worldPosition).setUnsaved(true);
+                this.level.getChunkAt(this.worldPosition).markUnsaved();
             }
         }
     }
@@ -127,9 +129,9 @@ public class BlockEntityCoFH extends BlockEntity implements ITileCallback, IPack
     // region HELPERS
     public boolean onActivatedDelegate(Level world, BlockPos pos, BlockState state, Player player, InteractionHand hand, BlockHitResult result) {
 
-        IFluidHandler handler = world.getCapability(Capabilities.FluidHandler.BLOCK, pos, state, this, result.getDirection());
+        ResourceHandler<FluidResource> handler = world.getCapability(Capabilities.Fluid.BLOCK, pos, state, this, result.getDirection());
         if (handler != null) {
-            return FluidHelper.interactWithHandler(player.getItemInHand(hand), handler, player, hand);
+            return FluidHelper.interactWithHandler(player.getItemInHand(hand), IFluidHandler.of(handler), player, hand);
         }
         return false;
     }

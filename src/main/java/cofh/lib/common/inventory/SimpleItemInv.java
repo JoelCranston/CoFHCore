@@ -6,7 +6,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,7 +23,7 @@ public class SimpleItemInv extends SimpleItemHandler {
 
     protected String tag;
 
-    protected IItemHandler allHandler;
+    protected SimpleItemHandler allHandler;
 
     public SimpleItemInv(@Nonnull List<ItemStorageCoFH> slots) {
 
@@ -224,7 +223,7 @@ public class SimpleItemInv extends SimpleItemHandler {
     }
     // endregion
 
-    public IItemHandler getHandler(StorageGroup group) {
+    public SimpleItemHandler getHandler(StorageGroup group) {
 
         if (allHandler == null) {
             ((ArrayList<ItemStorageCoFH>) slots).trimToSize();

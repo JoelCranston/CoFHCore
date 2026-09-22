@@ -65,7 +65,7 @@ public class FluidContainerItemWrapper implements IFluidHandlerItem {
     @Override
     public FluidStack drain(FluidStack resource, FluidAction action) {
 
-        if (!resource.isFluidEqual(getFluidInTank(0))) {
+        if (!FluidStack.isSameFluidSameComponents(resource, getFluidInTank(0))) {
             return FluidStack.EMPTY;
         }
         return item.drain(container, resource.getAmount(), action);

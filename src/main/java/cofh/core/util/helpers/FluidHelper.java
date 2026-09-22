@@ -39,6 +39,8 @@ import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.wrapper.InvWrapper;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -79,12 +81,12 @@ public final class FluidHelper {
     // region COMPARISON
     public static boolean fluidsEqualWithTags(FluidStack resourceA, FluidStack resourceB) {
 
-        return fluidsEqual(resourceA, resourceB) && FluidStack.areFluidStackTagsEqual(resourceA, resourceB);
+        return fluidsEqual(resourceA, resourceB) && FluidStack.isSameFluidSameComponents(resourceA, resourceB);
     }
 
     public static boolean fluidsEqual(FluidStack resourceA, FluidStack resourceB) {
 
-        return resourceA != null && resourceA.isFluidEqual(resourceB) || resourceA == null && resourceB == null;
+        return resourceA != null && FluidStack.isSameFluidSameComponents(resourceA, resourceB) || resourceA == null && resourceB == null;
     }
 
     public static boolean fluidsEqual(Fluid fluidA, FluidStack resourceB) {
@@ -175,24 +177,25 @@ public final class FluidHelper {
 
     public static boolean hasFluidHandlerCap(BlockEntity tile, Direction face) {
 
-        return tile != null && tile.getLevel() != null && tile.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, tile.getBlockPos(), tile.getBlockState(), tile, face) != null;
+        return tile != null && tile.getLevel() != null && tile.getLevel().getCapability(Capabilities.Fluid.BLOCK, tile.getBlockPos(), tile.getBlockState(), tile, face) != null;
     }
 
     public static IFluidHandler getFluidHandlerCap(BlockEntity tile, Direction face) {
 
-        return tile == null || tile.getLevel() == null ? null : tile.getLevel().getCapability(Capabilities.FluidHandler.BLOCK, tile.getBlockPos(), tile.getBlockState(), tile, face);
+        ResourceHandler<FluidResource> handler = tile == null || tile.getLevel() == null ? null : tile.getLevel().getCapability(Capabilities.Fluid.BLOCK, tile.getBlockPos(), tile.getBlockState(), tile, face);
+        return handler == null ? null : IFluidHandler.of(handler);
     }
     // endregion
 
     // region CAPABILITY HELPERS
     public static boolean hasFluidHandlerCap(ItemStack item) {
 
-        return !item.isEmpty() && item.getCapability(Capabilities.FluidHandler.ITEM) != null;
+        return !item.isEmpty() && FluidUtil.getFluidHandler(item).isPresent();
     }
 
     public static IFluidHandler getFluidHandlerCap(@Nonnull ItemStack stack) {
 
-        return stack.getCapability(Capabilities.FluidHandler.ITEM);
+        return FluidUtil.getFluidHandler(stack).orElse(null);
     }
 
     public static FluidStack getFluidContainedInItem(@Nonnull ItemStack container) {
@@ -200,7 +203,7 @@ public final class FluidHelper {
         if (!container.isEmpty()) {
             FluidStack fluidContained;
 
-            var handler = container.getCapability(Capabilities.FluidHandler.ITEM);
+            var handler = FluidUtil.getFluidHandler(container).orElse(null);
             if (handler != null) {
                 fluidContained = handler.getFluidInTank(0);
                 if (!fluidContained.isEmpty()) {
@@ -383,7 +386,7 @@ public final class FluidHelper {
             FluidStack containedFluid = getFluidContainedInItem(stack);
             int tankSpace = getCapacityForItem(stack) - containedFluid.getAmount();
             if (!containedFluid.isEmpty() && tankSpace > 0) {
-                var stackCap = stack.getCapability(Capabilities.FluidHandler.ITEM);
+                var stackCap = FluidUtil.getFluidHandler(stack).orElse(null);
                 if (stackCap != null) {
                     if (player.getAbilities().instabuild) {
                         handler.drain(containedFluid.copyWithAmount(tankSpace), EXECUTE);

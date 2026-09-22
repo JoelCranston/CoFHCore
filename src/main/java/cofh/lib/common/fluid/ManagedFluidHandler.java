@@ -36,6 +36,18 @@ public class ManagedFluidHandler extends SimpleFluidHandler {
         return this;
     }
 
+    @Override
+    protected boolean canInsert(int tank) {
+
+        return tank < inputTanks.size();
+    }
+
+    @Override
+    protected boolean canExtract(int tank) {
+
+        return tank >= (preventInputDrain ? inputTanks.size() : 0);
+    }
+
     // region IFluidHandler
     @Override
     public int fill(FluidStack resource, FluidAction action) {

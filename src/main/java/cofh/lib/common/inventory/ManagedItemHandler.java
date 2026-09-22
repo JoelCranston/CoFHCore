@@ -36,6 +36,18 @@ public class ManagedItemHandler extends SimpleItemHandler {
         return this;
     }
 
+    @Override
+    protected boolean canInsert(int slot) {
+
+        return slot < inputSlots.size();
+    }
+
+    @Override
+    protected boolean canExtract(int slot) {
+
+        return slot >= (preventInputExtract ? inputSlots.size() : 0);
+    }
+
     // region IItemHandler
     @Nonnull
     @Override

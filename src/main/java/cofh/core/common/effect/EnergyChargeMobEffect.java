@@ -5,8 +5,10 @@ import cofh.lib.common.effect.MobEffectCoFH;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 public class EnergyChargeMobEffect extends MobEffectCoFH {
 
@@ -24,8 +26,8 @@ public class EnergyChargeMobEffect extends MobEffectCoFH {
         if (entityLivingBaseIn instanceof ServerPlayer player) {
 
             if (amount <= 0) {
-                drainForgeEnergy(player, amount);
-                drainRedstoneFlux(player, amount);
+                drainForgeEnergy(player, -amount);
+                drainRedstoneFlux(player, -amount);
             } else {
                 chargeForgeEnergy(player, amount);
                 chargeRedstoneFlux(player, amount);
@@ -37,48 +39,24 @@ public class EnergyChargeMobEffect extends MobEffectCoFH {
     // region HELPERS
     private void chargeForgeEnergy(ServerPlayer player, final int chargeAmount) {
 
-        // Main Inventory
-        for (ItemStack stack : player.getInventory().items) {
-            var cap = stack.getCapability(Capabilities.EnergyStorage.ITEM);
-            if (cap != null) {
-                cap.receiveEnergy(chargeAmount, false);
+        for (int i = 0; i < player.getInventory().getContainerSize(); ++i) {
+            if (player.getInventory().getItem(i).isEmpty()) {
+                continue;
             }
-        }
-        // Armor Inventory
-        for (ItemStack stack : player.getInventory().armor) {
-            var cap = stack.getCapability(Capabilities.EnergyStorage.ITEM);
+            EnergyHandler cap = ItemAccess.forPlayerSlot(player, i).getCapability(Capabilities.Energy.ITEM);
             if (cap != null) {
-                cap.receiveEnergy(chargeAmount, false);
-            }
-        }
-        // Offhand
-        for (ItemStack stack : player.getInventory().offhand) {
-            var cap = stack.getCapability(Capabilities.EnergyStorage.ITEM);
-            if (cap != null) {
-                cap.receiveEnergy(chargeAmount, false);
+                try (Transaction transaction = Transaction.openRoot()) {
+                    cap.insert(chargeAmount, transaction);
+                    transaction.commit();
+                }
             }
         }
     }
 
     private void chargeRedstoneFlux(ServerPlayer player, final int chargeAmount) {
 
-        // Main Inventory
-        for (ItemStack stack : player.getInventory().items) {
-            var cap = stack.getCapability(CoreCapabilities.RedstoneFluxStorage.ITEM);
-            if (cap != null) {
-                cap.receiveEnergy(chargeAmount, false);
-            }
-        }
-        // Armor Inventory
-        for (ItemStack stack : player.getInventory().armor) {
-            var cap = stack.getCapability(CoreCapabilities.RedstoneFluxStorage.ITEM);
-            if (cap != null) {
-                cap.receiveEnergy(chargeAmount, false);
-            }
-        }
-        // Offhand
-        for (ItemStack stack : player.getInventory().offhand) {
-            var cap = stack.getCapability(CoreCapabilities.RedstoneFluxStorage.ITEM);
+        for (int i = 0; i < player.getInventory().getContainerSize(); ++i) {
+            var cap = player.getInventory().getItem(i).getCapability(CoreCapabilities.RedstoneFluxStorage.ITEM);
             if (cap != null) {
                 cap.receiveEnergy(chargeAmount, false);
             }
@@ -87,48 +65,24 @@ public class EnergyChargeMobEffect extends MobEffectCoFH {
 
     private void drainForgeEnergy(ServerPlayer player, final int drainAmount) {
 
-        // Main Inventory
-        for (ItemStack stack : player.getInventory().items) {
-            var cap = stack.getCapability(Capabilities.EnergyStorage.ITEM);
-            if (cap != null) {
-                cap.extractEnergy(drainAmount, false);
+        for (int i = 0; i < player.getInventory().getContainerSize(); ++i) {
+            if (player.getInventory().getItem(i).isEmpty()) {
+                continue;
             }
-        }
-        // Armor Inventory
-        for (ItemStack stack : player.getInventory().armor) {
-            var cap = stack.getCapability(Capabilities.EnergyStorage.ITEM);
+            EnergyHandler cap = ItemAccess.forPlayerSlot(player, i).getCapability(Capabilities.Energy.ITEM);
             if (cap != null) {
-                cap.extractEnergy(drainAmount, false);
-            }
-        }
-        // Offhand
-        for (ItemStack stack : player.getInventory().offhand) {
-            var cap = stack.getCapability(Capabilities.EnergyStorage.ITEM);
-            if (cap != null) {
-                cap.extractEnergy(drainAmount, false);
+                try (Transaction transaction = Transaction.openRoot()) {
+                    cap.extract(drainAmount, transaction);
+                    transaction.commit();
+                }
             }
         }
     }
 
     private void drainRedstoneFlux(ServerPlayer player, final int drainAmount) {
 
-        // Main Inventory
-        for (ItemStack stack : player.getInventory().items) {
-            var cap = stack.getCapability(CoreCapabilities.RedstoneFluxStorage.ITEM);
-            if (cap != null) {
-                cap.extractEnergy(drainAmount, false);
-            }
-        }
-        // Armor Inventory
-        for (ItemStack stack : player.getInventory().armor) {
-            var cap = stack.getCapability(CoreCapabilities.RedstoneFluxStorage.ITEM);
-            if (cap != null) {
-                cap.extractEnergy(drainAmount, false);
-            }
-        }
-        // Offhand
-        for (ItemStack stack : player.getInventory().offhand) {
-            var cap = stack.getCapability(CoreCapabilities.RedstoneFluxStorage.ITEM);
+        for (int i = 0; i < player.getInventory().getContainerSize(); ++i) {
+            var cap = player.getInventory().getItem(i).getCapability(CoreCapabilities.RedstoneFluxStorage.ITEM);
             if (cap != null) {
                 cap.extractEnergy(drainAmount, false);
             }

@@ -403,3 +403,29 @@ Two runtime traps a compile wouldn't have shown:
 
 1537 → 1364 errors (1411 after the hooks and entities, the rest from getters, stack helpers and
 stragglers). Next is B.4, the transfer API.
+
+---
+
+## B.4 transfer API (2026-09-22)
+
+Applied the B.3 principle again: CoFH's storage stack keeps the legacy `IItemHandler`/
+`IFluidHandler`/`IEnergyStorage` (still present in 26.1.2, deprecated for removal), and the
+capability boundary is bridged both ways. Its handlers also implement `ResourceHandler`/
+`EnergyHandler`, and query sites wrap with NeoForge's `.of()`. This kept ThermalCore and
+ThermalExpansion, whose machines drive the storages directly, out of the diff.
+
+The transaction design took the most care, for two reasons:
+- **Rollback state has to live on the storage, not the handler.** `ManagedItemInv` puts five
+  handlers over the same slots, and journals close in registration order.
+- **Change callbacks have to wait for root commit.** Thermal's `onInventoryChanged` can stop an
+  active machine, so a pipe's *simulated* extraction must not trigger it.
+
+Hence a per-storage `SnapshotJournal`, a per-handler journal of touched indices, and
+`canInsert`/`canExtract` hooks that keep the Managed/IO rules in one place while leaving the legacy
+methods untouched.
+
+Found on the way: `EnergyChargeMobEffect`'s drain passed a negative amount, which *added* energy on
+the legacy API and would throw on the new one. It's fixed by negating at the call site. B.4 has no
+runtime verification yet.
+
+1364 → 1326 errors.

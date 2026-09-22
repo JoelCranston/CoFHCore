@@ -304,3 +304,91 @@ String name)`).
 
 `Registry#get(Identifier)` returns `Optional<Holder.Reference<T>>`; the plain lookup is
 `getValue(Identifier)` (8 sites).
+
+---
+
+## B.4 Transfer API
+
+**Same principle as B.3: bridge at the edge.** NeoForge 26.1.2 keeps `IItemHandler`,
+`IFluidHandler` and `IEnergyStorage`, deprecated for removal, but **capabilities speak only
+`ResourceHandler<ItemResource>` / `ResourceHandler<FluidResource>` / `EnergyHandler`**. NeoForge
+adapts only new → old (`IItemHandler.of`, `IFluidHandler.of`, `IEnergyStorage.of`; the adapters
+are the package-private `*ResourceHandlerAdapter` / `EnergyHandlerAdapter`). There is no old →
+new adapter, and a general one can't honour transactions. So:
+
+- **CoFH internals keep the legacy interfaces.** Machines, ThermalCore and ThermalExpansion keep
+  calling `insertItem`/`fill`/`receiveEnergy` on the storages. That produces removal warnings,
+  not errors.
+- **Exposing (CoFH → other mods):** CoFH's handlers *also* implement the new interfaces. The two
+  sets of method names don't clash (`getSlots`/`insertItem` vs `size`/`insert`).
+- **Consuming (other mods → CoFH):** query sites wrap the capability result with
+  `IItemHandler.of` / `IFluidHandler.of` / `IEnergyStorage.of`.
+
+### Transactions: one journal per storage, callbacks on root commit
+
+`SnapshotJournal<T>`: `createSnapshot()`, `revertToSnapshot(T)`, `onRootCommit(T original)`, and
+`updateSnapshots(TransactionContext)` before the first mutation at each depth. The pattern is
+mutate immediately, revert on abort, the same as `StacksResourceHandler`.
+
+- **The journal lives on the storage** (`ItemStorageCoFH`, `FluidStorageCoFH`, `EnergyStorageCoFH`,
+  exposed as `updateSnapshots(tx)`), not on the handler. `ManagedItemInv` builds five handlers over
+  the same slots, and `Transaction#close` walks `journalsToClose` **in registration order**. Two
+  handler-level journals snapshotting one slot would revert out of order.
+- Snapshots copy the stack (`item.copy()`, `fluid.copy()`), because the legacy paths mutate in
+  place (`setCount`, `grow`). Revert assigns the field directly, bypassing setters and subclass
+  side effects.
+- **Change callbacks wait for root commit.** Each handler keeps a `BitSet` of touched indices in
+  its own journal (reverted on abort) and calls `onInventoryChange`/`onTankChange` from
+  `onRootCommit`. This matters: `MachineBlockEntity#onInventoryChanged` re-validates inputs and
+  can `processOff()`, so a pipe that merely *simulates* pulling an input (nested transaction,
+  aborted) would stop an active machine if the callback fired immediately.
+- New-API calls go to the **storage directly**, not through the handler's legacy
+  `insertItem`/`fill`, which fire their callbacks inline. Handler rules are protected hooks:
+  `canInsert(index)`/`canExtract(index)` on `SimpleItemHandler`/`SimpleFluidHandler`, overridden by
+  `ManagedItemHandler`/`ManagedFluidHandler` (inputs accept, outputs give, `restrict()` blocks input
+  extraction) and by `IOItemHandler` (its allow suppliers). The legacy methods are unchanged.
+- Fluid handlers were never per-tank in the legacy API (`fill` walks tanks, first match wins).
+  The new API is per index, so each index maps to its tank.
+
+### Surface for B.10
+
+- `SimpleItemInv`/`IOItemInv`/`ManagedItemInv#getHandler` now return `SimpleItemHandler`, and
+  `SimpleTankInv`/`ManagedTankInv#getHandler` return `SimpleFluidHandler`. Both still are the
+  legacy types, so existing callers compile, and registration needs no cast.
+- `FluidStorageCoFH` is itself a one-index `ResourceHandler<FluidResource>` (the fluid cell
+  exposes it directly), and `EnergyStorageCoFH` is an `EnergyHandler`.
+- `FluidHandlerRestrictionWrapper`/`EnergyHandlerRestrictionWrapper` take
+  `<T extends IFluidHandler & ResourceHandler<FluidResource>>` (or the energy pair), so the energy
+  and fluid cells' call sites compile unchanged and the wrapper holds a typed view of both.
+- Registration (ThermalCore/TD/TE) becomes
+  `event.registerBlockEntity(Capabilities.Item.BLOCK, type, (be, side) -> …)`, with
+  `Capabilities.Fluid.BLOCK` and `Capabilities.Energy.BLOCK` likewise. `AugmentableBlockEntity`'s
+  cached `IItemHandler itemCap` etc. need their field types narrowed to match.
+
+### Query sites
+
+| 1.21.1 | 26.1.2 |
+|---|---|
+| `Capabilities.ItemHandler/FluidHandler/EnergyStorage.BLOCK` | `Capabilities.Item/Fluid/Energy.BLOCK`, then `IItemHandler.of(h)` / `IFluidHandler.of(h)` / `IEnergyStorage.of(h)` |
+| `stack.getCapability(Capabilities.FluidHandler.ITEM)` | `FluidUtil.getFluidHandler(stack).orElse(null)`. This is the deprecated `neoforge.fluids.FluidUtil`, which returns an `IFluidHandlerItem` whose `getContainer()` still reports a changed item (bucket → water bucket) |
+| `stack.getCapability(Capabilities.EnergyStorage.ITEM)` | `ItemAccess.forStack(stack).getCapability(Capabilities.Energy.ITEM)`. **`forStack` throws on an empty stack**, and it mutates the stack in place but can never change its `Item` |
+| charging a player's items | `ItemAccess.forPlayerSlot(player, i)` over `0 … inventory.getContainerSize()`, then `insert` inside `Transaction.openRoot()` … `commit()` |
+| `FluidStack#isFluidEqual(other)` / `areFluidStackTagsEqual` | `FluidStack.isSameFluidSameComponents(a, b)` (it was already the deprecated alias) |
+| `Slot.slot` | `getContainerSlot()` (the field is private again since B.0) |
+
+Other 26.1 changes met here: `Inventory#items`/`armor`/`offhand` are private, with a single index
+space (0–35 main, 36–39 armor, 40 offhand, 41 body armor). `ChunkAccess#setUnsaved(true)` is
+`markUnsaved()`. **New-API `insert`/`extract` reject negative amounts** (`TransferPreconditions`).
+`EnergyChargeMobEffect` had passed its negative drain amount straight through, which on the
+legacy API *added* energy, so it now negates at the call site.
+
+### Not covered (parity with 1.21.1)
+
+No item capabilities (energy/fluid items, satchels) are registered on 1.21.1 either;
+`EnergyCellBlockItem`'s registration is commented out. `EnergyContainerItemWrapper`,
+`FluidContainerItemWrapper` and `InventoryContainerItemWrapper` still take an `ItemStack`, and
+exposing CoFH items to other mods would need `ItemAccess`-based handlers. That's a feature gap,
+not a regression.
+
+**Owed verification**: nothing in B.4 has run. Once 26.1.2 compiles and boots, move items/fluids/energy
+in and out of a machine with a pipe mod (or a GameTest), including an aborted simulation.

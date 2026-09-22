@@ -2,7 +2,6 @@ package cofh.lib.common.inventory;
 
 import cofh.lib.api.IStorageCallback;
 import cofh.lib.api.StorageGroup;
-import net.neoforged.neoforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -18,7 +17,7 @@ public class IOItemInv extends SimpleItemInv {
 
     protected IOItemHandler outputHandler;
     protected IOItemHandler inputHandler;
-    protected IItemHandler internalHandler;
+    protected SimpleItemHandler internalHandler;
 
     public IOItemInv(@Nullable IStorageCallback callback) {
 
@@ -116,7 +115,7 @@ public class IOItemInv extends SimpleItemInv {
     }
 
     @Override
-    public IItemHandler getHandler(StorageGroup group) {
+    public SimpleItemHandler getHandler(StorageGroup group) {
 
         if (allHandler == null) {
             initHandlers();

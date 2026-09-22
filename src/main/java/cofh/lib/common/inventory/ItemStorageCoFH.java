@@ -7,6 +7,8 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 import javax.annotation.Nonnull;
 import java.util.function.Predicate;
@@ -35,6 +37,21 @@ public class ItemStorageCoFH implements IItemHandler, IItemStackHolder, IResourc
     @Nonnull
     protected ItemStack item = ItemStack.EMPTY;
     protected int capacity;
+
+    protected final SnapshotJournal<ItemStack> journal = new SnapshotJournal<>() {
+
+        @Override
+        protected ItemStack createSnapshot() {
+
+            return item.copy();
+        }
+
+        @Override
+        protected void revertToSnapshot(ItemStack snapshot) {
+
+            item = snapshot;
+        }
+    };
 
     public ItemStorageCoFH() {
 
@@ -121,6 +138,11 @@ public class ItemStorageCoFH implements IItemHandler, IItemStackHolder, IResourc
     public void setItemStack(ItemStack item) {
 
         this.item = item.isEmpty() ? emptyItem.get() : item;
+    }
+
+    public void updateSnapshots(TransactionContext transaction) {
+
+        journal.updateSnapshots(transaction);
     }
 
     // region NBT

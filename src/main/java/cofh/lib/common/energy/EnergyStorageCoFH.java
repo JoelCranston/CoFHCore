@@ -6,6 +6,10 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.transfer.TransferPreconditions;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 import java.util.function.Supplier;
 
@@ -18,7 +22,7 @@ import static cofh.lib.util.helpers.StringHelper.localize;
  *
  * @author King Lemming
  */
-public class EnergyStorageCoFH implements IRedstoneFluxStorage, IResourceStorage {
+public class EnergyStorageCoFH implements IRedstoneFluxStorage, EnergyHandler, IResourceStorage {
 
     protected final int baseCapacity;
     protected final int baseReceive;
@@ -31,6 +35,21 @@ public class EnergyStorageCoFH implements IRedstoneFluxStorage, IResourceStorage
     protected int capacity;
     protected int maxReceive;
     protected int maxExtract;
+
+    protected final SnapshotJournal<Integer> journal = new SnapshotJournal<>() {
+
+        @Override
+        protected Integer createSnapshot() {
+
+            return energy;
+        }
+
+        @Override
+        protected void revertToSnapshot(Integer snapshot) {
+
+            energy = snapshot;
+        }
+    };
 
     public EnergyStorageCoFH(int capacity) {
 
@@ -243,6 +262,36 @@ public class EnergyStorageCoFH implements IRedstoneFluxStorage, IResourceStorage
     public boolean canReceive() {
 
         return maxReceive > 0;
+    }
+    // endregion
+
+    // region EnergyHandler
+    @Override
+    public long getAmountAsLong() {
+
+        return getEnergyStored();
+    }
+
+    @Override
+    public long getCapacityAsLong() {
+
+        return getMaxEnergyStored();
+    }
+
+    @Override
+    public int insert(int amount, TransactionContext transaction) {
+
+        TransferPreconditions.checkNonNegative(amount);
+        journal.updateSnapshots(transaction);
+        return receiveEnergy(amount, false);
+    }
+
+    @Override
+    public int extract(int amount, TransactionContext transaction) {
+
+        TransferPreconditions.checkNonNegative(amount);
+        journal.updateSnapshots(transaction);
+        return extractEnergy(amount, false);
     }
     // endregion
 
