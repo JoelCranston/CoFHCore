@@ -618,3 +618,213 @@ augmentable items' **per-stack** scaling (`getEnchantmentValue` × augment modif
   providers are deleted rather than rewritten on vanilla's `ModelProvider`. **B.10**: the same for
   `TCoreBlockStateProvider`/`TCoreItemModelProvider`, `TDynItemModelProvider`, `TExpBlockStateProvider`/
   `TExpItemModelProvider`.
+
+## B.7 Client
+
+Done as five parallel agents with exclusive file ownership (GUI; models + fluids + client setup;
+entity renderers; particles; render types/shaders/post effects/events). All shapes below were read
+from `minecraft-patched-26.1.2.109-sources.jar` (MC) or `neoforge-26.1.2.109-sources.jar` (NF).
+
+### (a) GUI framework
+
+| 1.21.1 | 26.1.2 |
+|---|---|
+| `GuiGraphics` | `net.minecraft.client.gui.GuiGraphicsExtractor` |
+| `Screen#render(g, mx, my, pt)` | `extractRenderState(g, mx, my, float a)`; never override it on a container screen. `Screen#extractRenderStateWithTooltipAndSubtitles` (final) calls `extractBackground`, `extractRenderState`, `extractDeferredElements` |
+| `AbstractContainerScreen#renderBg(g, pt, mx, my)` | `Screen#extractBackground(g, mx, my, a)` (public; `super` = blur + menu background). Untranslated pose |
+| `renderLabels(g, mx, my)` | `protected extractLabels(g, xm, ym)`, called from `extractContents` with the pose already translated by `(leftPos, topPos)` |
+| `renderTooltip(g, mx, my)` | `protected extractTooltip(g, mx, my)`, called last; override and call `super` to add more |
+| `imageWidth`/`imageHeight` mutable | `protected final`; `AbstractContainerScreen(menu, inv, title, int imageWidth, int imageHeight)` |
+| `hasClickedOutside(mx, my, xo, yo, button)` | `hasClickedOutside(double, double, int, int)`. NeoForge's `mouseClicked` treats a click on a slot as never "outside" |
+| `mouseClicked(double, double, int)` | `mouseClicked(MouseButtonEvent event, boolean doubleClick)`; `MouseButtonEvent(double x, double y, MouseButtonInfo)` record: `button()`, `modifiers()`, `hasShiftDown()` (`InputWithModifiers`) |
+| `mouseReleased(double, double, int)` / `keyPressed(int, int, int)` | `mouseReleased(MouseButtonEvent)` / `keyPressed(KeyEvent(int key, int scancode, int modifiers))`; `mouseScrolled` unchanged |
+| `tick()` | final; `containerTick()` |
+| `Screen.hasShiftDown()`/`hasControlDown()`/`hasAltDown()` (static) | `Minecraft.getInstance().hasShiftDown()` etc. |
+| `g.pose()` → `PoseStack` | `Matrix3x2fStack`: `pushMatrix()`, `translate(x, y)`, `popMatrix()` |
+| `g.drawString(font, …, x, y, color, shadow)` | `g.text(font, String\|FormattedCharSequence\|Component, x, y, argb, dropShadow)`. **`text()` skips the draw when `ARGB.alpha(color) == 0`** — 1.21.1's `Font` promoted alpha-less colours, 26.1 does not. `IGuiAccess.drawString` promotes them (`(c & 0xFC000000) == 0 ? c \| 0xFF000000 : c`). `centeredText` exists without a shadow flag |
+| `g.blit(texture, x, y, u, v, w, h)` | `g.blit(RenderPipelines.GUI_TEXTURED, Identifier, x, y, float u, float v, w, h, texW, texH[, int argb])`; the 13-arg form adds `srcWidth, srcHeight` before `texW, texH`; `g.blit(Identifier, x0, y0, x1, y1, u0, u1, v0, v1)` takes raw UVs, no tint |
+| `g.blit(x, y, z, w, h, sprite)` | `g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, w, h[, argb])` — stretches the whole sprite; the sub-rectangle overload is private, so tiling is 16×16 steps under `enableScissor/disableScissor` |
+| `fill`, `fillGradient` | unchanged; `hLine/vLine` → `horizontalLine/verticalLine`; `renderOutline` → `outline` |
+| `renderItem`/`renderFakeItem` | `g.item(stack, x, y[, seed])` / `g.fakeItem(…)`; `g.itemDecorations(font, stack, x, y[, countText])` |
+| `renderTooltip(font, List, Optional<TooltipComponent>, x, y)` | `setTooltipForNextFrame(...)`, deferred; **the first caller in a frame wins** unless the `replaceExisting` overload is used |
+| `enableScissor/disableScissor` | same names; the rectangle is transformed by the current pose |
+| GL stencil, `RenderSystem.setShader/setShaderColor/setShaderTexture/enableBlend/blendFunc`, `GlStateManager`, `BufferUploader.drawWithShader` | gone. Textures and tints are per-`blit` parameters; clipping is scissor |
+| `getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS)` | `Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.BLOCKS)` (`net.minecraft.data.AtlasIds`); `TextureAtlas#getSprite` returns the missing sprite when absent |
+| `Minecraft#getTimer()` | `getDeltaTracker()` (`getGameTimeDeltaPartialTick(boolean)`, `getGameTimeDeltaTicks()`) |
+| `Minecraft#getItemRenderer()/getBlockRenderer()` | gone, with `ItemRenderer` and `BlockRenderDispatcher` |
+| `options.graphicsMode() >= FABULOUS` | `GraphicsStatus` is gone; `options.improvedTransparency().get()` |
+| `GameProfile#getId()` | `id()` (record) |
+| `MultiPlayerGameMode#handleInventoryButtonClick(containerId, id)` | unchanged |
+| `ARGB` | `opaque(int)`, `scaleRGB(int, float)`, `alpha/red/green/blue`, `color(a, rgb)`, `multiply(a, b)` |
+
+Fluid in a GUI: `Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(fluid.defaultFluidState())`
+→ `FluidModel` (`stillMaterial().sprite()`, `fluidTintSource()` nullable → `colorAsStack(FluidStack)`);
+`RenderHelper.getFluidModel/getFluidTexture/getFluidColor` and `FluidHelper.color` wrap it.
+`RenderHelper.drawFluid(g, x, y, stack, w, h)` / `drawTiledTexture(g, x, y, sprite, w, h[, argb])` take
+**pose-relative** coordinates (elements pass `posX()/posY()`, not `guiLeft() + posX()`).
+
+`IGuiAccess`/`ElementBase` draw helpers take the texture explicitly: `drawTexturedModalRect(g, Identifier,
+x, y, u, v, w, h[, color])` (256×256) and `(…, texW, texH[, color])`, `drawIcon(g, texture[, color], x, y)`,
+`drawSprite(g, sprite[, color], x, y)`, `drawSizedRect/drawColoredModalRect(g, x1, y1, x2, y2, color)`,
+`drawString(g, …, x, y, color, shadow)`. `IGuiAccess.blitOffset()` and `Color.apply(GuiGraphics)` are gone.
+CoFH's own element callbacks (`mouseClicked(double, double, int)`, `mouseReleased`, `keyTyped`,
+`mouseWheel`, `addTooltip`) are **unchanged**.
+
+`RenderHelper.mulColor(BakedQuad, int)` survives, rebuilt on NeoForge's `MutableQuad`
+(`setFrom(quad)`, `setColor(i, ARGB.multiply(quad.bakedColors().color(i), color))`, `toBakedQuad()`).
+Removed with no counterpart: `unpackLight/packLight/vertexColorIndex`, `drawStencil`, the `setShader*`/
+`set*TextureSheet` family, the immediate-mode `drawFluid/drawIcon/drawTiledTexture/
+drawScaledTexturedModalRectFromSprite` overloads, `renderItem()`, `renderBlock()`.
+
+### (b) Models
+
+| 1.21.1 | 26.1.2 |
+|---|---|
+| `IGeometryLoader` + `SimpleUnbakedGeometry` (model JSON `"loader"`) | `UnbakedModelLoader<T extends UnbakedModel>` in `ModelEvent.RegisterLoaders` — yields `UnbakedModel`/`UnbakedGeometry` → `QuadCollection` only; no level/pos/`ModelData` hook |
+| `IDynamicBakedModel#getQuads(state, side, rand, ModelData, RenderType)` | `BlockStateModel#collectParts(BlockAndTintGetter, BlockPos, BlockState, RandomSource, List<BlockStateModelPart>)` (NF `BlockStateModelExtension`); `DelegateBlockStateModel(delegate)`, `DynamicBlockStateModel`; data via `level.getModelData(pos).get(PROPERTY)` |
+| a custom baked model per block | `CustomUnbakedBlockStateModel` (`bake(ModelBaker)`, `resolveDependencies`, `codec()`) registered in **`RegisterBlockStateModels#registerModel(Identifier, MapCodec)`** (NF `BlockStateModelHooks`, fired from `ClientHooks.initClientRegistries`); the blockstate variant JSON gets `"type": "<id>"` (`NeoForgeExtraCodecs.dispatchMapOrElse("type", …)`, fallback `SingleVariant.Unbaked.MAP_CODEC`). Alternative: swap in `ModelEvent.ModifyBakingResult#getBakingResult().blockStateModels()` |
+| `BakedModel` | `BlockStateModelPart#getQuads(@Nullable Direction)`, `useAmbientOcclusion()`, `particleMaterial()` (`Material.Baked`), `materialFlags()`; impl `SimpleModelWrapper(QuadCollection, boolean ao, Material.Baked)`; `QuadCollection.Builder#addCulledFace(dir, quad)/addUnculledFace(quad)/build()` |
+| `BakedQuad(int[] vertices, tint, dir, sprite, shade)` | `net.minecraft.client.resources.model.geometry.BakedQuad` record `(position0..3 Vector3fc, packedUV0..3 long, direction, MaterialInfo, BakedNormals, BakedColors)`; `MaterialInfo(sprite, ChunkSectionLayer layer, RenderType itemRenderType, tintIndex, shade, lightEmission, ambientOcclusion)`; `bakedColors().color(vertex)` (NF `BakedColors.PerQuad/PerVertex`) |
+| `RetexturedBakedQuad` | `new MutableQuad().setFrom(quad).setSpriteAndMoveUv(Material.Baked).toBakedQuad()` (NF `client/model/quad/MutableQuad`); layer from `sprite.transparency()` — **the chunk layer is per quad, from the sprite's alpha** |
+| `ItemOverrides#resolve(...)` | `ItemModel#update(ItemStackRenderState, ItemStack, ItemModelResolver, ItemDisplayContext, ClientLevel, ItemOwner, seed)`; `ItemModel.Unbaked` (`type()`, `bake(BakingContext, Matrix4fc)`); `RegisterItemModelsEvent#register(Identifier, MapCodec)`; vanilla `CuboidItemModelWrapper` is the `minecraft:model` reference |
+| `ItemProperties.register(item, id, fn)` | `RangeSelectItemModelProperty { float get(ItemStack, ClientLevel, ItemOwner, int seed); MapCodec type(); }` in `RegisterRangeSelectItemModelPropertyEvent#register(Identifier, MapCodec)`; the item JSON dispatches with `minecraft:range_dispatch`, `"property": "<id>"`. Posted from `ClientBootstrap.bootstrap()` in the `Minecraft` constructor, after registries |
+| `RegisterColorHandlersEvent.Item` / `ItemColors` | `RegisterColorHandlersEvent.ItemTintSources#register(Identifier, MapCodec<? extends ItemTintSource>)`; `ItemTintSource { int calculate(ItemStack, ClientLevel, LivingEntity); MapCodec type(); }`; listed per item in `items/*.json` `"tints"`; ARGB |
+| `RegisterClientReloadListenersEvent#registerReloadListener(l)` | `AddClientReloadListenersEvent#addListener(Identifier key, PreparableReloadListener)` (+ `addDependency`) |
+| `@EventBusSubscriber(bus = MOD)` | no `bus` parameter; the bus is inferred from the event type |
+
+CoFHCore's shape: `SimpleModel` is the `CustomUnbakedBlockStateModel` wrapper (`SimpleModel.Loader(IFactory).codec()`
+registers it; `IFactory<T extends BlockStateModel>.create(BlockStateModel)`), `SimpleItemModel` its item half
+(`IFactory.create(ItemStack, BlockStateModelPart)` per stack; JSON keys `model`, `transformation`, `tints`),
+`ModelUtils.WrappedBakedModelBuilder` takes/returns `BlockStateModelPart` with `retexture(BakedQuad, sprite)`
+and `getAllQuads(part)`. `ElementsModelWrapped` (vanilla bakes `elements`), `FluidContainerItemModel`
+(NeoForge `neoforge:fluid_container`), `RetexturedBakedQuad` and `BackfaceBakedQuad` (a marker type; `BakedQuad`
+is final) are deleted. Item tints (`cofh_core:colorable`, `{"index": n}`) and item properties (`ProxyClient`
+registers one `RangeSelectItemModelProperty` per id, resolved by `stack.getItem()`) now need the item JSON.
+
+### (c) Entity renderers and models
+
+| 1.21.1 | 26.1.2 |
+|---|---|
+| `EntityRenderer<T>`; `render(T, yaw, pt, PoseStack, MultiBufferSource, light)`; `getTextureLocation(T)` | `EntityRenderer<T extends Entity, S extends EntityRenderState>`: `createRenderState()`; `extractRenderState(T, S, float)` (call super first: `x/y/z`, `ageInTicks`, `eyeHeight`, `lightCoords`, `outlineColor`, name tag, leash, shadow); `submit(S, PoseStack, SubmitNodeCollector, CameraRenderState)` (super draws leash + name tag). No `getTextureLocation`; a per-entity texture goes into the state |
+| `ThrownItemRenderer`: `ItemRenderer.renderStatic(...)` | `ThrownItemRenderState.item` (`ItemStackRenderState`); extract `ctx.getItemModelResolver().updateForNonLiving(state.item, stack, ItemDisplayContext.GROUND, entity)`; submit `state.item.submit(poseStack, collector, light, overlay, outlineColor)` |
+| `NothingRenderer` empty `render` | `NoopRenderer<T> extends EntityRenderer<T, EntityRenderState>` |
+| `TntRenderer`: `getBlockRenderer().renderSingleBlock` | `TntRenderState { fuseRemainingInTicks; BlockModelRenderState blockState }`; `ctx.getBlockModelResolver().update(state.blockState, blockState, TntRenderer.BLOCK_DISPLAY_CONTEXT)`; `TntMinecartRenderer.submitWhiteSolidBlock(BlockModelRenderState, PoseStack, collector, light, boolean white, outlineColor)` or `blockModel.submit(pose, collector, light, overlay, outlineColor)` |
+| `MinecartRenderer<T>` + `renderMinecartContents(...)` | `AbstractMinecartRenderer<T extends AbstractMinecart, S extends MinecartRenderState>(ctx, ModelLayerLocation)`; `submitMinecartContents(S, BlockModelRenderState, PoseStack, collector, light)`; `MinecartTntRenderState.fuseRemainingInTicks` (-1 = unlit) |
+| `BoatRenderer(ctx, chestBoat)`, `ChestBoatModel` | `AbstractBoatRenderer(ctx, Identifier texture)` with `model()` and `submitTypeAdditions(...)`; `BoatRenderer(ctx, layer)` derives its texture from the layer path; `ChestBoatModel` is gone — `BoatModel.createBoatModel()`/`createChestBoatModel()` layer definitions. `BoatRendererCoFH` extends `AbstractBoatRenderer` to keep CoFH's explicit texture |
+| `buffer.getBuffer(RenderType)` + hand-built vertices | `collector.submitCustomGeometry(PoseStack, RenderType, (pose, buffer) -> …)`; `RenderTypes.entityTranslucent(Identifier)` from `net.minecraft.client.renderer.rendertype`; all six attributes per vertex. `submitModel(Model<? super S>, S, PoseStack, Identifier, light, overlay, outlineColor, @Nullable CrumblingOverlay)`, `submitModelPart(ModelPart, PoseStack, RenderType, light, overlay, @Nullable sprite)` |
+| `HumanoidModel<T extends LivingEntity>` | `HumanoidModel<T extends HumanoidRenderState>`; `createMesh(CubeDeformation, yOffset)` kept, but **`hat` is a child of `head`** (the constructor does `head.getChild("hat")`) |
+| `Context.getBlockRenderDispatcher()` | `getItemModelResolver()`, `getBlockModelResolver()`, `bakeLayer()`, `getModelSet()` |
+| `AbstractArrow.inGround` | `net.minecraft.world.entity.projectile.arrow.AbstractArrow`: protected `isInGround()` over public `IN_GROUND` accessor |
+| `EntityRenderersEvent.RegisterRenderers/RegisterLayerDefinitions` | unchanged |
+
+`ITranslucentRenderer` (CoFH's second "after particles" pass) is deleted; the pipeline orders translucent
+render types itself. `ShockwaveRenderer` renders nothing (its `VFXHelper` path needs a rewrite on the collector).
+
+### (d) Block-entity renderers
+
+Not exercised in CoFHCore (no BER here). Shapes are in the port plan and Pyronetics' notes:
+`BlockEntityRenderer<T, S extends BlockEntityRenderState>`, `createRenderState()`, `extractRenderState(be,
+state, partialTick, cameraPos, crumblingOverlay)` (super first), `submit(state, poseStack, collector, camera)`.
+
+### (e) Fluids
+
+| 1.21.1 | 26.1.2 |
+|---|---|
+| `IClientFluidTypeExtensions#getStillTexture/getFlowingTexture/getTintColor` | `RegisterFluidModelsEvent#register(new FluidModel.Unbaked(Material still, Material flow, @Nullable Material overlay, @Nullable FluidTintSource), still, flowing)` (mod bus); `Material` = `net.minecraft.client.resources.model.sprite.Material(Identifier)` (block atlas); `FluidTintSource { int color(FluidState); default colorInWorld(...); default colorAsStack(FluidStack) }`, `FluidTintSources.constant(argb)`. `IClientFluidTypeExtensions` keeps overlay/fog only |
+| `getTintColor(stack)` at a call site | `getModelManager().getFluidStateModelSet().get(fluidState)` → `FluidModel(layer, stillMaterial, flowingMaterial, overlayMaterial, fluidTintSource, customRenderer)` |
+
+The three CoFH fluids lost their `initializeClient` overrides; `CoreClientSetupEvents` registers their models
+(potion with a `FluidTintSource`: white in world, `0xFF000000 | potion colour` as a stack).
+
+### (f) Particles
+
+| 1.21.1 | 26.1.2 |
+|---|---|
+| `Particle#roll/oRoll`, `rCol/gCol/bCol/alpha`, `sprite` | moved to `SingleQuadParticle`. `Particle` keeps `x/y/z`, `xo/yo/zo`, `xd/yd/zd`, `age`, `lifetime`, `random`, `gravity`, `friction`, `onGround`, `hasPhysics`, `bbWidth/bbHeight` |
+| `getRenderType()` → `ParticleRenderType` | `getGroup()` → `ParticleRenderType`, now `record(String name)`: `SINGLE_QUADS`, `ITEM_PICKUP`, `ELDER_GUARDIANS`, `NO_RENDER`; `new ParticleRenderType("modid:name")` keys a custom group |
+| `Particle#render(VertexConsumer, Camera, float)` | gone. Rendering is `ParticleGroup<P>(ParticleEngine)#extractRenderState(Frustum, Camera, float)` → `ParticleGroupRenderState#submit(SubmitNodeCollector, CameraRenderState)`; register with NF `RegisterParticleGroupsEvent#register(ParticleRenderType, Function<ParticleEngine, ParticleGroup<?>>)` (mod bus). `Frustum#isVisible(AABB)`, `Camera#position()` |
+| `getLightColor(float)` | `getLightCoords(float)`; `LevelRenderer.getLightColor(level, pos)` → `getLightCoords(BlockAndLightGetter, pos)`; packing unchanged |
+| `TextureSheetParticle(level, x, y, z[, xd, yd, zd])` + `pickSprite(SpriteSet)` | `SingleQuadParticle(level, x, y, z[, xa, ya, za], TextureAtlasSprite)`; `setSprite(spriteSet.get(random))`; `setSpriteFromAge`, `scale`, `setColor`, `setAlpha` kept; `SpriteSet#get(int, int)`, `get(RandomSource)`, `first()` |
+| sheet `getRenderType()` | `protected Layer getLayer()`; `Layer(boolean translucent, Identifier atlas, RenderPipeline)` record: `OPAQUE`, `TRANSLUCENT`, `*_TERRAIN`, `*_ITEMS`, `bySprite(sprite)` |
+| quad emission | `extract(QuadParticleRenderState, Camera, float)` → `state.add(layer, x, y, z, quat, getQuadSize(pt), u0, u1, v0, v1, argb, light)`; `quadSize` is the half-extent |
+| `ParticleProvider#createParticle(T, level, x, y, z, xd, yd, zd)` | `+ RandomSource` (9th parameter); `X::new` constructor references no longer fit |
+| `RegisterParticleProvidersEvent#registerSpriteSet/registerSpecial` | unchanged |
+| `SubmitNodeCollector#submitCustomGeometry` | **one `VertexConsumer` per `RenderType`** per feature pass, so a callback must not request other types; the pose is camera-relative |
+| `VertexConsumer` abstract set | `addVertex(f, f, f)`, `setColor(i, i, i, i)`, `setColor(int)`, `setUv`, `setUv1`, `setUv2`, `setNormal(f, f, f)`, `setLineWidth` |
+| `ParticleType#streamCodec()` | `StreamCodec<? super RegistryFriendlyByteBuf, T>` |
+
+CoFHCore's shape: `SpriteParticle extends SingleQuadParticle` (`getQuadSize = size * 0.5F`, per-frame hook
+`animate(time, pTicks)`); the `PoseStack` particles keep `CoFHParticle` (`render(PoseStack, MultiBufferSource,
+int packedLight, float time, float pTicks)` — the dead `VertexConsumer` parameter is gone) under
+`CoFHParticle.GROUP` (`cofh_core:custom`), whose `CoFHParticleGroup` frustum-culls, records each particle into
+a per-`RenderType` recorder and submits custom geometry once per type. `DeferredRegisterCoFH#register(name,
+Type::new)` is ambiguous for a type with two constructors (B.2 added the `Function<Identifier, …>` overload);
+use `() -> new Type()`.
+
+### (g) Render types, shaders, post effects, VFX
+
+| 1.21.1 | 26.1.2 |
+|---|---|
+| `ShaderInstance` + `RegisterShadersEvent` + `shaders/core/<x>.json` | `RenderPipeline.builder(RenderPipelines.PARTICLE_SNIPPET).withLocation(id).withVertexShader(id "ns:core/x").withFragmentShader(...).withColorTargetState(new ColorTargetState(BlendFunction)).withDepthStencilState(new DepthStencilState(CompareOp, writeDepth)).build()`, registered in NF `RegisterRenderPipelinesEvent#registerPipeline` (mod bus). Shader id `ns:core/x` → `assets/ns/shaders/core/x.vsh/.fsh` (`#version 330`, `#moj_import <minecraft:fog.glsl>`/`dynamictransforms.glsl`/`projection.glsl`); the JSON program files are gone |
+| `RenderType.create(name, format, mode, size, crumbling, sort, CompositeState)` | `RenderType.create(name, RenderSetup.builder(pipeline).withTexture("Sampler0", id[, sampler]).useLightmap().useOverlay().sortOnUpload().bufferSize(n).setOutputTarget(OutputTarget).setLayeringTransform(LayeringTransform).createRenderSetup())` |
+| `RenderStateShard.TRANSLUCENT_TRANSPARENCY` / `NO_DEPTH_TEST` / `COLOR_WRITE` / `CULL` | `BlendFunction.TRANSLUCENT` (`new BlendFunction(SRC_ALPHA, ONE_MINUS_SRC_ALPHA[, srcA, dstA])`) / `DepthStencilState(CompareOp.ALWAYS_PASS, false)` / `DepthStencilState(LESS_THAN_OR_EQUAL, false)` / `Builder#withCull(boolean)`; `DepthStencilState.DEFAULT` = LEQUAL + write |
+| `RENDERTYPE_TRANSLUCENT_SHADER` on `NEW_ENTITY` | `ENTITY_SNIPPET` (`DefaultVertexFormat.ENTITY`) + `withShaderDefine("NO_CARDINAL_LIGHTING")` + `"NO_OVERLAY"` (entity defines: `EMISSIVE`, `NO_OVERLAY`, `PER_FACE_LIGHTING`, `NO_CARDINAL_LIGHTING`, `ALPHA_CUTOUT`, `APPLY_TEXTURE_MATRIX`); `RENDERTYPE_ENTITY_SOLID_SHADER` → `RenderPipelines.ENTITY_SOLID` (needs `useLightmap().useOverlay()`) |
+| `RENDERTYPE_LINES_SHADER` + `LineStateShard` | `RenderPipelines.LINES_SNIPPET` (`POSITION_COLOR_NORMAL_LINE_WIDTH`, cull off); the width is **per vertex**: `VertexConsumer#setLineWidth(float)`; vanilla's is `mc.gameRenderer.getGameRenderState().windowRenderState.appropriateLineWidth`. `POSITION_COLOR` quads → `DEBUG_FILLED_SNIPPET` |
+| `RenderType.lines()` etc. | `net.minecraft.client.renderer.rendertype.RenderTypes.lines()`, `solidMovingBlock()/cutoutMovingBlock()/translucentMovingBlock()`, `crumbling(id)`; `ModelBakery.DESTROY_TYPES` |
+| `ParticleRenderType` with `begin(Tesselator, TextureManager)` | `SingleQuadParticle.Layer(translucent, atlas, RenderPipeline)` |
+| `OutputStateShard`, `RenderType.MAIN_TARGET` | `OutputTarget(String, Supplier<@Nullable RenderTarget>)`, `OutputTarget.MAIN_TARGET` |
+| `PostChain(TextureManager, ResourceManager, RenderTarget, Identifier)`, `process(float)`, `resize` | `Minecraft#getShaderManager().getPostChain(Identifier, Set<Identifier>)`; `addToFrame(FrameGraphBuilder, w, h, TargetBundle)`, `process(RenderTarget, GraphicsResourceAllocator)`; config `assets/ns/post_effect/<name>.json` (`PostChainConfig`) |
+| `RenderTarget#blitToScreen(w, h, bool)`, `clear(bool)`, `bindWrite` | `blitToScreen()`, `copyDepthFrom(RenderTarget)`; clears via `RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(...)`; no `bindWrite` |
+| `BlockRenderDispatcher#renderBatched`, `getBlockModel(state).getRenderTypes(...)` | `new ModelBlockRenderer(ao, false, mc.getBlockColors()).tesselateBlock((x, y, z, quad, instance) -> …, 0, 0, 0, BlockAndTintGetter, pos, state, mc.getModelManager().getBlockStateModelSet().get(state), state.getSeed(pos))`; layer per quad from `quad.materialInfo().layer()` (`ChunkSectionLayer`) → moving-block render type; `VertexConsumer#putBakedQuad(Pose, BakedQuad, QuadInstance)`. `BlockAndTintGetter` is `net.minecraft.client.renderer.block.BlockAndTintGetter`, implemented by `ClientLevel` but **not** `Level` |
+
+CoFHCore's `RenderTypes` keeps its constant and factory names (`FLAT_CUTOUT`, `FLAT_TRANSLUCENT`, `LINEAR_GLOW`,
+`ROUND_GLOW`, `OVERLAY_LINES`, `OVERLAY_BOX`; `opaque(name, Identifier)`, `translucent*(Identifier)`), and
+`PARTICLE_SHEET_OVER/ADDITIVE_MULTIPLY/ADDITIVE_SCREEN` are now `SingleQuadParticle.Layer`s on the
+`CoreShaders` pipelines (which also add `LINES_NO_DEPTH` and `POSITION_COLOR_NO_DEPTH` for reuse).
+`CoreRenderType.THICK_LINES` is a `float` to pass to `setLineWidth`. **Post effects are stubbed**: `PostEffect`
+never loads a chain, `PostBuffer.getBuffer(...)` draws through to the level buffers, so `CoreShaders.PIXELATE`
+and `CoreClientConfig.stylizedGraphics` do nothing (TODO below). `VFXHelper` refers to vanilla's `RenderTypes`
+by qualified name because it shares a package with CoFH's.
+
+### (h) Client events
+
+| 1.21.1 | 26.1.2 |
+|---|---|
+| `RenderLevelStageEvent` + `getStage()`/`getCamera()`/`getPartialTick()` | subclasses `AfterSky`, `AfterOpaqueBlocks`, `AfterOpaqueFeatures`, `AfterTranslucentFeatures`, `AfterTranslucentBlocks`, `AfterTranslucentParticles`, `AfterWeather`, `AfterLevel`; `getLevelRenderer()`, `getLevelRenderState()` (camera position = `levelRenderState.cameraRenderState.pos`), `getPoseStack()` (nullable on Sky/OpaqueBlocks/Weather/Level), `getModelViewMatrix()`, `getRenderableSections()`; no partial tick — `RenderFrameEvent.Pre#getPartialTick().getGameTimeDeltaPartialTick(false)` |
+| `RenderHighlightEvent.Block` | `ExtractBlockOutlineRenderStateEvent` (extract phase; cancelling removes the outline entirely): `getHitResult()`, `getBlockPos()`, `getBlockState()`, `getCollisionContext()`, `isInTranslucentPass()`, `isHighContrast()`, `getCamera()`, `getLevelRenderer()`, `getLevelRenderState()`, `addCustomRenderer(CustomBlockOutlineRenderer)`. `CustomBlockOutlineRenderer#render(BlockOutlineRenderState, MultiBufferSource.BufferSource, PoseStack, boolean translucentPass, LevelRenderState)` runs **twice per frame** (gate on `translucentPass == state.isTranslucent()`), returns `true` to suppress vanilla's outline, and must only use extracted data. `LevelRenderer#renderHitOutline(PoseStack, VertexConsumer, camX, camY, camZ, BlockOutlineRenderState, int argb, float width)` (AT'd; vanilla colour `ARGB.black(102)`) |
+| crumbling via `renderBreakingTexture` | add `new BlockBreakingRenderState(pos, state, progress 0..9)` to `LevelRenderState#blockBreakingRenderStates` in `ExtractLevelRenderStateEvent` (after vanilla's extraction); vanilla submits them |
+| `RenderLivingEvent.Pre<T, M>` with `getEntity()` | `RenderLivingEvent.Pre<T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>>`; `getRenderState()`, `getRenderer()`, `getPoseStack()`, `getSubmitNodeCollector()`, `getPartialTick()` — **no entity**. Copy what you need in `RegisterRenderStateModifiersEvent#registerEntityModifier(new TypeToken<LivingEntityRenderer<LivingEntity, LivingEntityRenderState, ?>>() {}, (entity, state) -> state.setRenderData(ContextKey, value))` (mod bus) and read `state.getRenderData(key)` |
+| `RenderHandEvent` | unchanged |
+| `MouseHandler#turnPlayer` mixin | NF `CalculatePlayerTurnEvent` (`getMouseSensitivity()`/`setMouseSensitivity`, `getCinematicCameraEnabled()`); the option value is cubed inside `turnPlayer`, so a multiplier on the old cubed value becomes `cbrt` on `(value * 0.6 + 0.2)` |
+| `Camera#getPosition()`; `Entity#getCommandSenderWorld()`; `ItemStack#getDescriptionId()` | `position()`; `level()`; `getItem().getDescriptionId()` |
+
+`CoreClientEvents` lost its delayed-particle pass and the `ITranslucentRenderer` call; sub-hitbox and
+area-effect outlines are `CustomBlockOutlineRenderer`s; area-effect block damage goes through vanilla's
+breaking list; true invisibility reads a render-state flag set by a modifier in `CoreClientSetupEvents`.
+
+## B.8 Resources (CoFHCore's own)
+
+- **`data/<ns>/recipe/`**, singular, since 1.21. `data/cofh_core/recipes/securable.json` was in the plural
+  folder on the `1.21.1` branch too, so the securable recipe had not loaded since that hop.
+- `assets/<ns>/items/<name>.json` for every item (`{"model": {"type": "minecraft:model", "model": "<ns>:item/<name>"}}`);
+  `"render_type"` removed from block models (ignored: the layer is per quad from the sprite's alpha).
+- Fluid textures legitimately carry partial alpha (translucent fluids); the alpha audit is for block art.
+- Enchantment JSON (`holding.json`) and damage-type JSON are unchanged in shape. Curios 15.0.0+26.1.2 resolves,
+  so `data/cofh_core/curios/**` stays. `key.category.<ns>.<name>` lang keys were already in place.
+- Shaders: program/post JSON files deleted; GLSL under `shaders/core/` on the 330 includes.
+- Regenerated data (tags, loot) comes from `runData` (`clientData()`), not by hand.
+
+## B.9 Mixins and ATs
+
+| Mixin | 26.1.2 |
+|---|---|
+| `LivingEntityMixin` `hurt(DamageSource;F)Z` | `hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z`; the level is the first parameter |
+| `LivingEntityMixin` `isDamageSourceBlocked` | gone; blocking runs in `applyItemBlocking(ServerLevel, DamageSource, float)` over the `BLOCKS_ATTACKS` component, which posts NF `LivingShieldBlockEvent` with a settable `setBlocked(boolean)` — `ShieldEvents` now gates on `IShieldItem#canBlock` there. A CoFH shield must carry `BLOCKS_ATTACKS` or the event never fires |
+| `HorseArmorItemMixin`, `ShieldItemMixin` (`getEnchantmentValue`) | deleted; `ModifyDefaultComponentsEvent#modify(item, b -> b.set(DataComponents.ENCHANTABLE, new Enchantable(n)))` (mod bus, `CoreCommonEvents`). Vanilla's `horseArmor(material)` and the shield set no `ENCHANTABLE`; `AnimalArmorItem` no longer exists |
+| `MultiPlayerGameModeMixin` (`sameDestroyTarget`) | deleted: vanilla now checks `destroyingItem.shouldCauseBlockBreakReset(selected)` itself |
+| `MouseHandlerMixin` | deleted: `CalculatePlayerTurnEvent` (B.7h) |
+| `LevelRendererMixin` (`PostChain#process(F)` depth-mask workaround) | deleted: the transparency chain is a frame-graph pass and the injection point is gone. Verify Fabulous graphics with CoFH translucency in the client pass |
+| `GameRendererMixin` (`resize`), `ShearsItemMixin` (`doesSneakBypassUse`), `LivingEntityMixin`'s other targets (`canBeAffected`, `canFreeze`, `updateInvisibilityStatus`) | unchanged targets, confirmed in the jar |
+
+ATs: `validateAccessTransformers` passes; `LevelRenderer#renderHitOutline` and `renderBuffers`,
+`ParticleResources#spriteSets`, `MultiPlayerGameMode#destroyProgress` were already retargeted in B.0.
