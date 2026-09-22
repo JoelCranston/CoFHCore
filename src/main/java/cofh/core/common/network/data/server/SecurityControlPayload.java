@@ -1,5 +1,6 @@
 package cofh.core.common.network.data.server;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -12,7 +13,7 @@ public record SecurityControlPayload(BlockPos pos, byte mode) implements CustomP
 
     public static final Type<SecurityControlPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ID_COFH_CORE, "security_control_packet"));
 
-    public static final StreamCodec<io.netty.buffer.ByteBuf, SecurityControlPayload> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<ByteBuf, SecurityControlPayload> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC, SecurityControlPayload::pos,
             ByteBufCodecs.BYTE, SecurityControlPayload::mode,
             SecurityControlPayload::new

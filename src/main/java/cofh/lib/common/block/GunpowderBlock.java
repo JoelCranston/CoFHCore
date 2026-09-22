@@ -36,8 +36,6 @@ public class GunpowderBlock extends ColoredFallingBlock {
         return false;
     }
 
-    // Item-dependent (checks the held item for flint & steel / fire charge) - moves wholesale to
-    // useItemOn, which now gets the stack directly.
     @Override
     public InteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
 

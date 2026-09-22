@@ -1,5 +1,6 @@
 package cofh.core.common.network.data.client;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -11,7 +12,7 @@ public record PlayerMotionPayload(double motionX, double motionY, double motionZ
 
     public static final Type<PlayerMotionPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ID_COFH_CORE, "player_motion_packet"));
 
-    public static final StreamCodec<io.netty.buffer.ByteBuf, PlayerMotionPayload> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<ByteBuf, PlayerMotionPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.DOUBLE, PlayerMotionPayload::motionX,
             ByteBufCodecs.DOUBLE, PlayerMotionPayload::motionY,
             ByteBufCodecs.DOUBLE, PlayerMotionPayload::motionZ,

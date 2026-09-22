@@ -1,11 +1,9 @@
 package cofh.lib.common.block;
 
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
@@ -46,11 +44,7 @@ public class CakeBlockCoFH extends CakeBlock {
         return tall ? SHAPE_BY_BITE_TALL[state.getValue(BITES)] : SHAPE_BY_BITE[state.getValue(BITES)];
     }
 
-    // Block#use (item-independent - eating a cake slice doesn't care what's in your hand) split
-    // upstream into useWithoutItem/useItemOn; both are overridden here since a held item still
-    // routes through useItemOn first (falling back to useWithoutItem only on
-    // PASS_TO_DEFAULT_BLOCK_INTERACTION), and the old logic's CONSUME-on-empty-hand branch needs
-    // the stack to check emptiness.
+    // A held item routes through useItemOn first, so both are overridden.
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level worldIn, BlockPos pos, Player player, BlockHitResult hit) {
 
@@ -77,8 +71,6 @@ public class CakeBlockCoFH extends CakeBlock {
             return InteractionResult.PASS;
         } else {
             player.awardStat(Stats.EAT_CAKE_SLICE);
-            // FoodProperties is a record now, and its effects are PossibleEffect entries
-            // holding a supplier plus a probability rather than a Pair.
             player.getFoodData().eat(food);
 
             for (FoodProperties.PossibleEffect possible : this.food.effects()) {

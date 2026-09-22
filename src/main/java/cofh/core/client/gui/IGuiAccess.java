@@ -80,10 +80,10 @@ public interface IGuiAccess {
 
         Matrix4f mat = poseStack.last().pose();
         BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        buffer.addVertex(mat, (float) (x1), (float) (y2), (float) (blitOffset()));
-        buffer.addVertex(mat, (float) (x2), (float) (y2), (float) (blitOffset()));
-        buffer.addVertex(mat, (float) (x2), (float) (y1), (float) (blitOffset()));
-        buffer.addVertex(mat, (float) (x1), (float) (y1), (float) (blitOffset()));
+        buffer.addVertex(mat, x1, y2, blitOffset());
+        buffer.addVertex(mat, x2, y2, blitOffset());
+        buffer.addVertex(mat, x2, y1, blitOffset());
+        buffer.addVertex(mat, x1, y1, blitOffset());
         BufferUploader.drawWithShader(buffer.buildOrThrow());
     }
 
@@ -111,10 +111,10 @@ public interface IGuiAccess {
 
         Matrix4f mat = poseStack.last().pose();
         BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        buffer.addVertex(mat, (float) (x1), (float) (y2), (float) (blitOffset()));
-        buffer.addVertex(mat, (float) (x2), (float) (y2), (float) (blitOffset()));
-        buffer.addVertex(mat, (float) (x2), (float) (y1), (float) (blitOffset()));
-        buffer.addVertex(mat, (float) (x1), (float) (y1), (float) (blitOffset()));
+        buffer.addVertex(mat, x1, y2, blitOffset());
+        buffer.addVertex(mat, x2, y2, blitOffset());
+        buffer.addVertex(mat, x2, y1, blitOffset());
+        buffer.addVertex(mat, x1, y1, blitOffset());
         BufferUploader.drawWithShader(buffer.buildOrThrow());
         RenderSystem.disableBlend();
     }
@@ -131,10 +131,10 @@ public interface IGuiAccess {
 
         Matrix4f mat = poseStack.last().pose();
         BufferBuilder bufferbuilder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.addVertex(mat, (float) (x), (float) ((y + height)), (float) (blitOffset())).setUv(((float) textureX * f), ((float) (textureY + height) * f));
-        bufferbuilder.addVertex(mat, (float) ((x + width)), (float) ((y + height)), (float) (blitOffset())).setUv(((float) (textureX + width) * f), ((float) (textureY + height) * f));
-        bufferbuilder.addVertex(mat, (float) ((x + width)), (float) (y), (float) (blitOffset())).setUv(((float) (textureX + width) * f), ((float) textureY * f));
-        bufferbuilder.addVertex(mat, (float) (x), (float) (y), (float) (blitOffset())).setUv(((float) textureX * f), ((float) textureY * f));
+        bufferbuilder.addVertex(mat, x, (y + height), blitOffset()).setUv(((float) textureX * f), (textureY + height * f));
+        bufferbuilder.addVertex(mat, (x + width), (y + height), blitOffset()).setUv((textureX + width * f), (textureY + height * f));
+        bufferbuilder.addVertex(mat, (x + width), y, blitOffset()).setUv((textureX + width * f), ((float) textureY * f));
+        bufferbuilder.addVertex(mat, x, y, blitOffset()).setUv(((float) textureX * f), ((float) textureY * f));
         BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
     }
 
@@ -150,10 +150,10 @@ public interface IGuiAccess {
         BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
 
         Matrix4f mat = poseStack.last().pose();
-        buffer.addVertex(mat, (float) (x), (float) (y + height), (float) (blitOffset())).setUv((u) * texU, (v + height) * texV);
-        buffer.addVertex(mat, (float) (x + width), (float) (y + height), (float) (blitOffset())).setUv((u + width) * texU, (v + height) * texV);
-        buffer.addVertex(mat, (float) (x + width), (float) (y), (float) (blitOffset())).setUv((u + width) * texU, (v) * texV);
-        buffer.addVertex(mat, (float) (x), (float) (y), (float) (blitOffset())).setUv((u) * texU, (v) * texV);
+        buffer.addVertex(mat, x, y + height, blitOffset()).setUv((u) * texU, (v + height) * texV);
+        buffer.addVertex(mat, x + width, y + height, blitOffset()).setUv((u + width) * texU, (v + height) * texV);
+        buffer.addVertex(mat, x + width, y, blitOffset()).setUv((u + width) * texU, (v) * texV);
+        buffer.addVertex(mat, x, y, blitOffset()).setUv((u) * texU, (v) * texV);
         BufferUploader.drawWithShader(buffer.buildOrThrow());
     }
 

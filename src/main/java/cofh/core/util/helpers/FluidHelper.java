@@ -1,6 +1,5 @@
 package cofh.core.util.helpers;
 
-import net.minecraft.network.FriendlyByteBuf;
 import cofh.core.util.ProxyUtils;
 import cofh.lib.api.item.IFluidContainerItem;
 import cofh.lib.common.fluid.FluidStorageCoFH;
@@ -11,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -38,17 +38,15 @@ import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.wrapper.InvWrapper;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static cofh.lib.util.Constants.BOTTLE_VOLUME;
 import static cofh.lib.util.Constants.BUCKET_VOLUME;
-import static cofh.lib.util.constants.NBTTags.TAG_POTION;
 import static net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE;
 import static net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.SIMULATE;
 
@@ -419,9 +417,6 @@ public final class FluidHelper {
     // endregion
 
     // region POTION HELPERS
-    // A potion in a fluid is the POTION_CONTENTS component now, same as on an item stack -
-    // FluidStack is a DataComponentHolder too since 1.20.5. There is no Potions.EMPTY any more;
-    // "no potion" is an empty Optional on the contents.
     public static boolean hasPotionTag(FluidStack stack) {
 
         return !stack.isEmpty() && stack.has(DataComponents.POTION_CONTENTS);
@@ -429,10 +424,7 @@ public final class FluidHelper {
 
     public static PotionContents getPotionContents(FluidStack fluid) {
 
-        if (fluid.getFluid() == net.minecraft.world.level.material.Fluids.WATER) {
-            return new PotionContents(Potions.WATER);
-        }
-        return fluid.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+        return fluid.getFluid() == Fluids.WATER ? new PotionContents(Potions.WATER) : fluid.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
     }
 
     public static Optional<Holder<Potion>> getPotionFromFluid(FluidStack fluid) {
@@ -545,12 +537,7 @@ public final class FluidHelper {
     // endregion
 
     // region NETWORK
-    /**
-     * FriendlyByteBuf's {@code writeFluidStack}/{@code readFluidStack} extensions are gone, and
-     * FluidStack's STREAM_CODEC needs a {@link net.minecraft.network.RegistryFriendlyByteBuf} -
-     * which the tile/menu packet buffers are not (they are plain scratch buffers). These encode
-     * the stack as its optional save tag instead, which preserves its data components.
-     */
+    // For plain buffers; FluidStack.STREAM_CODEC needs a RegistryFriendlyByteBuf.
     public static void writeFluidStack(FriendlyByteBuf buffer, FluidStack stack) {
 
         buffer.writeNbt(stack.isEmpty() ? null : (CompoundTag) stack.save(ProxyUtils.registryAccess()));

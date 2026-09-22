@@ -6,12 +6,12 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Endermite;
 import net.minecraft.world.level.Level;
@@ -48,7 +48,7 @@ public class AreaUtils {
     public static final IEffectApplier IGNITE_ENTITIES = (target, duration, power, source) -> {
 
         if (!target.fireImmune() && !target.isInWater() && target.getRemainingFireTicks() <= 0) {
-            target.igniteForSeconds((float) (duration / 20));
+            target.igniteForSeconds(duration / 20);
         }
         if (target instanceof LivingEntity living) {
             living.removeEffect(CHILLED);
@@ -155,7 +155,7 @@ public class AreaUtils {
             succeeded |= world.setBlockAndUpdate(pos, SNOW.defaultBlockState());
 
             // TODO: This is just a quick testing hack to be used occassionally.
-            //            var duct = BuiltInRegistries.BLOCK.getValue(Identifier.parse("thermal:fluid_duct_windowed"));
+            //            var duct = BuiltInRegistries.BLOCK.getValue(new ResourceLocation("thermal:fluid_duct_windowed"));
             //            succeeded |= world.setBlockAndUpdate(pos, duct.defaultBlockState());
         }
         // FIRE
@@ -252,7 +252,6 @@ public class AreaUtils {
 
         if (target instanceof LivingEntity living) {
             living.addEffect(new MobEffectInstance(MobEffects.GLOWING, duration, power));
-            // MobType is gone; "undead" is the minecraft:undead entity type tag now.
             if (living.getType().is(EntityTypeTags.UNDEAD)) {
                 living.hurt(living.level().damageSources().indirectMagic(source instanceof LivingEntity ? source : null, null), 4.0F);
                 living.igniteForSeconds(duration / 20.0F);
@@ -506,7 +505,7 @@ public class AreaUtils {
         mobs.removeIf(Entity::fireImmune);
         mobs.removeIf(mob -> mob instanceof EnderMan);
         for (LivingEntity mob : mobs) {
-            mob.igniteForSeconds((float) (duration));
+            mob.igniteForSeconds(duration);
         }
     }
 

@@ -1,12 +1,10 @@
 package cofh.lib.common.block;
 
 import cofh.lib.util.helpers.MathHelper;
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
@@ -98,9 +96,7 @@ public class FeastBlock extends DirectionalBlock4Way {
         }
     }
 
-    // Same useWithoutItem/useItemOn split as CakeBlockCoFH - and note this deliberately does NOT
-    // fall back to DirectionalBlock4Way's wrench-rotate useItemOn (it fully shadows it), matching
-    // the old use() override here which unconditionally replaced the parent's use() too.
+    // Deliberately shadows DirectionalBlock4Way's wrench rotation.
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level worldIn, BlockPos pos, Player player, BlockHitResult hit) {
 

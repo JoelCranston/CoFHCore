@@ -129,8 +129,7 @@ public final class AugmentableHelper {
     // endregion
 
     // region INTERNAL HELPERS
-    // Block items keep their augments in the block entity data vanilla restores on placement
-    // (its own component since 1.20.5); everything else keeps them in the mod-attached blob.
+    // Block items keep augments in their block entity data, which is restored on placement.
     private static void writeAugmentsToItem(ItemStack stack, ListTag list) {
 
         if (stack.getItem() instanceof BlockItem || ItemHelper.hasCustomSubTag(stack, TAG_BLOCK_ENTITY)) {

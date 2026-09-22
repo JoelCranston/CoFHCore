@@ -51,12 +51,8 @@ public class ProxyUtils {
     }
 
     /**
-     * The registry lookup needed to (de)serialize an {@link net.minecraft.world.item.ItemStack}
-     * since 1.20.5. Several CoFH APIs persist stacks from an {@code ItemStack}-only context with
-     * no registry access threaded in (augments, container-item inventories); those read/write only
-     * while a world is loaded, so the running server's - or, client-side, the client level's -
-     * registries are the correct source. Falls back to {@link RegistryAccess#EMPTY} rather than
-     * throwing, which loses component data referencing registries but keeps plain stacks working.
+     * Registries for (de)serializing stacks where none are passed in.
+     * Falls back to {@link RegistryAccess#EMPTY}, which drops registry-bound components.
      */
     public static HolderLookup.Provider registryAccess() {
 

@@ -1,5 +1,6 @@
 package cofh.lib.util;
 
+import cofh.lib.common.block.CropType;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
@@ -8,7 +9,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import cofh.lib.common.block.CropType;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 
@@ -25,7 +25,6 @@ public class Constants {
 
     }
 
-    // Was a NeoForge PlantType, a system deleted in 21.0; CoFH crops carry their own type.
     public static final CropType FUNGUS = CropType.NETHER;
 
     public static final VoxelShape FULL_CUBE_COLLISION = Block.box(1.0D, 0.0D, 1.0D, 15.9375D, 15.9375D, 15.9375D);
@@ -73,10 +72,7 @@ public class Constants {
 
     public static final UUID EMPTY_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
-    // 1.21: an AttributeModifier is identified by a Identifier, not a UUID plus a display
-    // name (AttributeInstance#getModifier/removeModifier/hasModifier all take the id). The old
-    // UUIDs are dropped - they identified nothing else - and each modifier gets a stable
-    // cofh_core: id instead. Names kept so dependent repos need no rename.
+    // Attribute modifier ids; the UUID_ names are kept so dependent mods need no rename.
     public static final Identifier UUID_ARMOR_TOUGHNESS = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "armor_toughness");
     public static final Identifier UUID_WEAPON_KNOCKBACK = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "weapon_knockback");
     public static final Identifier UUID_WEAPON_RANGE = Identifier.fromNamespaceAndPath(ID_COFH_CORE, "weapon_range");

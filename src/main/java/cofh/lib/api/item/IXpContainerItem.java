@@ -1,11 +1,11 @@
 package cofh.lib.api.item;
 
+import cofh.core.util.helpers.ItemHelper;
 import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.player.Player;
-import cofh.core.util.helpers.ItemHelper;
 import net.minecraft.world.item.ItemStack;
 
 import static cofh.lib.util.constants.NBTTags.TAG_XP;

@@ -26,8 +26,6 @@ public class BlockStatePropertiesCoFH {
     public static final IntegerProperty BITES_0_3 = IntegerProperty.create("bites", 0, 3);
     public static final IntegerProperty BITES_0_7 = IntegerProperty.create("bites", 0, 7);
 
-    // 26.1.2: DirectionProperty was deleted (1.21.2 "Properties Changes"); vanilla's own
-    // BlockStateProperties.FACING/HORIZONTAL_FACING are plain EnumProperty<Direction> now.
     public static final EnumProperty<Direction> FACING_ALL = EnumProperty.create("facing", Direction.class, Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.UP, Direction.DOWN);
     public static final EnumProperty<Direction> FACING_HORIZONTAL = EnumProperty.create("facing", Direction.class, Direction.Plane.HORIZONTAL);
 

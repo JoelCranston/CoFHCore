@@ -1,17 +1,16 @@
 package cofh.lib.api.item;
 
-import cofh.lib.util.helpers.MathHelper;
 import cofh.core.util.ProxyUtils;
 import cofh.core.util.helpers.ItemHelper;
+import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-
-import java.util.function.Consumer;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 
+import java.util.function.Consumer;
+
 import static cofh.lib.api.ContainerType.FLUID;
-import static cofh.lib.util.constants.NBTTags.TAG_AMOUNT;
 import static cofh.lib.util.constants.NBTTags.TAG_FLUID;
 
 /**
@@ -24,9 +23,8 @@ import static cofh.lib.util.constants.NBTTags.TAG_FLUID;
 public interface IFluidContainerItem extends IContainerItem {
 
     /**
-     * The NBT the tank contents live in, as a copy - 1.20.5+ item data is immutable
-     * {@link net.minecraft.world.item.component.CustomData}, so writes go through
-     * {@link #mutateTankTag}. Implementations keeping fluid elsewhere override both.
+     * Returns a copy of the NBT the tank contents live in; writes go through {@link #mutateTankTag}.
+     * Implementations that keep fluid elsewhere override both.
      */
     default CompoundTag getTankTag(ItemStack container) {
 
@@ -38,10 +36,6 @@ public interface IFluidContainerItem extends IContainerItem {
         ItemHelper.mutateCustomData(container, mutator);
     }
 
-    /**
-     * FluidStack persistence needs a registry lookup since 1.20.5 (components can reference
-     * registries); this API is ItemStack-only, so the running world's registries are used.
-     */
     default FluidStack loadFluid(CompoundTag tankTag) {
 
         return FluidStack.parseOptional(ProxyUtils.registryAccess(), tankTag.getCompound(TAG_FLUID));

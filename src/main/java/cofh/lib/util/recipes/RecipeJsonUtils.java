@@ -6,8 +6,8 @@ import cofh.lib.util.crafting.IngredientWithCount;
 import com.google.gson.*;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.Identifier;
@@ -37,10 +37,6 @@ public abstract class RecipeJsonUtils {
     }
 
     // region HELPERS
-    /**
-     * 1.20.5: {@code Ingredient.fromJson} is gone - an ingredient is read through its Codec like
-     * everything else. This keeps CoFH's lenient, exception-tolerant parsing around it.
-     */
     private static Ingredient ingredientFromJson(JsonElement element) {
 
         return Ingredient.CODEC.parse(JsonOps.INSTANCE, element).getOrThrow(JsonParseException::new);

@@ -16,8 +16,6 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import static cofh.lib.util.Utils.getRegistryName;
-
 public class EffectAddedPacket {
 
     public static final EffectAddedPacket INSTANCE = new EffectAddedPacket();

@@ -1,5 +1,6 @@
 package cofh.core.common.network.data.client;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -11,7 +12,7 @@ public record ModelUpdatePayload(BlockPos pos) implements CustomPacketPayload {
 
     public static final Type<ModelUpdatePayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ID_COFH_CORE, "model_update_packet"));
 
-    public static final StreamCodec<io.netty.buffer.ByteBuf, ModelUpdatePayload> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<ByteBuf, ModelUpdatePayload> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC, ModelUpdatePayload::pos,
             ModelUpdatePayload::new
     );

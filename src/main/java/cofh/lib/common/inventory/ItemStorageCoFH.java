@@ -5,7 +5,6 @@ import cofh.lib.api.IResourceStorage;
 import cofh.lib.api.inventory.IItemStackHolder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -125,11 +124,6 @@ public class ItemStorageCoFH implements IItemHandler, IItemStackHolder, IResourc
     }
 
     // region NBT
-    // ItemStack persistence needs a HolderLookup.Provider now (components can reference
-    // registries) - ItemStack.of(CompoundTag)/ItemStack#save(CompoundTag) are both gone in favor
-    // of parseOptional(Provider, CompoundTag)/save(Provider). Note: nothing calls read/write on
-    // this class currently (item-inventory persistence elsewhere in this codebase goes through a
-    // different path) - kept correct for whenever something is wired up to it.
     public ItemStorageCoFH read(HolderLookup.Provider provider, CompoundTag nbt) {
 
         item = loadItemStack(provider, nbt);
@@ -157,7 +151,7 @@ public class ItemStorageCoFH implements IItemHandler, IItemStackHolder, IResourc
 
     protected final void saveItemStack(HolderLookup.Provider provider, ItemStack stack, CompoundTag nbt) {
 
-        // save(Provider) throws on an empty stack; saveOptional writes an empty compound.
+        // save() throws on an empty stack.
         if (stack.saveOptional(provider) instanceof CompoundTag savedTag) {
             nbt.merge(savedTag);
         }

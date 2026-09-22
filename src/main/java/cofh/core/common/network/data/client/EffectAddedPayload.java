@@ -1,5 +1,6 @@
 package cofh.core.common.network.data.client;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -11,7 +12,7 @@ public record EffectAddedPayload(int entityId, Identifier effect, int duration) 
 
     public static final Type<EffectAddedPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ID_COFH_CORE, "effect_added_packet"));
 
-    public static final StreamCodec<io.netty.buffer.ByteBuf, EffectAddedPayload> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<ByteBuf, EffectAddedPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT, EffectAddedPayload::entityId,
             Identifier.STREAM_CODEC, EffectAddedPayload::effect,
             ByteBufCodecs.INT, EffectAddedPayload::duration,

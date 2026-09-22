@@ -1,5 +1,6 @@
 package cofh.core.common.network.data.server;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -12,7 +13,7 @@ public record SideConfigPayload(BlockPos pos, byte[] sides) implements CustomPac
 
     public static final Type<SideConfigPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ID_COFH_CORE, "side_config_packet"));
 
-    public static final StreamCodec<io.netty.buffer.ByteBuf, SideConfigPayload> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<ByteBuf, SideConfigPayload> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC, SideConfigPayload::pos,
             ByteBufCodecs.byteArray(6), SideConfigPayload::sides,
             SideConfigPayload::new

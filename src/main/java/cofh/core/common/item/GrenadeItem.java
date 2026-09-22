@@ -34,8 +34,6 @@ public class GrenadeItem extends ItemCoFH implements ProjectileItem {
         this.factory = factory;
 
         ProxyUtils.registerItemModelProperty(this, Identifier.parse("thrown"), (stack, world, living, seed) -> (stack.getDamageValue() > 0 ? 1.0F : 0.0F));
-        // Per-item dispense-behavior subclasses are gone; ProjectileItem plus this call is
-        // the modern equivalent (same shape as KnifeItem and ArrowItemCoFH).
         DispenserBlock.registerProjectileBehavior(this);
     }
 
@@ -92,7 +90,6 @@ public class GrenadeItem extends ItemCoFH implements ProjectileItem {
     @Override
     public ProjectileItem.DispenseConfig createDispenseConfig() {
 
-        // Keeps the old behaviour's 3.0F uncertainty without hardcoding the other defaults.
         ProjectileItem.DispenseConfig defaults = ProjectileItem.super.createDispenseConfig();
         return new ProjectileItem.DispenseConfig(defaults.positionFunction(), 3.0F, defaults.power(), defaults.overrideDispenseEvent());
     }

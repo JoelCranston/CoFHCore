@@ -6,7 +6,6 @@ plugins {
     id 'com.matthewprenger.cursegradle' version '1.4.0'
     id 'com.modrinth.minotaur' version "2.+"
 
-    // ModDevGradle (replaced NeoGradle userdev 7.1.38 on 2026-09-21 - see docs/port-plan.md §1.4/§4.3)
     id 'net.neoforged.moddev' version '2.0.147'
 }
 
@@ -20,10 +19,6 @@ java {
 
 sourceSets.main.resources.srcDirs += "src/main/generated"
 
-// javac's default -Xmaxerrs 100 was silently capping error output during this port - the count
-// was hovering around 100 across many rebuilds regardless of how much got fixed, which turned out
-// to be the cap masking a larger real total rather than genuine lack of progress. Raised so
-// `compileJava` always shows the true error count/file list.
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs << "-Xmaxerrs" << "100000"
     options.encoding = 'UTF-8'
@@ -42,8 +37,6 @@ println "Using NeoForge: ${neo_version}, for Minecraft: ${mc_version}"
 neoForge {
     version = project.neo_version
 
-    // Fail the build on access transformer lines whose targets no longer exist - exactly what a
-    // version hop needs to surface. The file at the default path is picked up automatically.
     validateAccessTransformers = true
 
     runs {
@@ -61,7 +54,6 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
         data {
-            // 1.21.4+ has no plain 'data' run type; clientData generates assets and data together.
             clientData()
             programArguments.addAll '--mod', project.mod_id, '--all', '--output',
                     file('src/main/generated/').getAbsolutePath(), '--existing',
@@ -80,7 +72,7 @@ neoForge {
     }
 }
 
-// Runtime-only optional mods (the full JEI jar) go here so they are never published as a dependency.
+// Runtime-only mods, never published as dependencies.
 configurations {
     runtimeClasspath.extendsFrom localRuntime
 }
@@ -158,8 +150,6 @@ def commonManifest = {
     ])
 }
 
-// Was defined but never applied before 2026-09-21; the MixinConfigs attribute is what makes the
-// production jar's mixins load, so it has to be on the real manifest.
 tasks.named('jar', Jar) {
     manifest commonManifest
 }

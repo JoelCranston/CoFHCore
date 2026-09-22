@@ -9,8 +9,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.Optional;
-
 import static cofh.lib.api.control.IReconfigurable.SideConfig.SIDE_NONE;
 
 public class SideConfigPacket {

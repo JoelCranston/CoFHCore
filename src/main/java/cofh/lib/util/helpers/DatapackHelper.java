@@ -17,12 +17,12 @@ public final class DatapackHelper {
 
     // TODO: Fix
 
-    //    public static <T> JsonCodecProvider<T> datapackProvider(String modId, PackOutput output, ExistingFileHelper existingFileHelper, RegistryOps<JsonElement> registryOps, ResourceKey<Registry<T>> registryKey, Map<Identifier, T> entries) {
+    //    public static <T> JsonCodecProvider<T> datapackProvider(String modId, PackOutput output, ExistingFileHelper existingFileHelper, RegistryOps<JsonElement> registryOps, ResourceKey<Registry<T>> registryKey, Map<ResourceLocation, T> entries) {
     //
     //        return forDatapackRegistry(output, existingFileHelper, modId, registryOps, registryKey, entries);
     //    }
     //
-    //    public static <T> JsonCodecProvider<T> datapackProviderBiome(String modId, PackOutput output, ExistingFileHelper existingFileHelper, RegistryOps<JsonElement> registryOps, ResourceKey<Registry<T>> registryKey, Map<Identifier, T> entries) {
+    //    public static <T> JsonCodecProvider<T> datapackProviderBiome(String modId, PackOutput output, ExistingFileHelper existingFileHelper, RegistryOps<JsonElement> registryOps, ResourceKey<Registry<T>> registryKey, Map<ResourceLocation, T> entries) {
     //
     //        return forDatapackRegistry(output, existingFileHelper, modId, registryOps, Biome.DIRECT_CODEC, registryKey, entries);
     //    }
@@ -58,9 +58,9 @@ public final class DatapackHelper {
         return new OrHolderSet<>(List.of(holderSets));
     }
 
-    //    public static <T> JsonCodecProvider<T> forDatapackRegistry(PackOutput output, ExistingFileHelper existingFileHelper, String modid, RegistryOps<JsonElement> registryOps, Codec<T> codec, ResourceKey<Registry<T>> registryKey, Map<Identifier, T> entries) {
+    //    public static <T> JsonCodecProvider<T> forDatapackRegistry(PackOutput output, ExistingFileHelper existingFileHelper, String modid, RegistryOps<JsonElement> registryOps, Codec<T> codec, ResourceKey<Registry<T>> registryKey, Map<ResourceLocation, T> entries) {
     //
-    //        final Identifier registryId = registryKey.location();
+    //        final ResourceLocation registryId = registryKey.location();
     //        // Minecraft datapack registry folders are in data/json-namespace/registry-name/
     //        // Non-vanilla registry folders are data/json-namespace/registry-namespace/registry-name/
     //        final String registryFolder = registryId.getNamespace().equals("minecraft")

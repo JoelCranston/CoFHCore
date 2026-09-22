@@ -5,7 +5,7 @@
 //import net.minecraft.core.RegistryAccess;
 //import net.minecraft.world.InteractionHand;
 //import net.minecraft.world.InteractionResult;
-//import net.minecraft.world.InteractionResult;
+//import net.minecraft.world.InteractionResultHolder;
 //import net.minecraft.world.damagesource.DamageSource;
 //import net.minecraft.world.entity.Entity;
 //import net.minecraft.world.entity.LivingEntity;
@@ -36,7 +36,7 @@
 //        BlockPos blockPos = context.getClickedPos().relative(context.getClickedFace());
 //
 //        Random rand = new Random();
-//        //        if (level.isClientSide()) {
+//        //        if (level.isClientSide) {
 //        //            Vec3 start = pos;
 //        //            Vec3 end = pos.add(20, 20, 0);
 //        //            level.addParticle(new BiColorParticleOptions(CoreParticles.SHARD.get(), 1.0F, 500.0F, 30, 0xFF0000FF, 0x0000FFFF), start.x, start.y, start.z, end.x, end.y, end.z);
@@ -49,22 +49,22 @@
 //        //            //level.addParticle(new ColorParticleOptions(CoreParticles.BLAST.get(), 1.0F, 60.0F, 0, 0xFF0000FF), pos.x, pos.y, pos.z, 0, 0, 0);
 //        //
 //        //        }
-//        //        return InteractionResult.sidedSuccess(level.isClientSide());
+//        //        return InteractionResult.sidedSuccess(level.isClientSide);
 //        return InteractionResult.PASS;
 //    }
 //
 //    @Override
-//    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+//    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
 //
 //        ItemStack stack = player.getItemInHand(hand);
-//        if (level.isClientSide()) {
+//        if (level.isClientSide) {
 //        } else {
 //            System.out.println("biome modifiers");
 //            final RegistryAccess registries = level.getServer().registryAccess();
 //            // The order of holders() is the order modifiers were loaded in.
-//            registries.lookupOrThrow(ForgeRegistries.Keys.BIOME_MODIFIERS)
+//            registries.registryOrThrow(ForgeRegistries.Keys.BIOME_MODIFIERS)
 //                    .holders()
-//                    .forEach(holder -> holder.unwrapKey().ifPresent(key -> System.out.println(key.identifier())));
+//                    .forEach(holder -> holder.unwrapKey().ifPresent(key -> System.out.println(key.location())));
 //        }
 //        //if (level.isClientSide()) {
 //        //    Vec3 pos = player.getEyePosition();
@@ -72,14 +72,14 @@
 //        //    level.addParticle(new BiColorParticleOptions(STREAM.get(), 6, 200, 0, 0xFFFFFFFF, 0xFFFFFFFF), pos.x, pos.y, pos.z, to.x, to.y, to.z);
 //        //}
 //        //player.startUsingItem(hand);
-//        //if (level.isClientSide()) {
+//        //if (level.isClientSide) {
 //        //}
-//        //return InteractionResult.CONSUME;
-//        //return InteractionResult.PASS;
-//        //if (!level.isClientSide()) {
+//        //return InteractionResultHolder.consume(stack);
+//        //return InteractionResultHolder.pass(stack);
+//        //if (!level.isClientSide) {
 //        //    level.addFreshEntity(new Icicle(level, player, player.getEyePosition(), player.getLookAngle().scale(2.0F)));
 //        //}
-//        return InteractionResult.SUCCESS;
+//        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
 //    }
 //
 //    @Override
@@ -99,7 +99,7 @@
 //        if (living instanceof Player player) {
 //            player.getCooldowns().addCooldown(stack.getItem(), 10);
 //        }
-//        if (level.isClientSide()) {
+//        if (level.isClientSide) {
 //
 //        }
 //    }

@@ -8,8 +8,6 @@ import net.minecraft.world.item.Tier;
 
 public class PickaxeItemCoFH extends PickaxeItem implements ICoFHItem {
 
-    // PickaxeItem's ctor dropped the (int, float) attack damage/speed params - combat stats moved
-    // to the ItemAttributeModifiers data component, built via DiggerItem's shared static helper.
     public PickaxeItemCoFH(Tier tier, int attackDamageIn, float attackSpeedIn, Properties builder) {
 
         super(tier, builder.attributes(DiggerItem.createAttributes(tier, attackDamageIn, attackSpeedIn)));

@@ -8,7 +8,6 @@ import net.neoforged.neoforge.common.conditions.ICondition;
 
 public record FlagSetCondition(String flag) implements ICondition {
 
-    // 1.20.5: a condition registers its MapCodec, not a Codec (dispatch codecs need map codecs).
     public static final MapCodec<FlagSetCondition> CODEC = RecordCodecBuilder.mapCodec(
             builder -> builder.group(
                             Codec.STRING.fieldOf("flag").forGetter(FlagSetCondition::flag))

@@ -63,7 +63,6 @@ public class SocialUtils {
 
         private final Map<String, Set<GameProfile>> friendLists = new TreeMap<>();
 
-        // 1.20.5: the load half of a SavedData.Factory takes the registry lookup too.
         public static final Factory<FriendData> FACTORY = new Factory<>(FriendData::new, (nbt, registries) -> new FriendData(nbt));
 
         FriendData() {

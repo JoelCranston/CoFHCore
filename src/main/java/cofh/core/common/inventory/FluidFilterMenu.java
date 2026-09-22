@@ -183,7 +183,6 @@ public class FluidFilterMenu extends ContainerMenuCoFH implements IFilterOptions
         filter.setFluids(filterInventory.getStacks());
 
         if (type == SELF || type == ITEM) {
-            // getOrCreateTag() is gone - see ItemFilterMenu#removed for the same fix.
             CustomData.update(DataComponents.CUSTOM_DATA, filterStack, tag -> filter.write(player.registryAccess(), tag));
             filterableItem.onFilterChanged(filterStack);
         } else {
@@ -212,12 +211,7 @@ public class FluidFilterMenu extends ContainerMenuCoFH implements IFilterOptions
     @Override
     public FriendlyByteBuf getGuiPacket(FriendlyByteBuf buffer) {
 
-        // FriendlyByteBuf#writeFluidStack/readFluidStack were removed upstream - FluidStack's only
-        // serialization now is STREAM_CODEC/OPTIONAL_STREAM_CODEC, both of which need a
-        // RegistryFriendlyByteBuf, and this buffer is a plain scratch FriendlyByteBuf with no
-        // registry context available (see ContainerGuiPacket). Hand-encoding fluid id + amount is
-        // enough here - this only syncs what the client renders in the filter GUI, not anything
-        // that needs to round-trip a fluid's full data components.
+        // The GUI only renders fluid and amount, so components are not sent.
         byte size = (byte) filter.getFluids().size();
         buffer.writeByte(size);
         for (int i = 0; i < size; ++i) {

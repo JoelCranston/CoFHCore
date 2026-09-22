@@ -102,9 +102,6 @@ public class SimpleItemInv extends SimpleItemHandler {
     }
 
     // region NBT
-    // ItemStorageCoFH#read/write need a HolderLookup.Provider now (ItemStack persistence does) -
-    // threaded through every method here even though most of these are currently unused, since
-    // they all bottom out in the same per-slot read/write.
     public SimpleItemInv read(HolderLookup.Provider provider, CompoundTag nbt) {
 
         for (ItemStorageCoFH slot : slots) {

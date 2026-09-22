@@ -1,8 +1,8 @@
 package cofh.lib.util;
 
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -53,12 +53,6 @@ public class DeferredRegisterCoFH<T> {
         return ret;
     }
 
-    /**
-     * 26.1.2: BlockBehaviour.Properties and Item.Properties both require an explicit setId before the
-     * constructor runs, so a registration has to see its own id. NeoForge's DeferredRegister offers a
-     * Function<Identifier, I> overload for exactly this; mirror it here rather than making every caller
-     * reach past the wrapper. See docs/api-notes-26.1.2.md, B.2.
-     */
     public synchronized <I extends T> DeferredHolder<T, I> register(final String name, final Function<Identifier, ? extends I> func) {
 
         DeferredHolder<T, I> ret = wrappedRegister.register(name, func);

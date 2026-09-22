@@ -51,8 +51,6 @@ public class ArcheryBowItemWrapper implements IArcheryBowItem {
     @Override
     public void onArrowLoosed(Player shooter) {
 
-        // hurtAndBreak's 3rd param is the EquipmentSlot to broadcast the break event for directly
-        // now, not a callback - LivingEntity.getSlotForHand(...)/broadcastBreakEvent(...) is gone.
         bowItem.hurtAndBreak(1, shooter, LivingEntity.getSlotForHand(shooter.getUsedItemHand()));
     }
 

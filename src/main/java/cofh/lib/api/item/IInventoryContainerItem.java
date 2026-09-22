@@ -14,9 +14,7 @@ import static cofh.lib.util.constants.NBTTags.TAG_ITEM_INV;
 // TODO: Re-implement if a Holding solution is found.
 public interface IInventoryContainerItem { // extends IContainerItem {
 
-    // getOrCreateTagElement is gone - custom item NBT lives behind DataComponents.CUSTOM_DATA now.
-    // Note this returns a copy (components aren't a live-mutable tree the way the old tag was) -
-    // fine for the one read-only caller this has today.
+    // Returns a copy; writes to it are not saved to the stack.
     default CompoundTag getOrCreateInvTag(ItemStack container) {
 
         return container.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getCompound(TAG_ITEM_INV);

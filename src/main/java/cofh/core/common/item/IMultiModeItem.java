@@ -16,8 +16,7 @@ import static cofh.lib.util.constants.NBTTags.TAG_MODE;
 public interface IMultiModeItem {
 
     /**
-     * The mod-attached blob the mode lives in. 1.20.5+: this is a copy - mutating it does nothing
-     * to the stack, so writes go through {@link #setModeTag}.
+     * Returns a copy; write the mode through {@link #setModeTag}.
      */
     default CompoundTag getModeTag(ItemStack stack) {
 

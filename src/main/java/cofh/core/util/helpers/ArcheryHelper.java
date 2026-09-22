@@ -14,8 +14,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
@@ -125,9 +125,7 @@ public final class ArcheryHelper {
                             arrow.setCritArrow(true);
                         }
                         if (world instanceof ServerLevel serverLevel) {
-                            // Piercing, punch and flame are all weapon enchantment effects now
-                            // (setPierceLevel is private, setKnockback and setSecondsOnFire are
-                            // gone); onProjectileSpawned applies whatever the bow carries.
+                            // Applies the bow's piercing, punch and flame.
                             EnchantmentHelper.onProjectileSpawned(serverLevel, bow, arrow, item -> {});
                         }
                         if (encPower > 0 && arrow.getBaseDamage() > 0) {

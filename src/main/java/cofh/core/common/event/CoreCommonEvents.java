@@ -11,17 +11,16 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.ItemFishedEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerXpEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.BlockGrowFeatureEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -145,9 +144,6 @@ public class CoreCommonEvents {
     // region HELPERS
     private static Map.Entry<EquipmentSlot, ItemStack> getMostDamagedItem(Player player) {
 
-        // Enchantment#getSlotItems is gone with the class-based enchantments; the slots an
-        // enchantment applies to are data now, so walk every equipment slot and let the level
-        // lookup decide.
         Map<EquipmentSlot, ItemStack> map = new EnumMap<>(EquipmentSlot.class);
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             ItemStack slotStack = player.getItemBySlot(slot);

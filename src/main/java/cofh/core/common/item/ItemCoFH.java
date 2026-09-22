@@ -83,8 +83,7 @@ public class ItemCoFH extends Item implements ICoFHItem {
     @Override
     public int getBurnTime(ItemStack itemStack, RecipeType<?> recipeType) {
 
-        // NeoForge throws on a negative burn time now, so -1 ("no opinion") has to defer to the
-        // default, which reads the neoforge:furnace_fuels data map.
+        // Negative burn time throws; defer to the furnace_fuels data map.
         return burnTime < 0 ? super.getBurnTime(itemStack, recipeType) : burnTime;
     }
 

@@ -164,9 +164,6 @@ public class ItemFilterMenu extends ContainerMenuCoFH implements IFilterOptions 
         filter.setItems(filterInventory.getStacks());
 
         if (type == SELF || type == ITEM) {
-            // getOrCreateTag() is gone - custom item NBT is DataComponents.CUSTOM_DATA now;
-            // CustomData.update reads whatever is already there, hands it to the consumer to
-            // mutate in place, and re-sets the component with the result.
             CustomData.update(DataComponents.CUSTOM_DATA, filterStack, tag -> filter.write(player.registryAccess(), tag));
             filterableItem.onFilterChanged(filterStack);
         } else {

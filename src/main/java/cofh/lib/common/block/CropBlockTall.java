@@ -19,7 +19,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.common.CommonHooks;
 
-
 import java.util.List;
 
 import static cofh.lib.util.constants.BlockStatePropertiesCoFH.AGE_0_9;

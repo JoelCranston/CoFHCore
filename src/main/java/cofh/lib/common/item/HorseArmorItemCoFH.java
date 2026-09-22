@@ -6,11 +6,6 @@ import net.minecraft.world.item.AnimalArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
 
-/**
- * HorseArmorItem/DyeableHorseArmorItem were merged upstream into AnimalArmorItem (BodyType.CANINE
- * added for wolf armor); dyeability is now a constructor flag rather than a separate item class,
- * and protection/texture are both driven by the ArmorMaterial rather than passed directly.
- */
 public class HorseArmorItemCoFH extends AnimalArmorItem implements ICoFHItem {
 
     protected int enchantability = 1;

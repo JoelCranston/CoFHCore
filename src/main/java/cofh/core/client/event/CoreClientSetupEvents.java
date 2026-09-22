@@ -19,6 +19,7 @@ import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import static cofh.core.client.CoreKeys.CATEGORY;
 import static cofh.core.client.CoreKeys.MULTIMODE_DECREMENT;
 import static cofh.core.client.CoreKeys.MULTIMODE_INCREMENT;
 import static cofh.core.init.CoreParticles.*;
@@ -36,7 +37,7 @@ public class CoreClientSetupEvents {
     @SubscribeEvent
     public static void registerKeyMappings(final RegisterKeyMappingsEvent event) {
 
-        event.registerCategory(cofh.core.client.CoreKeys.CATEGORY);
+        event.registerCategory(CATEGORY);
         event.register(MULTIMODE_INCREMENT);
         event.register(MULTIMODE_DECREMENT);
     }

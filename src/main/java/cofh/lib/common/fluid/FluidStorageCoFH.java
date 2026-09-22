@@ -5,7 +5,6 @@ import cofh.lib.api.fluid.IFluidStackHolder;
 import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.IFluidTank;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -115,8 +114,6 @@ public class FluidStorageCoFH implements IFluidHandler, IFluidStackHolder, IReso
     }
 
     // region NBT
-    // FluidStack persistence now mirrors ItemStack's - parseOptional(Provider, CompoundTag)/
-    // save(Provider) replace loadFluidStackFromNBT/writeToNBT.
     public FluidStorageCoFH read(HolderLookup.Provider provider, CompoundTag nbt) {
 
         FluidStack fluid = FluidStack.parseOptional(provider, nbt);
@@ -126,7 +123,7 @@ public class FluidStorageCoFH implements IFluidHandler, IFluidStackHolder, IReso
 
     public CompoundTag write(HolderLookup.Provider provider, CompoundTag nbt) {
 
-        // save(Provider) throws on an empty stack; saveOptional writes an empty compound.
+        // save() throws on an empty stack.
         if (fluid.saveOptional(provider) instanceof CompoundTag savedTag) {
             nbt.merge(savedTag);
         }

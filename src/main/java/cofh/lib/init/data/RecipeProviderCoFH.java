@@ -26,7 +26,6 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
 
     protected boolean advancements = false;
 
-    // 1.21: RecipeProvider takes the registry future too (ingredients resolve tags).
     public RecipeProviderCoFH(PackOutput output, CompletableFuture<HolderLookup.Provider> registries, String modid) {
 
         super(output, registries);
@@ -36,7 +35,7 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
     //    @Override
     //    public CompletableFuture<?> run(CachedOutput pOutput) {
     //
-    //        Set<Identifier> set = Sets.newHashSet();
+    //        Set<ResourceLocation> set = Sets.newHashSet();
     //        List<CompletableFuture<?>> list = new ArrayList<>();
     //        this.buildRecipes((recipe) -> {
     //            if (!set.add(recipe.getId())) {
@@ -59,12 +58,12 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
 
     //    @Override
     //    public CompletableFuture<?> run(final CachedOutput pOutput) {
-    //        final Set<Identifier> set = Sets.newHashSet();
+    //        final Set<ResourceLocation> set = Sets.newHashSet();
     //        final List<CompletableFuture<?>> list = new ArrayList<>();
     //        this.buildRecipes(
     //                new RecipeOutput() {
     //                    @Override
-    //                    public void accept(Identifier id, Recipe<?> recipe, @Nullable AdvancementHolder advancement, ICondition... conditions) {
+    //                    public void accept(ResourceLocation id, Recipe<?> recipe, @Nullable AdvancementHolder advancement, ICondition... conditions) {
     //                        if (!set.add(id)) {
     //                            throw new IllegalStateException("Duplicate recipe " + id);
     //                        } else {

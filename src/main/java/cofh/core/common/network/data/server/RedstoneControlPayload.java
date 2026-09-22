@@ -1,5 +1,6 @@
 package cofh.core.common.network.data.server;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -12,7 +13,7 @@ public record RedstoneControlPayload(BlockPos pos, int threshold, byte mode) imp
 
     public static final Type<RedstoneControlPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ID_COFH_CORE, "redstone_control_packet"));
 
-    public static final StreamCodec<io.netty.buffer.ByteBuf, RedstoneControlPayload> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<ByteBuf, RedstoneControlPayload> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC, RedstoneControlPayload::pos,
             ByteBufCodecs.INT, RedstoneControlPayload::threshold,
             ByteBufCodecs.BYTE, RedstoneControlPayload::mode,

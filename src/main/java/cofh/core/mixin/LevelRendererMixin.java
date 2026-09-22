@@ -1,8 +1,8 @@
 package cofh.core.mixin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
@@ -28,7 +28,7 @@ public abstract class LevelRendererMixin {
                     target = "Lnet/minecraft/client/renderer/PostChain;process(F)V"
             )
     )
-    private void disableTransparencyShaderDepth(PoseStack p1, float p2, long p3, boolean p4, Camera p5, GameRenderer p6, LightTexture p7, Matrix4f p8, CallbackInfo ci) {
+    private void disableTransparencyShaderDepth(DeltaTracker deltaTracker, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f frustumMatrix, Matrix4f projectionMatrix, CallbackInfo ci) {
 
         GlStateManager._depthMask(false);
     }

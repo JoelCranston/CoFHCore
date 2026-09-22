@@ -133,8 +133,6 @@ public class RenderTypes {
 
     static ParticleRenderType translucentSheet(Supplier<ShaderInstance> shader) {
 
-        // 1.21: begin() is handed the Tesselator and returns the BufferBuilder for the batch;
-        // end() is gone - ParticleEngine draws the built mesh and restores depthMask/blend itself.
         return new ParticleRenderType() {
 
             @Override

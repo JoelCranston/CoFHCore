@@ -1,29 +1,25 @@
 package cofh.lib.util;
 
+import cofh.core.util.ProxyUtils;
 import cofh.lib.init.tags.ItemTagsCoFH;
 import cofh.lib.util.helpers.MathHelper;
-import cofh.core.util.ProxyUtils;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import com.electronwill.nightconfig.core.io.WritingMode;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -38,15 +34,14 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -57,7 +52,6 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.entity.PartEntity;
@@ -67,16 +61,11 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
-import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static cofh.lib.util.Constants.MAX_CAPACITY;
 import static cofh.lib.util.Constants.NETWORK_UPDATE_DISTANCE;
-import static cofh.lib.util.constants.NBTTags.TAG_ENCHANTMENTS;
-import static net.minecraft.nbt.Tag.TAG_COMPOUND;
-import static net.minecraft.nbt.Tag.TAG_LIST;
-import static net.minecraft.world.item.enchantment.EnchantmentHelper.getEnchantmentLevel;
 
 public class Utils {
 
@@ -450,8 +439,6 @@ public class Utils {
             return false;
         }
         if (entity instanceof ServerPlayer player && !isFakePlayer(entity)) {
-            // ServerCommonPacketListenerImpl#connection is protected now; the public
-            // isAcceptingMessages() is the same "still connected" check.
             if (player.connection.isAcceptingMessages() && !player.isSleeping()) {
                 if (entity.isPassenger()) {
                     entity.stopRiding();
@@ -472,11 +459,7 @@ public class Utils {
     // endregion
 
     // region ENCHANT UTILS
-    // 1.21: enchantments are datapack objects. They cannot be subclassed for behaviour, code
-    // refers to them by ResourceKey (identity, no registry access needed) or Holder, and a level
-    // is read off the stack's ENCHANTMENTS component. The old per-class "enable" flag lives here
-    // now, as a set of ids the config has switched off - the level lookups all consult it, so a
-    // disabled enchantment reads as level 0 everywhere, exactly as before.
+    // Enchantments switched off in config read as level 0 in every lookup below.
     private static final Set<ResourceKey<Enchantment>> DISABLED_ENCHANTMENTS = ConcurrentHashMap.newKeySet();
 
     public static void setEnchantmentEnabled(ResourceKey<Enchantment> enchant, boolean enabled) {
@@ -498,10 +481,6 @@ public class Utils {
         return ResourceKey.create(Registries.ENCHANTMENT, Identifier.fromNamespaceAndPath(modId, enchantId));
     }
 
-    /**
-     * The {@link Holder} for an enchantment key, or null if no loaded datapack defines it -
-     * needed only where vanilla insists on a holder (applying an enchantment, for instance).
-     */
     @Nullable
     public static Holder<Enchantment> getEnchantmentHolder(ResourceKey<Enchantment> enchant) {
 
@@ -564,10 +543,6 @@ public class Utils {
         stack.set(DataComponents.ENCHANTMENTS, mutable.toImmutable());
     }
 
-    /**
-     * The level of an enchantment in an already-read {@link ItemEnchantments}, matched by key -
-     * for callers that hold the component rather than the stack.
-     */
     public static int getLevel(ItemEnchantments enchantments, ResourceKey<Enchantment> enchant) {
 
         if (enchant == null) {

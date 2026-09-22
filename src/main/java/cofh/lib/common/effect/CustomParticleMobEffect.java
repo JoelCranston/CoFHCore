@@ -42,12 +42,7 @@ public abstract class CustomParticleMobEffect extends MobEffectCoFH {
         return true;
     }
 
-    /**
-     * These effects draw their own particles in {@link #applyEffectTick}, so they must not also
-     * feed the vanilla swirl. Until 1.20.6 that was done centrally by cancelling
-     * PotionColorCalculationEvent; that event was removed in NeoForge 21.0, and the per-effect
-     * hook is this one - returning null means "no ambient particle for this effect".
-     */
+    // Particles are spawned in applyEffectTick; null suppresses the vanilla swirl.
     @Override
     public ParticleOptions createParticleOptions(MobEffectInstance instance) {
 

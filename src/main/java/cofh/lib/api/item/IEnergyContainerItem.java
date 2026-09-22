@@ -1,7 +1,7 @@
 package cofh.lib.api.item;
 
-import cofh.lib.util.helpers.MathHelper;
 import cofh.core.util.helpers.ItemHelper;
+import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 
@@ -20,10 +20,8 @@ import static cofh.lib.util.constants.NBTTags.TAG_ENERGY;
 public interface IEnergyContainerItem extends IContainerItem {
 
     /**
-     * The NBT the stored energy lives in, as a copy - 1.20.5+ item data is immutable
-     * {@link net.minecraft.world.item.component.CustomData}, so writes go through
-     * {@link #mutateEnergyTag}. Implementations that keep energy somewhere else (a block item's
-     * block entity data, say) override both.
+     * Returns a copy of the NBT the stored energy lives in; writes go through {@link #mutateEnergyTag}.
+     * Implementations that keep energy elsewhere override both.
      */
     default CompoundTag getEnergyTag(ItemStack container) {
 

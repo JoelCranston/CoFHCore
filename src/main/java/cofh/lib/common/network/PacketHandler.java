@@ -8,7 +8,7 @@
 //import it.unimi.dsi.fastutil.bytes.Byte2ObjectMap;
 //import net.minecraft.network.FriendlyByteBuf;
 //import net.minecraft.network.PacketListener;
-//import net.minecraft.resources.Identifier;
+//import net.minecraft.resources.ResourceLocation;
 //import net.minecraft.server.network.ServerGamePacketListenerImpl;
 //import net.neoforged.api.distmarker.Dist;
 //import net.neoforged.bus.api.SubscribeEvent;
@@ -22,13 +22,13 @@
 //
 //public class PacketHandler {
 //
-//    private final Identifier channelName;
+//    private final ResourceLocation channelName;
 //    private final EventNetworkChannel channel;
 //    private final Byte2ObjectMap<Supplier<IPacket>> packets = new Byte2ObjectArrayMap<>(255);
 //
 //    private final Logger log;
 //
-//    public PacketHandler(Identifier channelName, Logger log) {
+//    public PacketHandler(ResourceLocation channelName, Logger log) {
 //
 //        this.channelName = channelName;
 //        this.log = log;
@@ -37,7 +37,7 @@
 //                .clientAcceptedVersions(e -> true)
 //                .serverAcceptedVersions(e -> true)
 //                .eventNetworkChannel();
-//        if (FMLEnvironment.getDist() == Dist.CLIENT) {
+//        if (FMLEnvironment.dist == Dist.CLIENT) {
 //            channel.registerObject(new ClientHandler());
 //        }
 //        channel.registerObject(new ServerHandler());
@@ -53,7 +53,7 @@
 //        log.debug("Channel {}, Register packet, ID: {}", channelName, id);
 //    }
 //
-//    public Identifier getChannelName() {
+//    public ResourceLocation getChannelName() {
 //
 //        return channelName;
 //    }

@@ -33,9 +33,7 @@ public class CylindricalParticleOptions extends ColorParticleOptions {
         this(type, 1.0F, 1.0F, 1.0F);
     }
 
-    // Named distinctly from ColorParticleOptions#codec/streamCodec - a static method here with the
-    // same erased signature as the superclass's would be a "name clash" (generic return types
-    // aren't substitutable the way an instance-method override would be).
+    // Not codec/streamCodec: a static method of the same erasure would clash with ColorParticleOptions'.
     public static MapCodec<CylindricalParticleOptions> cylindricalCodec(ParticleType<CylindricalParticleOptions> type) {
 
         return RecordCodecBuilder.mapCodec(builder -> builder.group(

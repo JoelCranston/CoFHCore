@@ -34,10 +34,6 @@ public class SoilBlock extends Block {
         return this;
     }
 
-    // NeoForge 21.0 deleted the PlantType/IPlantable system (it was "buggy and quite confusing"):
-    // a soil block is now asked about the plant's own BlockState and answers with a TriState, and
-    // the plant categories are expressed by what the plant block itself will accept. The checks
-    // below reproduce the old categories from the plant state rather than from a PlantType.
     @Override
     public TriState canSustainPlant(BlockState state, BlockGetter world, BlockPos pos, Direction facing, BlockState plant) {
 
@@ -50,16 +46,16 @@ public class SoilBlock extends Block {
         if (plantBlock instanceof AttachedStemBlock) {
             return TriState.TRUE;
         }
-        // CROP: only on tilled soil.
+        // CROP
         if (plantBlock instanceof CropBlock || plantBlock instanceof StemBlock) {
             return tilled ? TriState.TRUE : TriState.FALSE;
         }
-        // CAVE / DESERT / PLAINS / FUNGUS: on untilled soil.
+        // CAVE, DESERT, PLAINS, FUNGUS
         if (plantBlock instanceof BushBlock || plantBlock instanceof MushroomBlock || plantBlock instanceof NetherWartBlock
                 || plantBlock instanceof CactusBlock || plantBlock instanceof DeadBushBlock || plantBlock instanceof FungusBlock) {
             return tilled ? TriState.FALSE : TriState.TRUE;
         }
-        // BEACH: sugar cane and the like, next to water.
+        // BEACH
         if (plantBlock instanceof SugarCaneBlock) {
             for (Direction direction : Direction.Plane.HORIZONTAL) {
                 BlockPos qPos = pos.relative(direction);
@@ -68,6 +64,9 @@ public class SoilBlock extends Block {
                 }
             }
         }
+        //        if (plantable instanceof BushBlock && ((BushBlock) plantable).isValidGround(state, world, pos)) {
+        //            return true;
+        //        }
         return TriState.DEFAULT;
     }
 
@@ -78,9 +77,9 @@ public class SoilBlock extends Block {
     }
 
     @Override
-    public BlockState getToolModifiedState(BlockState state, UseOnContext context, ItemAbility itemAbility, boolean simulate) {
+    public BlockState getToolModifiedState(BlockState state, UseOnContext context, ItemAbility toolAction, boolean simulate) {
 
-        if (ItemAbilities.HOE_TILL == itemAbility && context.getItemInHand().canPerformAction(ItemAbilities.HOE_TILL)) {
+        if (ItemAbilities.HOE_TILL == toolAction && context.getItemInHand().canPerformAction(ItemAbilities.HOE_TILL)) {
             if (context.getLevel().getBlockState(context.getClickedPos().above()).isAir()) {
                 return otherBlock.get().defaultBlockState();
             }

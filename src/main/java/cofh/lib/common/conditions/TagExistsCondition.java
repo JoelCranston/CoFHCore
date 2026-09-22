@@ -1,6 +1,5 @@
 package cofh.lib.common.conditions;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.Registries;
@@ -11,7 +10,6 @@ import net.neoforged.neoforge.common.conditions.ICondition;
 
 public record TagExistsCondition(TagKey<Item> tag) implements ICondition {
 
-    // 1.20.5: a condition registers its MapCodec, not a Codec (dispatch codecs need map codecs).
     public static final MapCodec<TagExistsCondition> CODEC = RecordCodecBuilder.mapCodec(
             builder -> builder.group(
                             Identifier.CODEC.xmap(loc -> TagKey.create(Registries.ITEM, loc), TagKey::location).fieldOf("tag").forGetter(TagExistsCondition::tag))
