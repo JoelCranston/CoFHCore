@@ -158,8 +158,21 @@ public class ConfigManager {
     }
 
     // region CONFIGURATION
+    // Only Loading and Reloading - a value cannot be read during Unloading ("Cannot get config
+    // value before config is loaded"), and the spec is going away anyway.
     @SubscribeEvent
-    public void configRefresh(ModConfigEvent event) {
+    public void configLoad(ModConfigEvent.Loading event) {
+
+        configRefresh(event);
+    }
+
+    @SubscribeEvent
+    public void configReload(ModConfigEvent.Reloading event) {
+
+        configRefresh(event);
+    }
+
+    protected void configRefresh(ModConfigEvent event) {
 
         switch (event.getConfig().getType()) {
             case COMMON -> refreshCommonConfig();
