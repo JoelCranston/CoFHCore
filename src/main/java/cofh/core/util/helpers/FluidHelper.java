@@ -1,5 +1,7 @@
 package cofh.core.util.helpers;
 
+import net.minecraft.network.FriendlyByteBuf;
+import cofh.core.util.ProxyUtils;
 import cofh.lib.api.item.IFluidContainerItem;
 import cofh.lib.common.fluid.FluidStorageCoFH;
 import cofh.lib.init.tags.FluidTagsCoFH;
@@ -539,6 +541,25 @@ public final class FluidHelper {
     public static int viscosity(FluidStack stack) {
 
         return !stack.isEmpty() && stack.getFluid() != null ? stack.getFluid().getFluidType().getViscosity(stack) : 0;
+    }
+    // endregion
+
+    // region NETWORK
+    /**
+     * FriendlyByteBuf's {@code writeFluidStack}/{@code readFluidStack} extensions are gone, and
+     * FluidStack's STREAM_CODEC needs a {@link net.minecraft.network.RegistryFriendlyByteBuf} -
+     * which the tile/menu packet buffers are not (they are plain scratch buffers). These encode
+     * the stack as its optional save tag instead, which preserves its data components.
+     */
+    public static void writeFluidStack(FriendlyByteBuf buffer, FluidStack stack) {
+
+        buffer.writeNbt(stack.isEmpty() ? null : (CompoundTag) stack.save(ProxyUtils.registryAccess()));
+    }
+
+    public static FluidStack readFluidStack(FriendlyByteBuf buffer) {
+
+        CompoundTag tag = buffer.readNbt();
+        return tag == null ? FluidStack.EMPTY : FluidStack.parseOptional(ProxyUtils.registryAccess(), tag);
     }
     // endregion
 

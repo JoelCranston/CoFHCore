@@ -564,7 +564,11 @@ public class Utils {
         stack.set(DataComponents.ENCHANTMENTS, mutable.toImmutable());
     }
 
-    private static int getLevel(ItemEnchantments enchantments, ResourceKey<Enchantment> enchant) {
+    /**
+     * The level of an enchantment in an already-read {@link ItemEnchantments}, matched by key -
+     * for callers that hold the component rather than the stack.
+     */
+    public static int getLevel(ItemEnchantments enchantments, ResourceKey<Enchantment> enchant) {
 
         if (enchant == null) {
             return 0;
