@@ -3,19 +3,20 @@ package cofh.core.common.event;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.LivingAttackEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 
@@ -36,7 +37,7 @@ public class ArmorEvents {
     }
 
     @SubscribeEvent (priority = EventPriority.HIGH)
-    public static void handleLivingAttackEvent(LivingAttackEvent event) {
+    public static void handleLivingAttackEvent(LivingIncomingDamageEvent event) {
 
         if (event.isCanceled()) {
             return;
@@ -91,7 +92,8 @@ public class ArmorEvents {
             if (HAZARD_EFFECTS.contains(effect.getEffect())) {
                 if (entity.getRandom().nextDouble() < hazRes) {
                     attemptDamagePlayerArmor(entity, (1 + effect.getAmplifier()) * effect.getDuration() / 40F);
-                    event.setResult(Event.Result.DENY);
+                    // MobEffectEvent.Applicable has its own Result enum since Event.Result went away.
+                    event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
                 }
             }
         }
@@ -116,17 +118,28 @@ public class ArmorEvents {
     //        }
     //    }
 
-    // region HELPERS
-    private static void attemptDamagePlayerArmor(Entity entity, float amount) {
+    private static final EquipmentSlot[] ARMOR_SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
-        if (entity instanceof Player player) {
-            if (100 * entity.level.random.nextFloat() < amount) {
-                player.getInventory().hurtArmor(entity.level.damageSources().generic(), Math.min(20.0F, amount), Inventory.ALL_ARMOR_SLOTS);
+    // region HELPERS
+    /**
+     * 1.21: Inventory#hurtArmor is gone and LivingEntity#hurtArmor is protected, so the armour is
+     * damaged directly - which is what the vanilla method does internally, a quarter of the
+     * damage (at least 1) to each worn piece.
+     */
+    private static void attemptDamagePlayerArmor(LivingEntity entity, float amount) {
+
+        if (entity instanceof Player player && 100 * entity.level().random.nextFloat() < amount) {
+            int perPiece = Math.max(1, (int) Math.floor(Math.min(20.0F, amount) / 4.0F));
+            for (EquipmentSlot slot : ARMOR_SLOTS) {
+                ItemStack armor = player.getItemBySlot(slot);
+                if (!armor.isEmpty() && armor.isDamageableItem()) {
+                    armor.hurtAndBreak(perPiece, player, slot);
+                }
             }
         }
     }
 
-    private static double getFallResistance(Entity entity) {
+    private static double getFallResistance(LivingEntity entity) {
 
         double ret = 0.0D;
         for (ItemStack armor : entity.getArmorSlots()) {
@@ -135,7 +148,7 @@ public class ArmorEvents {
         return ret;
     }
 
-    private static double getHazardResistance(Entity entity) {
+    private static double getHazardResistance(LivingEntity entity) {
 
         double ret = 0.0D;
         for (ItemStack armor : entity.getArmorSlots()) {
@@ -144,7 +157,7 @@ public class ArmorEvents {
         return ret;
     }
 
-    private static double getStingResistance(Entity entity) {
+    private static double getStingResistance(LivingEntity entity) {
 
         double ret = 0.0D;
         for (ItemStack armor : entity.getArmorSlots()) {
@@ -173,7 +186,7 @@ public class ArmorEvents {
 
     private static final Object2ObjectOpenHashMap<Item, Double> HAZARD_RESISTANCE_MAP = new Object2ObjectOpenHashMap<>();
     private static final Set<String> HAZARD_DAMAGE_TYPES = new ObjectOpenHashSet<>();
-    private static final Set<MobEffect> HAZARD_EFFECTS = new ObjectOpenHashSet<>();
+    private static final Set<Holder<MobEffect>> HAZARD_EFFECTS = new ObjectOpenHashSet<>();
 
     private static final Object2ObjectOpenHashMap<Item, Double> STING_RESISTANCE_MAP = new Object2ObjectOpenHashMap<>();
     private static final Set<String> STING_DAMAGE_TYPES = new ObjectOpenHashSet<>();

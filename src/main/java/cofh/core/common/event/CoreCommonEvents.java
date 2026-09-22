@@ -23,6 +23,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerXpEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.BlockGrowFeatureEvent;
 
+import java.util.EnumMap;
 import java.util.Map;
 
 import static cofh.core.init.CoreMobEffects.SLIMED;
@@ -144,7 +145,16 @@ public class CoreCommonEvents {
     // region HELPERS
     private static Map.Entry<EquipmentSlot, ItemStack> getMostDamagedItem(Player player) {
 
-        Map<EquipmentSlot, ItemStack> map = MENDING.getSlotItems(player);
+        // Enchantment#getSlotItems is gone with the class-based enchantments; the slots an
+        // enchantment applies to are data now, so walk every equipment slot and let the level
+        // lookup decide.
+        Map<EquipmentSlot, ItemStack> map = new EnumMap<>(EquipmentSlot.class);
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            ItemStack slotStack = player.getItemBySlot(slot);
+            if (!slotStack.isEmpty()) {
+                map.put(slot, slotStack);
+            }
+        }
         Map.Entry<EquipmentSlot, ItemStack> mostDamaged = null;
         if (map.isEmpty()) {
             return null;

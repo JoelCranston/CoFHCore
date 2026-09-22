@@ -4,7 +4,7 @@ import cofh.core.common.capability.CoreCapabilities;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.living.ShieldBlockEvent;
+import net.neoforged.neoforge.event.entity.living.LivingShieldBlockEvent;
 
 import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 import static net.neoforged.bus.api.EventPriority.HIGH;
@@ -17,7 +17,7 @@ public class ShieldEvents {
     }
 
     @SubscribeEvent (priority = HIGH)
-    public static void handleShieldBlock(ShieldBlockEvent event) {
+    public static void handleShieldBlock(LivingShieldBlockEvent event) {
 
         if (event.isCanceled()) {
             return;

@@ -6,7 +6,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -91,11 +90,8 @@ public class EffectEvents {
     @SubscribeEvent (priority = EventPriority.LOWEST)
     public static void handlePotionAddEvent(MobEffectEvent.Added event) {
 
-        if (event.getResult() == Event.Result.DENY) {
-            return;
-        }
         MobEffectInstance instance = event.getEffectInstance();
-        if (instance.getEffect() instanceof MobEffectCoFH effect) {
+        if (instance.getEffect().value() instanceof MobEffectCoFH effect) {
             effect.onApply(event.getEntity(), instance);
         }
     }
@@ -103,12 +99,9 @@ public class EffectEvents {
     @SubscribeEvent (priority = EventPriority.LOWEST)
     public static void handlePotionTrackEvent(PlayerEvent.StartTracking event) {
 
-        if (event.getResult() == Event.Result.DENY) {
-            return;
-        }
         if (event.getTarget() instanceof LivingEntity entity) {
             for (MobEffectInstance instance : entity.getActiveEffects()) {
-                if (instance.getEffect() instanceof MobEffectCoFH effect) {
+                if (instance.getEffect().value() instanceof MobEffectCoFH effect) {
                     effect.onTrack(entity, instance, event.getEntity());
                 }
             }
@@ -122,7 +115,7 @@ public class EffectEvents {
             return;
         }
         MobEffectInstance instance = event.getEffectInstance();
-        if (instance != null && instance.getEffect() instanceof MobEffectCoFH effect) {
+        if (instance != null && instance.getEffect().value() instanceof MobEffectCoFH effect) {
             effect.onRemove(event.getEntity(), instance);
         }
     }
@@ -134,7 +127,7 @@ public class EffectEvents {
             return;
         }
         MobEffectInstance instance = event.getEffectInstance();
-        if (instance != null && instance.getEffect() instanceof MobEffectCoFH effect) {
+        if (instance != null && instance.getEffect().value() instanceof MobEffectCoFH effect) {
             effect.onExpire(event.getEntity(), instance);
         }
     }
