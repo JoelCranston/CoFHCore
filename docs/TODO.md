@@ -68,6 +68,19 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
   `clientData()`, which the 26.1.2 `build.gradle` already declares. ThermalExpansion's
   `--existing-mod thermal` must carry over.
 
+## After the port (Joel, 2026-09-22)
+
+1. **Energy and fluid items aren't exposed as capabilities**, and weren't on 1.21.1 either (it's
+   a pre-existing gap, not a regression). Energy cells and fluid cells in item form, the RF potato,
+   the florb, satchels and any other `IEnergyContainerItem`/`IFluidContainerItem`/
+   `IInventoryContainerItem` item register no item capability. So other mods' chargers, tanks and
+   pipes can't see them, and `EnergyCellBlockItem`'s registration is commented out. On 26.1.2 this
+   means `ItemAccess`-based handlers (`ItemAccessEnergyHandler`-style, exchanging the stack through
+   the access) in place of `EnergyContainerItemWrapper`/`FluidContainerItemWrapper`/
+   `InventoryContainerItemWrapper`, registered with
+   `event.registerItem(Capabilities.Energy.ITEM, …)` etc. in ThermalCore. See
+   api-notes-26.1.2.md, B.4 "Not covered".
+
 ## Inbox
 
 - **Behaviour differences the style pass found (2026-09-22), left alone because that pass was
