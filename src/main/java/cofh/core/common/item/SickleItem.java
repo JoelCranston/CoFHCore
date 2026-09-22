@@ -22,7 +22,7 @@ public class SickleItem extends DiggerItem implements ICoFHItem {
 
     public SickleItem(Tier tier, float attackDamageIn, float attackSpeedIn, int radius, int height, Properties builder) {
 
-        super(attackDamageIn, attackSpeedIn, tier, MINEABLE_WITH_SICKLE, builder.durability(tier.getUses() * 4));
+        super(tier, MINEABLE_WITH_SICKLE, builder.durability(tier.getUses() * 4).attributes(DiggerItem.createAttributes(tier, attackDamageIn, attackSpeedIn)));
         this.radius = radius;
         this.height = height;
     }

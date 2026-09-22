@@ -7,6 +7,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
@@ -97,13 +98,15 @@ public class FluidIngredient implements Predicate<FluidStack> {
         }
     }
 
-    public final void toNetwork(FriendlyByteBuf buffer) {
+    // FluidStack's only wire format is its StreamCodec now, which needs the registry-aware
+    // buffer - FriendlyByteBuf's writeFluidStack/readFluidStack extensions are gone.
+    public final void toNetwork(RegistryFriendlyByteBuf buffer) {
 
         this.dissolve();
         buffer.writeVarInt(this.fluidStacks.length);
         buffer.writeVarInt(this.amount);
         for (FluidStack matchingStack : this.fluidStacks) {
-            buffer.writeFluidStack(matchingStack);
+            FluidStack.OPTIONAL_STREAM_CODEC.encode(buffer, matchingStack);
         }
     }
 
@@ -146,11 +149,11 @@ public class FluidIngredient implements Predicate<FluidStack> {
         return fromValues(Stream.of(new FluidIngredient.TagList(tagIn, amount)));
     }
 
-    public static FluidIngredient fromNetwork(FriendlyByteBuf buffer) {
+    public static FluidIngredient fromNetwork(RegistryFriendlyByteBuf buffer) {
 
         int i = buffer.readVarInt();
         int amount = buffer.readVarInt();
-        return fromValues(Stream.generate(() -> new SingleFluidList(buffer.readFluidStack())).limit(i)).setAmount(amount);
+        return fromValues(Stream.generate(() -> new SingleFluidList(FluidStack.OPTIONAL_STREAM_CODEC.decode(buffer))).limit(i)).setAmount(amount);
     }
 
     public static FluidIngredient fromJson(@Nullable JsonElement jsonElement) {

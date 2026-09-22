@@ -2,22 +2,27 @@ package cofh.lib.init.data;
 
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.storage.loot.LootTable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public class LootTableProviderCoFH extends LootTableProvider {
 
-    protected LootTableProviderCoFH(PackOutput output, List<LootTableProvider.SubProviderEntry> subProviders) {
+    // 1.21: required tables are ResourceKeys, and the provider takes the registry future
+    // (loot tables reference registry objects).
+    protected LootTableProviderCoFH(PackOutput output, List<LootTableProvider.SubProviderEntry> subProviders, CompletableFuture<HolderLookup.Provider> registries) {
 
-        this(output, Collections.emptySet(), subProviders);
+        this(output, Collections.emptySet(), subProviders, registries);
     }
 
-    protected LootTableProviderCoFH(PackOutput output, Set<ResourceLocation> requiredTables, List<SubProviderEntry> subProviders) {
+    protected LootTableProviderCoFH(PackOutput output, Set<ResourceKey<LootTable>> requiredTables, List<SubProviderEntry> subProviders, CompletableFuture<HolderLookup.Provider> registries) {
 
-        super(output, requiredTables, subProviders);
+        super(output, requiredTables, subProviders, registries);
     }
 
 }

@@ -3,6 +3,7 @@ package cofh.lib.init.data;
 import cofh.lib.util.DeferredRegisterCoFH;
 import cofh.lib.util.Utils;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
 import net.minecraft.resources.ResourceLocation;
@@ -17,6 +18,7 @@ import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public abstract class RecipeProviderCoFH extends RecipeProvider implements IConditionBuilder {
 
@@ -24,9 +26,10 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
 
     protected boolean advancements = false;
 
-    public RecipeProviderCoFH(PackOutput output, String modid) {
+    // 1.21: RecipeProvider takes the registry future too (ingredients resolve tags).
+    public RecipeProviderCoFH(PackOutput output, CompletableFuture<HolderLookup.Provider> registries, String modid) {
 
-        super(output);
+        super(output, registries);
         this.modid = modid;
     }
 

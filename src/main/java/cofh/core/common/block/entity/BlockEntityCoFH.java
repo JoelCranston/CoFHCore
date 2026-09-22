@@ -9,6 +9,7 @@ import cofh.lib.api.block.entity.IPacketHandlerTile;
 import cofh.lib.api.block.entity.ITileCallback;
 import cofh.lib.util.Utils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -128,9 +129,9 @@ public class BlockEntityCoFH extends BlockEntity implements ITileCallback, IPack
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
 
-        return saveWithoutMetadata();
+        return saveWithoutMetadata(registries);
     }
     // endregion
 

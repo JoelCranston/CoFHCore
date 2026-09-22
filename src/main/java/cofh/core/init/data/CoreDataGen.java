@@ -31,7 +31,7 @@ public class CoreDataGen {
         gen.addProvider(event.includeServer(), new CoreTagsProvider.Fluid(output, event.getLookupProvider(), exFileHelper));
         gen.addProvider(event.includeServer(), new CoreTagsProvider.DamageType(output, event.getLookupProvider(), exFileHelper));
 
-        gen.addProvider(event.includeServer(), new CoreLootTableProvider(output));
+        gen.addProvider(event.includeServer(), new CoreLootTableProvider(output, event.getLookupProvider()));
 
         gen.addProvider(event.includeClient(), new CoreBlockStateProvider(output, exFileHelper));
         gen.addProvider(event.includeClient(), new CoreItemModelProvider(output, exFileHelper));

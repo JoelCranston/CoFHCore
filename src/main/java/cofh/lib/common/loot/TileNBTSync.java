@@ -2,6 +2,7 @@ package cofh.lib.common.loot;
 
 import cofh.lib.api.block.entity.ITileCallback;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -20,7 +21,7 @@ import static net.minecraft.world.level.storage.loot.parameters.LootContextParam
 
 public class TileNBTSync extends LootItemConditionalFunction {
 
-    public static final Codec<TileNBTSync> CODEC = RecordCodecBuilder.create(
+    public static final MapCodec<TileNBTSync> CODEC = RecordCodecBuilder.mapCodec(
             instance -> commonFields(instance)
                     .apply(instance, TileNBTSync::new)
     );
