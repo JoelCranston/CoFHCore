@@ -15,6 +15,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -40,25 +41,28 @@ public class ThrownKnife extends AbstractArrow {
     protected static final EntityDataAccessor<ItemStack> DATA_ITEM_STACK = SynchedEntityData.defineId(ThrownKnife.class, EntityDataSerializers.ITEM_STACK);
     protected int hitTime = -1;
 
+    // 1.21: an arrow also records the weapon it was fired from (used for enchantment effects and
+    // for "shot from a crossbow"); a thrown knife is its own weapon, so it passes the same stack.
     public ThrownKnife(EntityType<? extends AbstractArrow> type, Level worldIn) {
 
-        super(type, worldIn, ItemStack.EMPTY);
+        super(type, worldIn);
     }
 
     public ThrownKnife(EntityType<? extends AbstractArrow> type, Level worldIn, ItemStack stack) {
 
-        super(type, worldIn, stack);
+        super(type, worldIn);
+        this.entityData.set(DATA_ITEM_STACK, stack.copy());
     }
 
     public ThrownKnife(Level world, double x, double y, double z, ItemStack stack) {
 
-        super(THROWN_KNIFE.get(), x, y, z, world, stack);
+        super(THROWN_KNIFE.get(), x, y, z, world, stack, stack);
         this.entityData.set(DATA_ITEM_STACK, stack.copy());
     }
 
     public ThrownKnife(Level world, LivingEntity owner, ItemStack stack) {
 
-        super(THROWN_KNIFE.get(), owner, world, stack);
+        super(THROWN_KNIFE.get(), owner, world, stack, stack);
         this.entityData.set(DATA_ITEM_STACK, stack.copy());
     }
 
@@ -140,11 +144,14 @@ public class ThrownKnife extends AbstractArrow {
             float damage = ((KnifeItem) stack.getItem()).getDamage(stack);
 
             damage = (float) MathHelper.clamp(velocity * damage, 0.0D, damage * 3);
-            if (target instanceof LivingEntity) {
-                damage += EnchantmentHelper.getDamageBonus(stack, target.getType());
+            // 1.21: the weapon's damage enchantments are applied through modifyDamage against the
+            // real DamageSource rather than looked up per mob type.
+            DamageSource damageSource = this.damageSource();
+            if (level() instanceof ServerLevel serverLevel) {
+                damage = EnchantmentHelper.modifyDamage(serverLevel, stack, target, damageSource, damage);
             }
             Entity owner = this.getOwner();
-            if (target.hurt(this.damageSource(), damage)) {
+            if (target.hurt(damageSource, damage)) {
                 if (target.getType() == EntityType.ENDERMAN) {
                     return;
                 }
@@ -153,8 +160,11 @@ public class ThrownKnife extends AbstractArrow {
                 }
                 if (target instanceof LivingEntity livingTarget) {
                     if (owner instanceof LivingEntity) {
-                        EnchantmentHelper.doPostHurtEffects(livingTarget, owner);
-                        EnchantmentHelper.doPostDamageEffects((LivingEntity) owner, livingTarget);
+                        // The two separate post-hurt/post-damage hooks became one, applied with
+                        // the item that caused the damage.
+                        if (level() instanceof ServerLevel serverLevel) {
+                            EnchantmentHelper.doPostAttackEffectsWithItemSource(serverLevel, livingTarget, damageSource, stack);
+                        }
                         if (owner instanceof Player player) {
                             stack.hurtEnemy(livingTarget, player);
                         }
