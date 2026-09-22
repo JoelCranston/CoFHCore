@@ -129,7 +129,7 @@ public abstract class ElementBase {
 
     public final ElementBase setTexture(String texture, int texW, int texH) {
 
-        this.texture = new ResourceLocation(texture);
+        this.texture = ResourceLocation.parse(texture);
         this.texW = texW;
         this.texH = texH;
         return this;

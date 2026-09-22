@@ -22,9 +22,9 @@ import static net.minecraft.client.renderer.RenderStateShard.*;
 
 public class RenderTypes {
 
-    public static final ResourceLocation BLANK_TEXTURE = new ResourceLocation(ID_COFH_CORE, "textures/render/blank.png");
-    public static final ResourceLocation LIN_GLOW_TEXTURE = new ResourceLocation(ID_COFH_CORE, "textures/render/glow_linear.png");
-    public static final ResourceLocation RND_GLOW_TEXTURE = new ResourceLocation(ID_COFH_CORE, "textures/render/glow_round.png");
+    public static final ResourceLocation BLANK_TEXTURE = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "textures/render/blank.png");
+    public static final ResourceLocation LIN_GLOW_TEXTURE = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "textures/render/glow_linear.png");
+    public static final ResourceLocation RND_GLOW_TEXTURE = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "textures/render/glow_round.png");
 
     private static final DepthTestStateShard DISABLE_DEPTH = new DepthTestStateShard("none", 519) {
         @Override

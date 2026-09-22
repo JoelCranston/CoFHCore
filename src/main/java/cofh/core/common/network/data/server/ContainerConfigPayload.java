@@ -10,7 +10,7 @@ import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 
 public record ContainerConfigPayload(FriendlyByteBuf buf) implements CustomPacketPayload {
 
-    public static final Type<ContainerConfigPayload> TYPE = new Type<>(new ResourceLocation(ID_COFH_CORE, "container_config_packet"));
+    public static final Type<ContainerConfigPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "container_config_packet"));
 
     public static final StreamCodec<FriendlyByteBuf, ContainerConfigPayload> STREAM_CODEC = PayloadCodecs.REMAINING_BYTES.map(
             ContainerConfigPayload::new, ContainerConfigPayload::buf

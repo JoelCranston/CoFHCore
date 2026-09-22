@@ -277,12 +277,12 @@ public class ItemTagsCoFH {
     // region HELPERS
     private static TagKey<Item> cofhTag(String name) {
 
-        return ItemTags.create(new ResourceLocation(ID_COFH_CORE, name));
+        return ItemTags.create(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, name));
     }
 
     private static TagKey<Item> commonTag(String name) {
 
-        return ItemTags.create(new ResourceLocation("c", name));
+        return ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", name));
     }
     // endregion
 }

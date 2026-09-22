@@ -39,7 +39,7 @@ public class CoreJeiPlugin implements IModPlugin {
     @Override
     public ResourceLocation getPluginUid() {
 
-        return new ResourceLocation(ID_COFH_CORE, "default");
+        return ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "default");
     }
 
 }

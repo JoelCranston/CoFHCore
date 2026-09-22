@@ -57,8 +57,8 @@ public class HoneyFluid extends FluidCoFH {
             consumer.accept(new IClientFluidTypeExtensions() {
 
                 private static final ResourceLocation
-                        STILL = new ResourceLocation("cofh_core:block/fluids/honey_still"),
-                        FLOW = new ResourceLocation("cofh_core:block/fluids/honey_flow");
+                        STILL = ResourceLocation.parse("cofh_core:block/fluids/honey_still"),
+                        FLOW = ResourceLocation.parse("cofh_core:block/fluids/honey_flow");
 
                 @Override
                 public ResourceLocation getStillTexture() {

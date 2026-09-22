@@ -14,7 +14,7 @@ public class SerializableRecipeType<T extends SerializableRecipe> implements Rec
 
     public SerializableRecipeType(String modId, String name) {
 
-        this.registryName = new ResourceLocation(modId, name);
+        this.registryName = ResourceLocation.fromNamespaceAndPath(modId, name);
     }
 
     @Override

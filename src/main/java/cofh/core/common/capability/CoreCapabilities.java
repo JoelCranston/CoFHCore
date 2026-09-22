@@ -61,7 +61,7 @@ public final class CoreCapabilities {
 
     private static ResourceLocation create(String path) {
 
-        return new ResourceLocation("cofh", path);
+        return ResourceLocation.fromNamespaceAndPath("cofh", path);
     }
 
     private CoreCapabilities() {

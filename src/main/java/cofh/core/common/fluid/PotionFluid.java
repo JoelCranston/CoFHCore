@@ -94,8 +94,8 @@ public class PotionFluid extends FluidCoFH {
             consumer.accept(new IClientFluidTypeExtensions() {
 
                 private static final ResourceLocation
-                        STILL = new ResourceLocation("cofh_core:block/fluids/potion_still"),
-                        FLOW = new ResourceLocation("cofh_core:block/fluids/potion_flow");
+                        STILL = ResourceLocation.parse("cofh_core:block/fluids/potion_still"),
+                        FLOW = ResourceLocation.parse("cofh_core:block/fluids/potion_flow");
 
                 @Override
                 public int getTintColor(FluidStack stack) {

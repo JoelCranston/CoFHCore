@@ -60,8 +60,8 @@ public class ExperienceFluid extends FluidCoFH {
             consumer.accept(new IClientFluidTypeExtensions() {
 
                 private static final ResourceLocation
-                        STILL = new ResourceLocation("cofh_core:block/fluids/experience_still"),
-                        FLOW = new ResourceLocation("cofh_core:block/fluids/experience_flow");
+                        STILL = ResourceLocation.parse("cofh_core:block/fluids/experience_still"),
+                        FLOW = ResourceLocation.parse("cofh_core:block/fluids/experience_flow");
 
                 @Override
                 public ResourceLocation getStillTexture() {

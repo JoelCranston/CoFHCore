@@ -25,13 +25,13 @@ import static cofh.lib.util.helpers.SoundHelper.playClickSound;
 
 public class FluidFilterScreen extends ContainerScreenCoFH<FluidFilterMenu> {
 
-    public static final ResourceLocation TEXTURE = new ResourceLocation(PATH_GUI + "generic.png");
-    public static final ResourceLocation SLOT_OVERLAY = new ResourceLocation(PATH_ELEMENTS + "locked_overlay_slot.png");
+    public static final ResourceLocation TEXTURE = ResourceLocation.parse(PATH_GUI + "generic.png");
+    public static final ResourceLocation SLOT_OVERLAY = ResourceLocation.parse(PATH_ELEMENTS + "locked_overlay_slot.png");
 
-    public static final ResourceLocation TEX_DENY_LIST = new ResourceLocation(PATH_GUI + "filters/filter_deny_list.png");
-    public static final ResourceLocation TEX_ALLOW_LIST = new ResourceLocation(PATH_GUI + "filters/filter_allow_list.png");
-    public static final ResourceLocation TEX_IGNORE_NBT = new ResourceLocation(PATH_GUI + "filters/filter_ignore_nbt.png");
-    public static final ResourceLocation TEX_USE_NBT = new ResourceLocation(PATH_GUI + "filters/filter_use_nbt.png");
+    public static final ResourceLocation TEX_DENY_LIST = ResourceLocation.parse(PATH_GUI + "filters/filter_deny_list.png");
+    public static final ResourceLocation TEX_ALLOW_LIST = ResourceLocation.parse(PATH_GUI + "filters/filter_allow_list.png");
+    public static final ResourceLocation TEX_IGNORE_NBT = ResourceLocation.parse(PATH_GUI + "filters/filter_ignore_nbt.png");
+    public static final ResourceLocation TEX_USE_NBT = ResourceLocation.parse(PATH_GUI + "filters/filter_use_nbt.png");
 
     public FluidFilterScreen(FluidFilterMenu container, Inventory inv, Component titleIn) {
 

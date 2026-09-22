@@ -33,7 +33,7 @@ public class ElementConditionalLayered extends ElementBase {
         if (location == null) {
             return this;
         }
-        return addSprite(new ResourceLocation(location), condition);
+        return addSprite(ResourceLocation.parse(location), condition);
     }
 
     public ElementConditionalLayered addSprite(ResourceLocation location, Supplier<Boolean> condition) {

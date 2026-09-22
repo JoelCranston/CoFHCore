@@ -11,7 +11,7 @@ import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 
 public record TileRedstonePayload(BlockPos pos, FriendlyByteBuf buf) implements CustomPacketPayload {
 
-    public static final Type<TileRedstonePayload> TYPE = new Type<>(new ResourceLocation(ID_COFH_CORE, "tile_redstone_packet"));
+    public static final Type<TileRedstonePayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "tile_redstone_packet"));
 
     public static final StreamCodec<FriendlyByteBuf, TileRedstonePayload> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC, TileRedstonePayload::pos,

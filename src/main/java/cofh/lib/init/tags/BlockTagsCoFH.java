@@ -70,7 +70,7 @@ public class BlockTagsCoFH {
     // region HELPERS
     private static TagKey<Block> commonTag(String name) {
 
-        return BlockTags.create(new ResourceLocation("c", name));
+        return BlockTags.create(ResourceLocation.fromNamespaceAndPath("c", name));
     }
     // endregion
 }

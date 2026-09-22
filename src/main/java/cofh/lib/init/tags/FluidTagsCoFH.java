@@ -26,7 +26,7 @@ public class FluidTagsCoFH {
     // region HELPERS
     private static TagKey<Fluid> commonTag(String name) {
 
-        return FluidTags.create(new ResourceLocation("c", name));
+        return FluidTags.create(ResourceLocation.fromNamespaceAndPath("c", name));
     }
     // endregion
 }

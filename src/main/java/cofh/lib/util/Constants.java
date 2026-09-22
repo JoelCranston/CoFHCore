@@ -100,8 +100,8 @@ public class Constants {
     // endregion
 
     // region FONTS
-    public static final ResourceLocation ENDER_FONT = new ResourceLocation(ID_COFH_CORE, "ender");
-    public static final ResourceLocation INVIS_FONT = new ResourceLocation(ID_COFH_CORE, "invis");
+    public static final ResourceLocation ENDER_FONT = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "ender");
+    public static final ResourceLocation INVIS_FONT = ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "invis");
 
     public static final Style ENDER_STYLE = Style.EMPTY.withFont(ENDER_FONT);
     public static final Style INVIS_STYLE = Style.EMPTY.withFont(INVIS_FONT);

@@ -17,12 +17,12 @@ public record TagExistsCondition(TagKey<Item> tag) implements ICondition {
 
     public TagExistsCondition(String location) {
 
-        this(new ResourceLocation(location));
+        this(ResourceLocation.parse(location));
     }
 
     public TagExistsCondition(String namespace, String path) {
 
-        this(new ResourceLocation(namespace, path));
+        this(ResourceLocation.fromNamespaceAndPath(namespace, path));
     }
 
     public TagExistsCondition(ResourceLocation tag) {

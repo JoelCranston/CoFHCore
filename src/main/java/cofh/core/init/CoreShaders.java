@@ -27,7 +27,7 @@ public class CoreShaders {
     public static ShaderInstance PARTICLE_OVER;
     public static ShaderInstance PARTICLE_ADDITIVE_MULTIPLY;
     public static ShaderInstance PARTICLE_ADDITIVE_SCREEN;
-    public static final PostBuffer PIXELATE = new PostBuffer(new ResourceLocation(ID_COFH_CORE, "pixelate")) {
+    public static final PostBuffer PIXELATE = new PostBuffer(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "pixelate")) {
 
         @Override
         public boolean isEnabled() {
@@ -60,7 +60,7 @@ public class CoreShaders {
 
     private static void registerShader(RegisterShadersEvent event, String id, VertexFormat format, Consumer<ShaderInstance> callback) throws IOException {
 
-        event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(ID_COFH_CORE, id), format), callback);
+        event.registerShader(new ShaderInstance(event.getResourceProvider(), ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, id), format), callback);
     }
 
 }

@@ -22,7 +22,7 @@ import java.util.stream.IntStream;
 
 public class ElectricFieldRenderer extends EntityRenderer<ElectricField> implements ITranslucentRenderer {
 
-    public static final ResourceLocation[] TEXTURES = IntStream.range(0, 5).mapToObj(i -> new ResourceLocation(ModIds.ID_COFH_CORE, "textures/particle/plasma_ball_" + i + ".png")).toArray(ResourceLocation[]::new);
+    public static final ResourceLocation[] TEXTURES = IntStream.range(0, 5).mapToObj(i -> ResourceLocation.fromNamespaceAndPath(ModIds.ID_COFH_CORE, "textures/particle/plasma_ball_" + i + ".png")).toArray(ResourceLocation[]::new);
 
     public ElectricFieldRenderer(EntityRendererProvider.Context ctx) {
 

@@ -9,7 +9,7 @@ import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 
 public record SecurityPayload(byte mode) implements CustomPacketPayload {
 
-    public static final Type<SecurityPayload> TYPE = new Type<>(new ResourceLocation(ID_COFH_CORE, "security_packet"));
+    public static final Type<SecurityPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "security_packet"));
 
     public static final StreamCodec<io.netty.buffer.ByteBuf, SecurityPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.BYTE, SecurityPayload::mode,

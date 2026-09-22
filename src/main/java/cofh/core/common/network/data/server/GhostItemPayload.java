@@ -11,7 +11,7 @@ import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 
 public record GhostItemPayload(int slotNumber, ItemStack stack, int count) implements CustomPacketPayload {
 
-    public static final Type<GhostItemPayload> TYPE = new Type<>(new ResourceLocation(ID_COFH_CORE, "ghost_item_packet"));
+    public static final Type<GhostItemPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "ghost_item_packet"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, GhostItemPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.INT, GhostItemPayload::slotNumber,

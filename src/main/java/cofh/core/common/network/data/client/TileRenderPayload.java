@@ -11,7 +11,7 @@ import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 
 public record TileRenderPayload(BlockPos pos, FriendlyByteBuf buf) implements CustomPacketPayload {
 
-    public static final Type<TileRenderPayload> TYPE = new Type<>(new ResourceLocation(ID_COFH_CORE, "tile_render_packet"));
+    public static final Type<TileRenderPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "tile_render_packet"));
 
     public static final StreamCodec<FriendlyByteBuf, TileRenderPayload> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC, TileRenderPayload::pos,

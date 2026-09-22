@@ -473,7 +473,7 @@ public class Utils {
     // region ENCHANT UTILS
     public static Enchantment getEnchantment(String modId, String enchantId) {
 
-        return BuiltInRegistries.ENCHANTMENT.get(new ResourceLocation(modId, enchantId));
+        return BuiltInRegistries.ENCHANTMENT.get(ResourceLocation.fromNamespaceAndPath(modId, enchantId));
     }
 
     public static int getEnchantedCapacity(int amount, int holding) {

@@ -147,7 +147,7 @@ public abstract class BlockLootSubProviderCoFH extends BlockLootSubProvider {
                                 .copy("Items", "BlockEntityTag.Items", CopyNbtFunction.MergeStrategy.REPLACE)
                                 .copy("Energy", "BlockEntityTag.Energy", CopyNbtFunction.MergeStrategy.REPLACE))
                         .apply(SetContainerContents.setContents(type)
-                                .withEntry(DynamicLoot.dynamicEntry(new ResourceLocation("minecraft", "contents")))));
+                                .withEntry(DynamicLoot.dynamicEntry(ResourceLocation.withDefaultNamespace("contents")))));
         return LootTable.lootTable().withPool(builder);
     }
 

@@ -23,7 +23,7 @@ public class PostEffect implements ResourceManagerReloadListener {
 
     public PostEffect(ResourceLocation shader) {
 
-        this.shader = new ResourceLocation(shader.getNamespace(), "shaders/post/" + shader.getPath() + ".json");
+        this.shader = ResourceLocation.fromNamespaceAndPath(shader.getNamespace(), "shaders/post/" + shader.getPath() + ".json");
         EFFECTS.add(this);
     }
 

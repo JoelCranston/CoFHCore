@@ -18,9 +18,9 @@ public class BoatRendererCoFH extends BoatRenderer {
 
         super(context, chestBoat);
         if (chestBoat) {
-            modelPair = Pair.of(new ResourceLocation(modId, "textures/entity/chest_boat/" + name + ".png"), new ChestBoatModel(context.bakeLayer(modelLayerLoc)));
+            modelPair = Pair.of(ResourceLocation.fromNamespaceAndPath(modId, "textures/entity/chest_boat/" + name + ".png"), new ChestBoatModel(context.bakeLayer(modelLayerLoc)));
         } else {
-            modelPair = Pair.of(new ResourceLocation(modId, "textures/entity/boat/" + name + ".png"), new BoatModel(context.bakeLayer(modelLayerLoc)));
+            modelPair = Pair.of(ResourceLocation.fromNamespaceAndPath(modId, "textures/entity/boat/" + name + ".png"), new BoatModel(context.bakeLayer(modelLayerLoc)));
         }
     }
 

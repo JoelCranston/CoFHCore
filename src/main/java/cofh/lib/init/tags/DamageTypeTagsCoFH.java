@@ -20,12 +20,12 @@ public class DamageTypeTagsCoFH {
     // region HELPERS
     private static TagKey<DamageType> cofhTag(String name) {
 
-        return TagKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(ID_COFH_CORE, name));
+        return TagKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, name));
     }
 
     private static TagKey<DamageType> commonTag(String name) {
 
-        return TagKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("c", name));
+        return TagKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath("c", name));
     }
     // endregion
 }

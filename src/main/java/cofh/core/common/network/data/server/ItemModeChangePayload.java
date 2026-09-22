@@ -9,7 +9,7 @@ import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 
 public record ItemModeChangePayload(boolean decr) implements CustomPacketPayload {
 
-    public static final Type<ItemModeChangePayload> TYPE = new Type<>(new ResourceLocation(ID_COFH_CORE, "item_mode_change_packet"));
+    public static final Type<ItemModeChangePayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "item_mode_change_packet"));
 
     public static final StreamCodec<io.netty.buffer.ByteBuf, ItemModeChangePayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.BOOL, ItemModeChangePayload::decr,

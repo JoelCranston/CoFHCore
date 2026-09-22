@@ -9,7 +9,7 @@ import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 
 public record PlayerMotionPayload(double motionX, double motionY, double motionZ) implements CustomPacketPayload {
 
-    public static final Type<PlayerMotionPayload> TYPE = new Type<>(new ResourceLocation(ID_COFH_CORE, "player_motion_packet"));
+    public static final Type<PlayerMotionPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "player_motion_packet"));
 
     public static final StreamCodec<io.netty.buffer.ByteBuf, PlayerMotionPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.DOUBLE, PlayerMotionPayload::motionX,

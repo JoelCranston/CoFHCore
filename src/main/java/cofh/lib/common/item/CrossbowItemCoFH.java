@@ -45,8 +45,8 @@ public class CrossbowItemCoFH extends CrossbowItem implements ICoFHItem {
     public CrossbowItemCoFH(Properties builder) {
 
         super(builder);
-        ProxyUtils.registerItemModelProperty(this, new ResourceLocation("pull"), this::getPullModelProperty);
-        ProxyUtils.registerItemModelProperty(this, new ResourceLocation("ammo"), this::getAmmoModelProperty);
+        ProxyUtils.registerItemModelProperty(this, ResourceLocation.parse("pull"), this::getPullModelProperty);
+        ProxyUtils.registerItemModelProperty(this, ResourceLocation.parse("ammo"), this::getAmmoModelProperty);
     }
 
     public CrossbowItemCoFH(Tier tier, Properties builder) {

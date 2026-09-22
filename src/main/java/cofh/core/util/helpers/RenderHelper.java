@@ -49,10 +49,10 @@ public final class RenderHelper {
 
     public static final float RENDER_OFFSET = 1.0F / 512.0F;
     public static final int FULL_BRIGHT = 0x00F000F0;
-    public static final ResourceLocation MC_BLOCK_SHEET = new ResourceLocation("textures/atlas/blocks.png");
-    public static final ResourceLocation MC_FONT_DEFAULT = new ResourceLocation("textures/font/ascii.png");
-    public static final ResourceLocation MC_FONT_SGA = new ResourceLocation("textures/font/ascii_sga.png");
-    public static final ResourceLocation MC_ITEM_GLINT = new ResourceLocation("textures/misc/enchanted_item_glint.png");
+    public static final ResourceLocation MC_BLOCK_SHEET = ResourceLocation.parse("textures/atlas/blocks.png");
+    public static final ResourceLocation MC_FONT_DEFAULT = ResourceLocation.parse("textures/font/ascii.png");
+    public static final ResourceLocation MC_FONT_SGA = ResourceLocation.parse("textures/font/ascii_sga.png");
+    public static final ResourceLocation MC_ITEM_GLINT = ResourceLocation.parse("textures/misc/enchanted_item_glint.png");
     public static PoseStack particleStack = new PoseStack();
 
     // region ACCESSORS
@@ -376,7 +376,7 @@ public final class RenderHelper {
     // region TEXTURE GETTERS
     public static TextureAtlasSprite getTexture(String location) {
 
-        return textureMap().getSprite(new ResourceLocation(location));
+        return textureMap().getSprite(ResourceLocation.parse(location));
     }
 
     public static TextureAtlasSprite getTexture(ResourceLocation location) {
@@ -396,7 +396,7 @@ public final class RenderHelper {
 
     public static boolean textureExists(String location) {
 
-        return textureExists(new ResourceLocation(location));
+        return textureExists(ResourceLocation.parse(location));
     }
 
     public static boolean textureExists(ResourceLocation location) {

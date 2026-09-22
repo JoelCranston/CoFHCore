@@ -424,7 +424,7 @@ public abstract class RecipeProviderCoFH extends RecipeProvider implements ICond
 
     protected static TagKey<Item> commonTag(String name) {
 
-        return ItemTags.create(new ResourceLocation("c", name));
+        return ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", name));
     }
 
     protected static String name(Block block) {

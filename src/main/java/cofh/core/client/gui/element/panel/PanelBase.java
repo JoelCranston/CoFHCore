@@ -18,8 +18,8 @@ import static cofh.lib.util.Constants.PATH_ELEMENTS;
 
 public abstract class PanelBase extends ElementBase {
 
-    public static final ResourceLocation DEFAULT_TEXTURE_LEFT = new ResourceLocation(PATH_ELEMENTS + "panel_left.png");
-    public static final ResourceLocation DEFAULT_TEXTURE_RIGHT = new ResourceLocation(PATH_ELEMENTS + "panel_right.png");
+    public static final ResourceLocation DEFAULT_TEXTURE_LEFT = ResourceLocation.parse(PATH_ELEMENTS + "panel_left.png");
+    public static final ResourceLocation DEFAULT_TEXTURE_RIGHT = ResourceLocation.parse(PATH_ELEMENTS + "panel_right.png");
 
     public static final int LEFT = 0;
     public static final int RIGHT = 1;

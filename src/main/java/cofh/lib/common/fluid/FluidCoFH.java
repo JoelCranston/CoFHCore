@@ -18,8 +18,8 @@ import java.util.function.Supplier;
  */
 public abstract class FluidCoFH {
 
-    public static final ResourceLocation WATER_OVERLAY = new ResourceLocation("block/water_overlay");
-    public static final ResourceLocation UNDERWATER_LOCATION = new ResourceLocation("textures/misc/underwater.png");
+    public static final ResourceLocation WATER_OVERLAY = ResourceLocation.parse("block/water_overlay");
+    public static final ResourceLocation UNDERWATER_LOCATION = ResourceLocation.parse("textures/misc/underwater.png");
 
     protected DeferredHolder<Fluid, BaseFlowingFluid> stillFluid;
     protected DeferredHolder<Fluid, BaseFlowingFluid> flowingFluid;

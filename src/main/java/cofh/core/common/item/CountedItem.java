@@ -9,7 +9,7 @@ public class CountedItem extends ItemCoFH {
 
         super(builder);
 
-        ProxyUtils.registerItemModelProperty(this, new ResourceLocation("count"), (stack, world, living, seed) -> ((float) stack.getCount()) / stack.getMaxStackSize());
+        ProxyUtils.registerItemModelProperty(this, ResourceLocation.parse("count"), (stack, world, living, seed) -> ((float) stack.getCount()) / stack.getMaxStackSize());
     }
 
 }

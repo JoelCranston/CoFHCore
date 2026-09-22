@@ -80,7 +80,7 @@ public class DeferredRegisterCoFH<T> {
 
     public T get(final String modid, final String name) {
 
-        return get(new ResourceLocation(modid, name));
+        return get(ResourceLocation.fromNamespaceAndPath(modid, name));
     }
 
     public T get(final ResourceLocation resourceLoc) {
@@ -103,7 +103,7 @@ public class DeferredRegisterCoFH<T> {
 
     public Supplier<T> getSup(final String modid, final String name) {
 
-        return getSup(new ResourceLocation(modid, name));
+        return getSup(ResourceLocation.fromNamespaceAndPath(modid, name));
     }
 
     @Nullable

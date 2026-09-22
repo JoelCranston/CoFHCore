@@ -116,7 +116,7 @@ public final class FluidContainerItemModel implements IUnbakedGeometry<FluidCont
 
             FluidStack stack = FluidStack.EMPTY;
             if (jsonObject.has("fluid")) {
-                ResourceLocation fluidName = new ResourceLocation(jsonObject.get("fluid").getAsString());
+                ResourceLocation fluidName = ResourceLocation.parse(jsonObject.get("fluid").getAsString());
                 Fluid fluid = BuiltInRegistries.FLUID.get(fluidName);
                 if (fluid != null) {
                     stack = new FluidStack(fluid, BUCKET_VOLUME);
@@ -149,7 +149,7 @@ public final class FluidContainerItemModel implements IUnbakedGeometry<FluidCont
             int fluidHash = FluidHelper.fluidHashcode(fluidStack);
             if (!cache.containsKey(fluidHash)) {
                 FluidContainerItemModel unbaked = this.parent.withProperties(fluidStack);
-                BakedModel bakedModel = unbaked.bake(owner, baker, Material::sprite, BlockModelRotation.X0_Y0, this, new ResourceLocation(ID_COFH_CORE, "fluid_container_override"));
+                BakedModel bakedModel = unbaked.bake(owner, baker, Material::sprite, BlockModelRotation.X0_Y0, this, ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "fluid_container_override"));
                 cache.put(fluidHash, bakedModel);
                 return bakedModel;
             }

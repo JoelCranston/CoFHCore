@@ -29,13 +29,13 @@ public abstract class BlockStateProviderCoFH extends BlockStateProvider {
     protected ResourceLocation blockTexture(Supplier<? extends Block> block) {
 
         ResourceLocation base = Utils.getRegistryName(block.get());
-        return new ResourceLocation(base.getNamespace(), ModelProvider.BLOCK_FOLDER + "/" + base.getPath());
+        return ResourceLocation.fromNamespaceAndPath(base.getNamespace(), ModelProvider.BLOCK_FOLDER + "/" + base.getPath());
     }
 
     protected ResourceLocation blockTexture(Supplier<? extends Block> block, String subfolder) {
 
         ResourceLocation base = Utils.getRegistryName(block.get());
-        return new ResourceLocation(base.getNamespace(), ModelProvider.BLOCK_FOLDER + "/" + subfolder + "/" + base.getPath());
+        return ResourceLocation.fromNamespaceAndPath(base.getNamespace(), ModelProvider.BLOCK_FOLDER + "/" + subfolder + "/" + base.getPath());
     }
 
     protected ResourceLocation modBlockLoc(String texture) {

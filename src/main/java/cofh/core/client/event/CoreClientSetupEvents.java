@@ -5,6 +5,7 @@ import cofh.core.client.model.FluidContainerItemModel;
 import cofh.core.client.particle.impl.*;
 import cofh.lib.api.item.IColorableItem;
 import net.minecraft.client.color.item.ItemColors;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -51,7 +52,7 @@ public class CoreClientSetupEvents {
     @SubscribeEvent
     public static void registerModels(final RegisterGeometryLoaders event) {
 
-        event.register("fluid_container", new FluidContainerItemModel.Loader());
+        event.register(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "fluid_container"), new FluidContainerItemModel.Loader());
     }
 
     @SubscribeEvent

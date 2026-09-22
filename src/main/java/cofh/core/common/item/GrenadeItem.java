@@ -32,7 +32,7 @@ public class GrenadeItem extends ItemCoFH {
         super(builder);
         this.factory = factory;
 
-        ProxyUtils.registerItemModelProperty(this, new ResourceLocation("thrown"), (stack, world, living, seed) -> (stack.getDamageValue() > 0 ? 1.0F : 0.0F));
+        ProxyUtils.registerItemModelProperty(this, ResourceLocation.parse("thrown"), (stack, world, living, seed) -> (stack.getDamageValue() > 0 ? 1.0F : 0.0F));
         DispenserBlock.registerBehavior(this, DISPENSER_BEHAVIOR);
     }
 

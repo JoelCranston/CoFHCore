@@ -11,7 +11,7 @@ import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 public record FilterableGuiTogglePayload(int type, int entityId, BlockPos pos,
                                          byte mode) implements CustomPacketPayload {
 
-    public static final Type<FilterableGuiTogglePayload> TYPE = new Type<>(new ResourceLocation(ID_COFH_CORE, "filterable_gui_toggle_packet"));
+    public static final Type<FilterableGuiTogglePayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "filterable_gui_toggle_packet"));
 
     public static final StreamCodec<io.netty.buffer.ByteBuf, FilterableGuiTogglePayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT, FilterableGuiTogglePayload::type,

@@ -363,70 +363,70 @@ public final class GuiHelper {
     public static final String BUTTON_18_HIGHLIGHT = PATH_ELEMENTS + "button_18_highlight.png";
     public static final String BUTTON_18_INACTIVE = PATH_ELEMENTS + "button_18_inactive.png";
 
-    public static final ResourceLocation ICON_ACCESS_PUBLIC = new ResourceLocation(PATH_ICONS + "icon_access_public.png");
-    public static final ResourceLocation ICON_ACCESS_PRIVATE = new ResourceLocation(PATH_ICONS + "icon_access_private.png");
-    public static final ResourceLocation ICON_ACCESS_FRIENDS = new ResourceLocation(PATH_ICONS + "icon_access_friends.png");
-    public static final ResourceLocation ICON_ACCESS_TEAM = new ResourceLocation(PATH_ICONS + "icon_access_team.png");
+    public static final ResourceLocation ICON_ACCESS_PUBLIC = ResourceLocation.parse(PATH_ICONS + "icon_access_public.png");
+    public static final ResourceLocation ICON_ACCESS_PRIVATE = ResourceLocation.parse(PATH_ICONS + "icon_access_private.png");
+    public static final ResourceLocation ICON_ACCESS_FRIENDS = ResourceLocation.parse(PATH_ICONS + "icon_access_friends.png");
+    public static final ResourceLocation ICON_ACCESS_TEAM = ResourceLocation.parse(PATH_ICONS + "icon_access_team.png");
 
-    public static final ResourceLocation ICON_ACCEPT = new ResourceLocation(PATH_ICONS + "icon_accept.png");
-    public static final ResourceLocation ICON_ACCEPT_INACTIVE = new ResourceLocation(PATH_ICONS + "icon_accept_inactive.png");
-    public static final ResourceLocation ICON_AUGMENT = new ResourceLocation(PATH_ICONS + "icon_augment.png");
-    public static final ResourceLocation ICON_BUTTON = new ResourceLocation(PATH_ICONS + "icon_button.png");
-    public static final ResourceLocation ICON_BUTTON_HIGHLIGHT = new ResourceLocation(PATH_ICONS + "icon_button_highlight.png");
-    public static final ResourceLocation ICON_BUTTON_INACTIVE = new ResourceLocation(PATH_ICONS + "icon_button_inactive.png");
-    public static final ResourceLocation ICON_CANCEL = new ResourceLocation(PATH_ICONS + "icon_cancel.png");
-    public static final ResourceLocation ICON_CANCEL_INACTIVE = new ResourceLocation(PATH_ICONS + "icon_cancel_inactive.png");
-    public static final ResourceLocation ICON_CONFIG = new ResourceLocation(PATH_ICONS + "icon_config.png");
-    public static final ResourceLocation ICON_ENCHANTMENT = new ResourceLocation(PATH_ICONS + "icon_enchantment.png");
-    public static final ResourceLocation ICON_ENERGY = new ResourceLocation(PATH_ICONS + "icon_energy.png");
-    public static final ResourceLocation ICON_NOPE = new ResourceLocation(PATH_ICONS + "icon_nope.png");
-    public static final ResourceLocation ICON_INFORMATION = new ResourceLocation(PATH_ICONS + "icon_information.png");
-    public static final ResourceLocation ICON_STEAM = new ResourceLocation(PATH_ICONS + "icon_steam.png");
-    public static final ResourceLocation ICON_TUTORIAL = new ResourceLocation(PATH_ICONS + "icon_tutorial.png");
+    public static final ResourceLocation ICON_ACCEPT = ResourceLocation.parse(PATH_ICONS + "icon_accept.png");
+    public static final ResourceLocation ICON_ACCEPT_INACTIVE = ResourceLocation.parse(PATH_ICONS + "icon_accept_inactive.png");
+    public static final ResourceLocation ICON_AUGMENT = ResourceLocation.parse(PATH_ICONS + "icon_augment.png");
+    public static final ResourceLocation ICON_BUTTON = ResourceLocation.parse(PATH_ICONS + "icon_button.png");
+    public static final ResourceLocation ICON_BUTTON_HIGHLIGHT = ResourceLocation.parse(PATH_ICONS + "icon_button_highlight.png");
+    public static final ResourceLocation ICON_BUTTON_INACTIVE = ResourceLocation.parse(PATH_ICONS + "icon_button_inactive.png");
+    public static final ResourceLocation ICON_CANCEL = ResourceLocation.parse(PATH_ICONS + "icon_cancel.png");
+    public static final ResourceLocation ICON_CANCEL_INACTIVE = ResourceLocation.parse(PATH_ICONS + "icon_cancel_inactive.png");
+    public static final ResourceLocation ICON_CONFIG = ResourceLocation.parse(PATH_ICONS + "icon_config.png");
+    public static final ResourceLocation ICON_ENCHANTMENT = ResourceLocation.parse(PATH_ICONS + "icon_enchantment.png");
+    public static final ResourceLocation ICON_ENERGY = ResourceLocation.parse(PATH_ICONS + "icon_energy.png");
+    public static final ResourceLocation ICON_NOPE = ResourceLocation.parse(PATH_ICONS + "icon_nope.png");
+    public static final ResourceLocation ICON_INFORMATION = ResourceLocation.parse(PATH_ICONS + "icon_information.png");
+    public static final ResourceLocation ICON_STEAM = ResourceLocation.parse(PATH_ICONS + "icon_steam.png");
+    public static final ResourceLocation ICON_TUTORIAL = ResourceLocation.parse(PATH_ICONS + "icon_tutorial.png");
 
-    public static final ResourceLocation ICON_INPUT = new ResourceLocation(PATH_ICONS + "icon_input.png");
-    public static final ResourceLocation ICON_OUTPUT = new ResourceLocation(PATH_ICONS + "icon_output.png");
+    public static final ResourceLocation ICON_INPUT = ResourceLocation.parse(PATH_ICONS + "icon_input.png");
+    public static final ResourceLocation ICON_OUTPUT = ResourceLocation.parse(PATH_ICONS + "icon_output.png");
 
-    public static final ResourceLocation ICON_REDSTONE_OFF = new ResourceLocation(PATH_ICONS + "icon_redstone_off.png");
-    public static final ResourceLocation ICON_REDSTONE_ON = new ResourceLocation(PATH_ICONS + "icon_redstone_on.png");
+    public static final ResourceLocation ICON_REDSTONE_OFF = ResourceLocation.parse(PATH_ICONS + "icon_redstone_off.png");
+    public static final ResourceLocation ICON_REDSTONE_ON = ResourceLocation.parse(PATH_ICONS + "icon_redstone_on.png");
 
-    public static final ResourceLocation ICON_RS_TORCH_OFF = new ResourceLocation(PATH_ICONS + "icon_rs_torch_off.png");
-    public static final ResourceLocation ICON_RS_TORCH_ON = new ResourceLocation(PATH_ICONS + "icon_rs_torch_on.png");
+    public static final ResourceLocation ICON_RS_TORCH_OFF = ResourceLocation.parse(PATH_ICONS + "icon_rs_torch_off.png");
+    public static final ResourceLocation ICON_RS_TORCH_ON = ResourceLocation.parse(PATH_ICONS + "icon_rs_torch_on.png");
 
-    public static final ResourceLocation ICON_ARROW_DOWN = new ResourceLocation(PATH_ICONS + "icon_arrow_down.png");
-    public static final ResourceLocation ICON_ARROW_DOWN_INACTIVE = new ResourceLocation(PATH_ICONS + "icon_arrow_down_inactive.png");
+    public static final ResourceLocation ICON_ARROW_DOWN = ResourceLocation.parse(PATH_ICONS + "icon_arrow_down.png");
+    public static final ResourceLocation ICON_ARROW_DOWN_INACTIVE = ResourceLocation.parse(PATH_ICONS + "icon_arrow_down_inactive.png");
 
-    public static final ResourceLocation ICON_ARROW_UP = new ResourceLocation(PATH_ICONS + "icon_arrow_up.png");
-    public static final ResourceLocation ICON_ARROW_UP_INACTIVE = new ResourceLocation(PATH_ICONS + "icon_arrow_up_inactive.png");
+    public static final ResourceLocation ICON_ARROW_UP = ResourceLocation.parse(PATH_ICONS + "icon_arrow_up.png");
+    public static final ResourceLocation ICON_ARROW_UP_INACTIVE = ResourceLocation.parse(PATH_ICONS + "icon_arrow_up_inactive.png");
 
-    public static final ResourceLocation INFO_INPUT = new ResourceLocation(PATH_ELEMENTS + "info_input.png");
-    public static final ResourceLocation INFO_OUTPUT = new ResourceLocation(PATH_ELEMENTS + "info_output.png");
+    public static final ResourceLocation INFO_INPUT = ResourceLocation.parse(PATH_ELEMENTS + "info_input.png");
+    public static final ResourceLocation INFO_OUTPUT = ResourceLocation.parse(PATH_ELEMENTS + "info_output.png");
 
-    public static final ResourceLocation NAV_BACK = new ResourceLocation(PATH_ELEMENTS + "nav_back.png");
-    public static final ResourceLocation NAV_FILTER = new ResourceLocation(PATH_ELEMENTS + "nav_filter.png");
+    public static final ResourceLocation NAV_BACK = ResourceLocation.parse(PATH_ELEMENTS + "nav_back.png");
+    public static final ResourceLocation NAV_FILTER = ResourceLocation.parse(PATH_ELEMENTS + "nav_filter.png");
 
-    public static final ResourceLocation TAB_BOTTOM = new ResourceLocation(PATH_ELEMENTS + "tab_bottom.png");
-    public static final ResourceLocation TAB_TOP = new ResourceLocation(PATH_ELEMENTS + "tab_top.png");
+    public static final ResourceLocation TAB_BOTTOM = ResourceLocation.parse(PATH_ELEMENTS + "tab_bottom.png");
+    public static final ResourceLocation TAB_TOP = ResourceLocation.parse(PATH_ELEMENTS + "tab_top.png");
 
-    public static final ResourceLocation PROG_ARROW_LEFT = new ResourceLocation(PATH_ELEMENTS + "progress_arrow_left.png");
-    public static final ResourceLocation PROG_ARROW_RIGHT = new ResourceLocation(PATH_ELEMENTS + "progress_arrow_right.png");
-    public static final ResourceLocation PROG_ARROW_FLUID_LEFT = new ResourceLocation(PATH_ELEMENTS + "progress_arrow_fluid_left.png");
-    public static final ResourceLocation PROG_ARROW_FLUID_RIGHT = new ResourceLocation(PATH_ELEMENTS + "progress_arrow_fluid_right.png");
-    public static final ResourceLocation PROG_DROP_LEFT = new ResourceLocation(PATH_ELEMENTS + "progress_fluid_left.png");
-    public static final ResourceLocation PROG_DROP_RIGHT = new ResourceLocation(PATH_ELEMENTS + "progress_fluid_right.png");
+    public static final ResourceLocation PROG_ARROW_LEFT = ResourceLocation.parse(PATH_ELEMENTS + "progress_arrow_left.png");
+    public static final ResourceLocation PROG_ARROW_RIGHT = ResourceLocation.parse(PATH_ELEMENTS + "progress_arrow_right.png");
+    public static final ResourceLocation PROG_ARROW_FLUID_LEFT = ResourceLocation.parse(PATH_ELEMENTS + "progress_arrow_fluid_left.png");
+    public static final ResourceLocation PROG_ARROW_FLUID_RIGHT = ResourceLocation.parse(PATH_ELEMENTS + "progress_arrow_fluid_right.png");
+    public static final ResourceLocation PROG_DROP_LEFT = ResourceLocation.parse(PATH_ELEMENTS + "progress_fluid_left.png");
+    public static final ResourceLocation PROG_DROP_RIGHT = ResourceLocation.parse(PATH_ELEMENTS + "progress_fluid_right.png");
 
-    public static final ResourceLocation SCALE_ALCHEMY = new ResourceLocation(PATH_ELEMENTS + "scale_alchemy.png");
-    public static final ResourceLocation SCALE_BOOK = new ResourceLocation(PATH_ELEMENTS + "scale_book.png");
-    public static final ResourceLocation SCALE_BUBBLE = new ResourceLocation(PATH_ELEMENTS + "scale_bubble.png");
-    public static final ResourceLocation SCALE_COMPACT = new ResourceLocation(PATH_ELEMENTS + "scale_compact.png");
-    public static final ResourceLocation SCALE_CRUSH = new ResourceLocation(PATH_ELEMENTS + "scale_crush.png");
-    public static final ResourceLocation SCALE_FLAME = new ResourceLocation(PATH_ELEMENTS + "scale_flame.png");
-    public static final ResourceLocation SCALE_FLAME_GREEN = new ResourceLocation(PATH_ELEMENTS + "scale_flame_green.png");
-    public static final ResourceLocation SCALE_FLUX = new ResourceLocation(PATH_ELEMENTS + "scale_flux.png");
-    public static final ResourceLocation SCALE_SAW = new ResourceLocation(PATH_ELEMENTS + "scale_saw.png");
-    public static final ResourceLocation SCALE_SPIN = new ResourceLocation(PATH_ELEMENTS + "scale_spin.png");
-    public static final ResourceLocation SCALE_SUN = new ResourceLocation(PATH_ELEMENTS + "scale_sun.png");
-    public static final ResourceLocation SCALE_SNOWFLAKE = new ResourceLocation(PATH_ELEMENTS + "scale_snowflake.png");
+    public static final ResourceLocation SCALE_ALCHEMY = ResourceLocation.parse(PATH_ELEMENTS + "scale_alchemy.png");
+    public static final ResourceLocation SCALE_BOOK = ResourceLocation.parse(PATH_ELEMENTS + "scale_book.png");
+    public static final ResourceLocation SCALE_BUBBLE = ResourceLocation.parse(PATH_ELEMENTS + "scale_bubble.png");
+    public static final ResourceLocation SCALE_COMPACT = ResourceLocation.parse(PATH_ELEMENTS + "scale_compact.png");
+    public static final ResourceLocation SCALE_CRUSH = ResourceLocation.parse(PATH_ELEMENTS + "scale_crush.png");
+    public static final ResourceLocation SCALE_FLAME = ResourceLocation.parse(PATH_ELEMENTS + "scale_flame.png");
+    public static final ResourceLocation SCALE_FLAME_GREEN = ResourceLocation.parse(PATH_ELEMENTS + "scale_flame_green.png");
+    public static final ResourceLocation SCALE_FLUX = ResourceLocation.parse(PATH_ELEMENTS + "scale_flux.png");
+    public static final ResourceLocation SCALE_SAW = ResourceLocation.parse(PATH_ELEMENTS + "scale_saw.png");
+    public static final ResourceLocation SCALE_SPIN = ResourceLocation.parse(PATH_ELEMENTS + "scale_spin.png");
+    public static final ResourceLocation SCALE_SUN = ResourceLocation.parse(PATH_ELEMENTS + "scale_sun.png");
+    public static final ResourceLocation SCALE_SNOWFLAKE = ResourceLocation.parse(PATH_ELEMENTS + "scale_snowflake.png");
     // endregion
 
     // region PANELS

@@ -9,7 +9,7 @@ import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
 
 public record OverlayMessagePayload(String message) implements CustomPacketPayload {
 
-    public static final Type<OverlayMessagePayload> TYPE = new Type<>(new ResourceLocation(ID_COFH_CORE, "overlay_message_packet"));
+    public static final Type<OverlayMessagePayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "overlay_message_packet"));
 
     public static final StreamCodec<io.netty.buffer.ByteBuf, OverlayMessagePayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, OverlayMessagePayload::message,

@@ -220,6 +220,6 @@ public class ThrownKnife extends AbstractArrow {
         return this.level.damageSources().source(KNIFE_DAMAGE, this, getOwner());
     }
 
-    protected static final ResourceKey<DamageType> KNIFE_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(ID_COFH_CORE, "knife"));
+    protected static final ResourceKey<DamageType> KNIFE_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath(ID_COFH_CORE, "knife"));
 
 }

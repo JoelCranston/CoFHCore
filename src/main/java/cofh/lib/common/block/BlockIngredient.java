@@ -145,7 +145,7 @@ public class BlockIngredient implements Predicate<BlockState> {
             if (jsonObject.has(RecipeJsonUtils.TAG)) {
                 throw new JsonParseException("A block ingredient entry is either a block tag or a block, not both");
             }
-            ResourceLocation resLoc = new ResourceLocation(GsonHelper.getAsString(jsonObject, RecipeJsonUtils.NAME));
+            ResourceLocation resLoc = ResourceLocation.parse(GsonHelper.getAsString(jsonObject, RecipeJsonUtils.NAME));
             if (!BuiltInRegistries.BLOCK.containsKey(resLoc)) {
                 throw new JsonSyntaxException("Unknown block '" + resLoc + "'");
             }
@@ -166,7 +166,7 @@ public class BlockIngredient implements Predicate<BlockState> {
             }
             return new BlockList(state, state.getProperties());
         } else if (jsonObject.has(RecipeJsonUtils.TAG)) {
-            return new TagList(BlockTags.create(new ResourceLocation(GsonHelper.getAsString(jsonObject, RecipeJsonUtils.TAG))));
+            return new TagList(BlockTags.create(ResourceLocation.parse(GsonHelper.getAsString(jsonObject, RecipeJsonUtils.TAG))));
         } else {
             throw new JsonParseException("A block ingredient entry needs either a tag or a block");
         }
