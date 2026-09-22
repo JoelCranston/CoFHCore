@@ -66,7 +66,7 @@ public class FluidIngredient implements Predicate<FluidStack> {
         if (this.fluidStacks == null) {
             this.fluidStacks = Arrays.stream(this.values).flatMap((ingredientList) -> ingredientList.getFluids().stream()).distinct().toArray(FluidStack[]::new);
             for (FluidStack stack : fluidStacks) {
-                if (stack.getRawFluid() != Fluids.EMPTY) {
+                if (stack.getFluid() != Fluids.EMPTY) {
                     stack.setAmount(amount);
                     if (tag != null && !tag.isEmpty()) {
                         // FluidStack#setTag is gone; a fluid's mod-attached NBT is CUSTOM_DATA now.

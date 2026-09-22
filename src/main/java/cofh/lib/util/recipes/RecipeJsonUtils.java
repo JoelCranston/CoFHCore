@@ -5,6 +5,7 @@ import cofh.lib.common.fluid.FluidIngredient;
 import cofh.lib.util.crafting.IngredientWithCount;
 import com.google.gson.*;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -36,6 +37,15 @@ public abstract class RecipeJsonUtils {
     }
 
     // region HELPERS
+    /**
+     * 1.20.5: {@code Ingredient.fromJson} is gone - an ingredient is read through its Codec like
+     * everything else. This keeps CoFH's lenient, exception-tolerant parsing around it.
+     */
+    private static Ingredient ingredientFromJson(JsonElement element) {
+
+        return Ingredient.CODEC.parse(JsonOps.INSTANCE, element).getOrThrow(JsonParseException::new);
+    }
+
     public static Ingredient parseIngredient(JsonElement element) {
 
         if (element == null || element.isJsonNull()) {
@@ -45,7 +55,7 @@ public abstract class RecipeJsonUtils {
 
         if (element.isJsonArray()) {
             try {
-                ingredient = Ingredient.fromJson(element, true);
+                ingredient = ingredientFromJson(element);
             } catch (Throwable t) {
                 ingredient = Ingredient.of(ItemStack.EMPTY);
                 LOG.debug("Invalid Ingredient - using EMPTY instead!", t);
@@ -55,9 +65,9 @@ public abstract class RecipeJsonUtils {
             try {
                 JsonObject object = subElement.getAsJsonObject();
                 if (object.has(VALUE)) {
-                    ingredient = Ingredient.fromJson(object.get(VALUE), true);
+                    ingredient = ingredientFromJson(object.get(VALUE));
                 } else {
-                    ingredient = Ingredient.fromJson(subElement, true);
+                    ingredient = ingredientFromJson(subElement);
                 }
                 int count = 1;
                 if (object.has(COUNT)) {

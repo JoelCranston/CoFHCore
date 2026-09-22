@@ -1,5 +1,6 @@
 package cofh.lib.util.helpers;
 
+import cofh.core.util.ProxyUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -68,7 +69,7 @@ public final class StringHelper {
         Item item = stack.getItem();
         MutableComponent name = item.getName(stack).copy();
 
-        switch (item.getRarity(stack)) {
+        switch (stack.getRarity()) {
             case UNCOMMON -> name.withStyle(ChatFormatting.YELLOW);
             case RARE -> name.withStyle(ChatFormatting.AQUA);
             case EPIC -> name.withStyle(ChatFormatting.LIGHT_PURPLE);
@@ -114,14 +115,16 @@ public final class StringHelper {
     //        return chat;
     //    }
 
+    // Component (de)serialization needs the registries since 1.20.5 - a component can reference
+    // registry objects - so these take the lookup from the running world.
     public static String toJSON(Component chatComponent) {
 
-        return Component.Serializer.toJson(chatComponent);
+        return Component.Serializer.toJson(chatComponent, ProxyUtils.registryAccess());
     }
 
     public static MutableComponent fromJSON(String string) {
 
-        return Component.Serializer.fromJsonLenient(string);
+        return Component.Serializer.fromJsonLenient(string, ProxyUtils.registryAccess());
     }
 
     public static MutableComponent getEmptyLine() {
