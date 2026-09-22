@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -87,7 +88,7 @@ public class ItemTracker {
     public static void onStartUsing(LivingEntityUseItemEvent.Start event) {
 
         if (!event.isCanceled()) {
-            updateUsing(event.getItem(), event.getDuration());
+            updateUsing(event.getItem(), event.getEntity(), event.getDuration());
         }
     }
 
@@ -95,7 +96,7 @@ public class ItemTracker {
     public static void onTickUsing(LivingEntityUseItemEvent.Tick event) {
 
         if (!event.isCanceled()) {
-            updateUsing(event.getItem(), event.getDuration());
+            updateUsing(event.getItem(), event.getEntity(), event.getDuration());
         }
     }
 
@@ -136,9 +137,10 @@ public class ItemTracker {
         }
     }
 
-    protected static void updateUsing(ItemStack stack, int duration) {
+    // ItemStack#getUseDuration takes the using entity now (items can vary it per user).
+    protected static void updateUsing(ItemStack stack, LivingEntity entity, int duration) {
 
-        USING.computeIntIfPresent(stack, (key, old) -> stack.getUseDuration() - duration);
+        USING.computeIntIfPresent(stack, (key, old) -> stack.getUseDuration(entity) - duration);
     }
 
     protected static void stopUsing(ItemStack stack) {

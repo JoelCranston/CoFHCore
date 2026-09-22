@@ -7,11 +7,12 @@ import com.google.common.collect.Sets;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Item.TooltipContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.ToolAction;
+import net.neoforged.neoforge.common.ItemAbility;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -50,10 +51,10 @@ public class ItemCoFH extends Item implements ICoFHItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
 
         List<Component> additionalTooltips = new ArrayList<>();
-        tooltipDelegate(stack, worldIn, additionalTooltips, flagIn);
+        tooltipDelegate(stack, context.level(), additionalTooltips, flagIn);
 
         if (SecurityHelper.isItemClaimable(stack)) {
             tooltip.add(getTextComponent("info.cofh.claimable").withStyle(GREEN).withStyle(ITALIC));
@@ -85,7 +86,7 @@ public class ItemCoFH extends Item implements ICoFHItem {
         return burnTime;
     }
 
-    protected static Set<ToolAction> toolActions(ToolAction... actions) {
+    protected static Set<ItemAbility> toolActions(ItemAbility... actions) {
 
         return Stream.of(actions).collect(Collectors.toCollection(Sets::newIdentityHashSet));
     }

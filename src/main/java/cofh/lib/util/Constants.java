@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.common.PlantType;
+import cofh.lib.common.block.CropType;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 
@@ -25,7 +25,8 @@ public class Constants {
 
     }
 
-    public static final PlantType FUNGUS = PlantType.get("fungus");
+    // Was a NeoForge PlantType, a system deleted in 21.0; CoFH crops carry their own type.
+    public static final CropType FUNGUS = CropType.NETHER;
 
     public static final VoxelShape FULL_CUBE_COLLISION = Block.box(1.0D, 0.0D, 1.0D, 15.9375D, 15.9375D, 15.9375D);
 

@@ -16,7 +16,6 @@ import net.neoforged.neoforge.common.util.TriState;
 
 import java.util.function.Supplier;
 
-import static cofh.lib.util.Constants.FUNGUS;
 
 public class SoilBlock extends Block {
 

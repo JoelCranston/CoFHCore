@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item.TooltipContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -74,10 +75,10 @@ public class BlockItemCoFH extends BlockItem implements ICoFHItem {
     //    }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
 
         List<Component> additionalTooltips = new ArrayList<>();
-        tooltipDelegate(stack, worldIn, additionalTooltips, flagIn);
+        tooltipDelegate(stack, context.level(), additionalTooltips, flagIn);
 
         if (!additionalTooltips.isEmpty()) {
             if (Screen.hasShiftDown() || CoreClientConfig.alwaysShowDetails.get()) {

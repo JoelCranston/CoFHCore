@@ -75,7 +75,7 @@ public class ArcheryEvents {
     public static void handleItemUseTickEvent(LivingEntityUseItemEvent.Tick event) {
 
         int encQuickDraw = getItemEnchantmentLevel(getEnchantment(ID_ENSORCELLATION, ID_QUICK_DRAW), event.getItem());
-        if (encQuickDraw > 0 && event.getDuration() > event.getItem().getUseDuration() - 20) {
+        if (encQuickDraw > 0 && event.getDuration() > event.getItem().getUseDuration(event.getEntity()) - 20) {
             event.setDuration(event.getDuration() - encQuickDraw);
         }
     }

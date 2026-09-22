@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.BowItem;
+import net.minecraft.core.Holder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileItem;
 import net.minecraft.world.item.Tier;
@@ -43,10 +44,13 @@ public class KnifeItem extends SwordItemCoFH implements ProjectileItem {
         this(tier, DEFAULT_ATTACK_DAMAGE, DEFAULT_ATTACK_SPEED, builder);
     }
 
+    // 1.21: what an enchantment can go on is datapack data (an enchantment's supported_items
+    // tag). NeoForge keeps a per-item override for the extra cases; Loyalty is allowed here the
+    // way it was before, on top of whatever the data says.
     @Override
-    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
+    public boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
 
-        return super.canApplyAtEnchantingTable(stack, enchantment) || enchantment.equals(Enchantments.LOYALTY);
+        return enchantment.is(Enchantments.LOYALTY) || super.supportsEnchantment(stack, enchantment);
     }
 
     @Override
@@ -57,7 +61,7 @@ public class KnifeItem extends SwordItemCoFH implements ProjectileItem {
     }
 
     @Override
-    public int getUseDuration(ItemStack stack) {
+    public int getUseDuration(ItemStack stack, LivingEntity living) {
 
         return 72000;
     }
@@ -72,7 +76,7 @@ public class KnifeItem extends SwordItemCoFH implements ProjectileItem {
     public void releaseUsing(ItemStack stack, Level world, LivingEntity living, int durationRemaining) {
 
         if (living instanceof Player player) {
-            float power = BowItem.getPowerForTime(this.getUseDuration(stack) - durationRemaining);
+            float power = BowItem.getPowerForTime(this.getUseDuration(stack, living) - durationRemaining);
             if (power < 0.1D) {
                 return;
             }
