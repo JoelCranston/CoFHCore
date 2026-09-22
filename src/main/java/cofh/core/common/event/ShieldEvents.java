@@ -19,11 +19,14 @@ public class ShieldEvents {
     @SubscribeEvent (priority = HIGH)
     public static void handleShieldBlock(LivingShieldBlockEvent event) {
 
+        LivingEntity entity = event.getEntity();
+        var shield = entity.getUseItem().getCapability(CoreCapabilities.ShieldHandler.ITEM);
+        if (shield != null) {
+            event.setBlocked(shield.canBlock(entity, event.getDamageSource()));
+        }
         if (!event.getBlocked()) {
             return;
         }
-        LivingEntity entity = event.getEntity();
-        var shield = entity.getUseItem().getCapability(CoreCapabilities.ShieldHandler.ITEM);
         if (shield != null) {
             event.setBlockedDamage(shield.onBlock(entity, event.getDamageSource(), event.getBlockedDamage()));
         }

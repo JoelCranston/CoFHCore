@@ -1,12 +1,10 @@
 package cofh.core.mixin;
 
-import cofh.core.common.capability.CoreCapabilities;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -21,9 +19,6 @@ import static net.minecraft.tags.DamageTypeTags.*;
  */
 @Mixin (LivingEntity.class)
 public abstract class LivingEntityMixin {
-
-    @Shadow
-    public abstract ItemStack getUseItem();
 
     @Inject (
             method = "canBeAffected(Lnet/minecraft/world/effect/MobEffectInstance;)Z",
@@ -57,11 +52,11 @@ public abstract class LivingEntityMixin {
     }
 
     @Inject (
-            method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z",
+            method = "hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z",
             at = @At ("HEAD"),
             cancellable = true
     )
-    private void cancelHurt(DamageSource source, float amount, CallbackInfoReturnable<Boolean> callback) {
+    private void cancelHurt(ServerLevel level, DamageSource source, float amount, CallbackInfoReturnable<Boolean> callback) {
 
         LivingEntity living = (LivingEntity) (Object) this;
 
@@ -75,10 +70,10 @@ public abstract class LivingEntityMixin {
             if (source.is(IS_MAGIC) && living.hasEffect(MAGIC_RESISTANCE)) {
                 callback.setReturnValue(false);
             }
-            if (source == living.level.damageSources().freeze() && living.hasEffect(COLD_RESISTANCE)) {
+            if (source == level.damageSources().freeze() && living.hasEffect(COLD_RESISTANCE)) {
                 callback.setReturnValue(false);
             }
-            if (source == living.level.damageSources().lightningBolt() && living.hasEffect(LIGHTNING_RESISTANCE)) {
+            if (source == level.damageSources().lightningBolt() && living.hasEffect(LIGHTNING_RESISTANCE)) {
                 callback.setReturnValue(false);
             }
         }
@@ -96,21 +91,6 @@ public abstract class LivingEntityMixin {
             living.removeEffectParticles();
             living.setInvisible(true);
             callback.cancel();
-        }
-    }
-
-    @Inject (
-            method = "isDamageSourceBlocked",
-            at = @At ("HEAD"),
-            cancellable = true
-    )
-    public void shield(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
-
-        var shield = this.getUseItem().getCapability(CoreCapabilities.ShieldHandler.ITEM);
-        if (shield != null) {
-            LivingEntity living = (LivingEntity) (Object) this;
-            cir.setReturnValue(shield.canBlock(living, source));
-            cir.cancel();
         }
     }
 
