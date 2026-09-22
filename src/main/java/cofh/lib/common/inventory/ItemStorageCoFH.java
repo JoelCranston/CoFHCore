@@ -157,8 +157,8 @@ public class ItemStorageCoFH implements IItemHandler, IItemStackHolder, IResourc
 
     protected final void saveItemStack(HolderLookup.Provider provider, ItemStack stack, CompoundTag nbt) {
 
-        Tag saved = stack.save(provider);
-        if (saved instanceof CompoundTag savedTag) {
+        // save(Provider) throws on an empty stack; saveOptional writes an empty compound.
+        if (stack.saveOptional(provider) instanceof CompoundTag savedTag) {
             nbt.merge(savedTag);
         }
         if (stack.getCount() > Byte.MAX_VALUE) {

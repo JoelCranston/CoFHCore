@@ -126,8 +126,8 @@ public class FluidStorageCoFH implements IFluidHandler, IFluidStackHolder, IReso
 
     public CompoundTag write(HolderLookup.Provider provider, CompoundTag nbt) {
 
-        Tag saved = fluid.save(provider);
-        if (saved instanceof CompoundTag savedTag) {
+        // save(Provider) throws on an empty stack; saveOptional writes an empty compound.
+        if (fluid.saveOptional(provider) instanceof CompoundTag savedTag) {
             nbt.merge(savedTag);
         }
         nbt.putInt(TAG_CAPACITY, baseCapacity);
