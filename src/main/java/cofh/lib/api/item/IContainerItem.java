@@ -4,6 +4,7 @@ import cofh.core.common.item.IAugmentableItem;
 import cofh.lib.api.ContainerType;
 import cofh.lib.util.Utils;
 import net.minecraft.nbt.CompoundTag;
+import cofh.core.util.helpers.ItemHelper;
 import net.minecraft.world.item.ItemStack;
 
 import static cofh.core.util.helpers.AugmentableHelper.getAttributeMod;
@@ -27,7 +28,7 @@ public interface IContainerItem {
     default boolean isCreative(ItemStack stack, ContainerType type) {
 
         if (stack.getItem() instanceof IAugmentableItem) {
-            CompoundTag subTag = stack.getTagElement(TAG_PROPERTIES);
+            CompoundTag subTag = ItemHelper.getCustomSubTag(stack, TAG_PROPERTIES);
             if (subTag == null) {
                 return false;
             }

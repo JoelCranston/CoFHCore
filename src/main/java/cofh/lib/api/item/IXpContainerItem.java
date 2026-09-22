@@ -5,6 +5,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.player.Player;
+import cofh.core.util.helpers.ItemHelper;
 import net.minecraft.world.item.ItemStack;
 
 import static cofh.lib.util.constants.NBTTags.TAG_XP;
@@ -20,7 +21,7 @@ public interface IXpContainerItem extends IContainerItem {
 
     default int getStoredXp(ItemStack stack) {
 
-        return stack.getOrCreateTag().getInt(TAG_XP);
+        return ItemHelper.getCustomData(stack).getInt(TAG_XP);
     }
 
     default int getSpaceXp(ItemStack stack) {
@@ -37,7 +38,8 @@ public interface IXpContainerItem extends IContainerItem {
         } else if (totalXP < 0) {
             totalXP = 0;
         }
-        stack.getOrCreateTag().putInt(TAG_XP, totalXP);
+        int stored = totalXP;
+        ItemHelper.mutateCustomData(stack, tag -> tag.putInt(TAG_XP, stored));
         return totalXP;
     }
 

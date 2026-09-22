@@ -1,7 +1,9 @@
 package cofh.core.util.helpers;
 
 import cofh.core.common.item.IAugmentableItem;
+import cofh.core.util.ProxyUtils;
 import cofh.lib.util.helpers.MathHelper;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.BlockItem;
@@ -14,6 +16,7 @@ import java.util.List;
 import static cofh.lib.util.Constants.MAX_AUGMENTS;
 import static cofh.lib.util.constants.NBTTags.*;
 import static net.minecraft.nbt.Tag.TAG_COMPOUND;
+import static net.minecraft.nbt.Tag.TAG_LIST;
 
 public final class AugmentableHelper {
 
@@ -115,54 +118,47 @@ public final class AugmentableHelper {
 
     public static float getPropertyWithDefault(ItemStack container, String key, float defaultValue) {
 
-        CompoundTag subTag = container.getTagElement(TAG_PROPERTIES);
-        return subTag == null ? defaultValue : getAttributeModWithDefault(subTag, key, defaultValue);
+        return getAttributeModWithDefault(ItemHelper.getCustomSubTag(container, TAG_PROPERTIES), key, defaultValue);
     }
 
     public static String getPropertyWithDefault(ItemStack container, String key, String defaultValue) {
 
-        CompoundTag subTag = container.getTagElement(TAG_PROPERTIES);
-        return subTag == null ? defaultValue : getAttributeModWithDefault(subTag, key, defaultValue);
+        return getAttributeModWithDefault(ItemHelper.getCustomSubTag(container, TAG_PROPERTIES), key, defaultValue);
     }
 
     // endregion
 
     // region INTERNAL HELPERS
+    // Block items keep their augments in the block entity data vanilla restores on placement
+    // (its own component since 1.20.5); everything else keeps them in the mod-attached blob.
     private static void writeAugmentsToItem(ItemStack stack, ListTag list) {
 
-        CompoundTag nbt = stack.getTagElement(TAG_BLOCK_ENTITY);
-        if (nbt != null) {
+        if (stack.getItem() instanceof BlockItem || ItemHelper.hasCustomSubTag(stack, TAG_BLOCK_ENTITY)) {
+            CompoundTag nbt = ItemHelper.getBlockEntityData(stack);
             nbt.put(TAG_AUGMENTS, list);
+            ItemHelper.setBlockEntityData(stack, nbt);
             return;
         }
-        if (stack.getItem() instanceof BlockItem) {
-            nbt = new CompoundTag();
-            nbt.put(TAG_AUGMENTS, list);
-            stack.addTagElement(TAG_BLOCK_ENTITY, nbt);
-            return;
-        }
-        stack.addTagElement(TAG_AUGMENTS, list);
+        ItemHelper.setCustomSubTag(stack, TAG_AUGMENTS, list);
     }
 
     private static List<ItemStack> getAugments(ListTag list) {
 
+        HolderLookup.Provider provider = ProxyUtils.registryAccess();
         ArrayList<ItemStack> ret = new ArrayList<>();
         for (int i = 0; i < list.size(); ++i) {
-            ret.add(ItemStack.of(list.getCompound(i)));
+            ret.add(ItemStack.parseOptional(provider, list.getCompound(i)));
         }
         return ret.isEmpty() ? Collections.emptyList() : ret;
     }
 
     private static ListTag getAugmentNBT(ItemStack stack) {
 
-        if (stack.getTag() == null) {
-            return new ListTag();
+        CompoundTag blockEntityData = ItemHelper.getBlockEntityData(stack);
+        if (blockEntityData.contains(TAG_AUGMENTS, TAG_LIST)) {
+            return blockEntityData.getList(TAG_AUGMENTS, TAG_COMPOUND);
         }
-        CompoundTag nbt = stack.getTagElement(TAG_BLOCK_ENTITY);
-        if (nbt != null) {
-            return nbt.contains(TAG_AUGMENTS) ? nbt.getList(TAG_AUGMENTS, TAG_COMPOUND) : new ListTag();
-        }
-        return stack.getTag().getList(TAG_AUGMENTS, TAG_COMPOUND);
+        return ItemHelper.getCustomData(stack).getList(TAG_AUGMENTS, TAG_COMPOUND);
     }
 
     private static ListTag convertAugments(List<ItemStack> augments) {
@@ -171,7 +167,7 @@ public final class AugmentableHelper {
         for (ItemStack augment : augments) {
             // Empty slots are intentionally written.
             //if (!augment.isEmpty()) {
-            list.add(augment.save(new CompoundTag()));
+            list.add(augment.isEmpty() ? new CompoundTag() : augment.save(ProxyUtils.registryAccess()));
             //}
         }
         return list;

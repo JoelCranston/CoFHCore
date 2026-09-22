@@ -1,8 +1,12 @@
 package cofh.lib.api.item;
 
 import cofh.lib.util.helpers.MathHelper;
+import cofh.core.util.ProxyUtils;
+import cofh.core.util.helpers.ItemHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.function.Consumer;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 
@@ -19,9 +23,33 @@ import static cofh.lib.util.constants.NBTTags.TAG_FLUID;
  */
 public interface IFluidContainerItem extends IContainerItem {
 
-    default CompoundTag getOrCreateTankTag(ItemStack container) {
+    /**
+     * The NBT the tank contents live in, as a copy - 1.20.5+ item data is immutable
+     * {@link net.minecraft.world.item.component.CustomData}, so writes go through
+     * {@link #mutateTankTag}. Implementations keeping fluid elsewhere override both.
+     */
+    default CompoundTag getTankTag(ItemStack container) {
 
-        return container.getOrCreateTag();
+        return ItemHelper.getCustomData(container);
+    }
+
+    default void mutateTankTag(ItemStack container, Consumer<CompoundTag> mutator) {
+
+        ItemHelper.mutateCustomData(container, mutator);
+    }
+
+    /**
+     * FluidStack persistence needs a registry lookup since 1.20.5 (components can reference
+     * registries); this API is ItemStack-only, so the running world's registries are used.
+     */
+    default FluidStack loadFluid(CompoundTag tankTag) {
+
+        return FluidStack.parseOptional(ProxyUtils.registryAccess(), tankTag.getCompound(TAG_FLUID));
+    }
+
+    default CompoundTag saveFluid(FluidStack stack) {
+
+        return (CompoundTag) stack.save(ProxyUtils.registryAccess(), new CompoundTag());
     }
 
     default int getSpace(ItemStack container) {
@@ -45,11 +73,7 @@ public interface IFluidContainerItem extends IContainerItem {
      */
     default FluidStack getFluid(ItemStack container) {
 
-        CompoundTag tag = getOrCreateTankTag(container);
-        if (!tag.contains(TAG_FLUID)) {
-            return FluidStack.EMPTY;
-        }
-        return FluidStack.loadFluidStackFromNBT(tag.getCompound(TAG_FLUID));
+        return loadFluid(getTankTag(container));
     }
 
     /**
@@ -76,57 +100,35 @@ public interface IFluidContainerItem extends IContainerItem {
      */
     default int fill(ItemStack container, FluidStack resource, FluidAction action) {
 
-        CompoundTag containerTag = getOrCreateTankTag(container);
         if (resource.isEmpty() || !isFluidValid(container, resource)) {
             return 0;
         }
         int capacity = getCapacity(container);
+        FluidStack stored = getFluid(container);
 
         if (isCreative(container, FLUID)) {
             if (action.execute()) {
-                CompoundTag fluidTag = resource.writeToNBT(new CompoundTag());
-                fluidTag.putInt(TAG_AMOUNT, capacity);
-                containerTag.put(TAG_FLUID, fluidTag);
+                FluidStack full = resource.copyWithAmount(capacity);
+                mutateTankTag(container, tag -> tag.put(TAG_FLUID, saveFluid(full)));
             }
             return resource.getAmount();
         }
-        if (action.simulate()) {
-            if (!containerTag.contains(TAG_FLUID)) {
-                return Math.min(capacity, resource.getAmount());
+        if (stored.isEmpty()) {
+            int filled = Math.min(capacity, resource.getAmount());
+            if (action.execute()) {
+                FluidStack toStore = resource.copyWithAmount(filled);
+                mutateTankTag(container, tag -> tag.put(TAG_FLUID, saveFluid(toStore)));
             }
-            FluidStack stack = FluidStack.loadFluidStackFromNBT(containerTag.getCompound(TAG_FLUID));
-            if (stack.isEmpty()) {
-                return Math.min(capacity, resource.getAmount());
-            }
-            if (!stack.isFluidEqual(resource)) {
-                return 0;
-            }
-            return Math.min(capacity - stack.getAmount(), resource.getAmount());
+            return filled;
         }
-        if (!containerTag.contains(TAG_FLUID)) {
-            CompoundTag fluidTag = resource.writeToNBT(new CompoundTag());
-            if (capacity < resource.getAmount()) {
-                fluidTag.putInt(TAG_AMOUNT, capacity);
-                containerTag.put(TAG_FLUID, fluidTag);
-                return capacity;
-            }
-            fluidTag.putInt(TAG_AMOUNT, resource.getAmount());
-            containerTag.put(TAG_FLUID, fluidTag);
-            return resource.getAmount();
-        }
-        CompoundTag fluidTag = containerTag.getCompound(TAG_FLUID);
-        FluidStack stack = FluidStack.loadFluidStackFromNBT(fluidTag);
-        if (stack.isEmpty() || !stack.isFluidEqual(resource)) {
+        if (!FluidStack.isSameFluidSameComponents(stored, resource)) {
             return 0;
         }
-        int filled = capacity - stack.getAmount();
-        if (resource.getAmount() < filled) {
-            stack.grow(resource.getAmount());
-            filled = resource.getAmount();
-        } else {
-            stack.setAmount(capacity);
+        int filled = Math.min(capacity - stored.getAmount(), resource.getAmount());
+        if (action.execute() && filled > 0) {
+            FluidStack toStore = stored.copyWithAmount(stored.getAmount() + filled);
+            mutateTankTag(container, tag -> tag.put(TAG_FLUID, saveFluid(toStore)));
         }
-        containerTag.put(TAG_FLUID, stack.writeToNBT(fluidTag));
         return filled;
     }
 
@@ -139,27 +141,24 @@ public interface IFluidContainerItem extends IContainerItem {
      */
     default FluidStack drain(ItemStack container, int maxDrain, FluidAction action) {
 
-        CompoundTag containerTag = getOrCreateTankTag(container);
-        if (maxDrain <= 0 || !containerTag.contains(TAG_FLUID)) {
+        if (maxDrain <= 0) {
             return FluidStack.EMPTY;
         }
-        FluidStack stack = FluidStack.loadFluidStackFromNBT(containerTag.getCompound(TAG_FLUID));
-        if (stack.isEmpty()) {
+        FluidStack stored = getFluid(container);
+        if (stored.isEmpty()) {
             return FluidStack.EMPTY;
         }
         boolean creative = isCreative(container, FLUID);
-        int drained = creative ? maxDrain : Math.min(stack.getAmount(), maxDrain);
+        int drained = creative ? maxDrain : Math.min(stored.getAmount(), maxDrain);
         if (action.execute() && !creative) {
-            if (maxDrain >= stack.getAmount()) {
-                containerTag.remove(TAG_FLUID);
-                return stack;
+            if (maxDrain >= stored.getAmount()) {
+                mutateTankTag(container, tag -> tag.remove(TAG_FLUID));
+                return stored;
             }
-            CompoundTag fluidTag = containerTag.getCompound(TAG_FLUID);
-            fluidTag.putInt(TAG_AMOUNT, fluidTag.getInt(TAG_AMOUNT) - drained);
-            containerTag.put(TAG_FLUID, fluidTag);
+            FluidStack remaining = stored.copyWithAmount(stored.getAmount() - drained);
+            mutateTankTag(container, tag -> tag.put(TAG_FLUID, saveFluid(remaining)));
         }
-        stack.setAmount(drained);
-        return stack;
+        return stored.copyWithAmount(drained);
     }
 
 }

@@ -1,8 +1,11 @@
 package cofh.lib.api.item;
 
 import cofh.lib.util.helpers.MathHelper;
+import cofh.core.util.helpers.ItemHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.function.Consumer;
 
 import static cofh.lib.api.ContainerType.ENERGY;
 import static cofh.lib.util.constants.NBTTags.TAG_ENERGY;
@@ -16,9 +19,20 @@ import static cofh.lib.util.constants.NBTTags.TAG_ENERGY;
  */
 public interface IEnergyContainerItem extends IContainerItem {
 
-    default CompoundTag getOrCreateEnergyTag(ItemStack container) {
+    /**
+     * The NBT the stored energy lives in, as a copy - 1.20.5+ item data is immutable
+     * {@link net.minecraft.world.item.component.CustomData}, so writes go through
+     * {@link #mutateEnergyTag}. Implementations that keep energy somewhere else (a block item's
+     * block entity data, say) override both.
+     */
+    default CompoundTag getEnergyTag(ItemStack container) {
 
-        return container.getOrCreateTag();
+        return ItemHelper.getCustomData(container);
+    }
+
+    default void mutateEnergyTag(ItemStack container, Consumer<CompoundTag> mutator) {
+
+        ItemHelper.mutateCustomData(container, mutator);
     }
 
     default int getSpace(ItemStack container) {
@@ -36,8 +50,7 @@ public interface IEnergyContainerItem extends IContainerItem {
      */
     default int getEnergyStored(ItemStack container) {
 
-        CompoundTag tag = getOrCreateEnergyTag(container);
-        return Math.min(tag.getInt(TAG_ENERGY), getMaxEnergyStored(container));
+        return Math.min(getEnergyTag(container).getInt(TAG_ENERGY), getMaxEnergyStored(container));
     }
 
     int getExtract(ItemStack container);
@@ -51,8 +64,7 @@ public interface IEnergyContainerItem extends IContainerItem {
 
     default void setEnergyStored(ItemStack container, int energy) {
 
-        CompoundTag tag = getOrCreateEnergyTag(container);
-        tag.putInt(TAG_ENERGY, MathHelper.clamp(energy, 0, getMaxEnergyStored(container)));
+        mutateEnergyTag(container, tag -> tag.putInt(TAG_ENERGY, MathHelper.clamp(energy, 0, getMaxEnergyStored(container))));
     }
 
     /**
@@ -66,16 +78,15 @@ public interface IEnergyContainerItem extends IContainerItem {
      */
     default int receiveEnergy(ItemStack container, int maxReceive, boolean simulate) {
 
-        CompoundTag tag = getOrCreateEnergyTag(container);
         if (isCreative(container, ENERGY)) {
             return 0;
         }
-        int stored = Math.min(tag.getInt(TAG_ENERGY), getMaxEnergyStored(container));
+        int stored = getEnergyStored(container);
         int receive = Math.min(Math.min(maxReceive, getReceive(container)), getSpace(container));
 
         if (!simulate) {
-            stored += receive;
-            tag.putInt(TAG_ENERGY, stored);
+            int total = stored + receive;
+            mutateEnergyTag(container, tag -> tag.putInt(TAG_ENERGY, total));
         }
         return receive;
     }
@@ -91,16 +102,15 @@ public interface IEnergyContainerItem extends IContainerItem {
      */
     default int extractEnergy(ItemStack container, int maxExtract, boolean simulate) {
 
-        CompoundTag tag = getOrCreateEnergyTag(container);
         if (isCreative(container, ENERGY)) {
             return maxExtract;
         }
-        int stored = Math.min(tag.getInt(TAG_ENERGY), getMaxEnergyStored(container));
+        int stored = getEnergyStored(container);
         int extract = Math.min(Math.min(maxExtract, getExtract(container)), stored);
 
         if (!simulate) {
-            stored -= extract;
-            tag.putInt(TAG_ENERGY, stored);
+            int total = stored - extract;
+            mutateEnergyTag(container, tag -> tag.putInt(TAG_ENERGY, total));
         }
         return extract;
     }

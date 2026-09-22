@@ -3,6 +3,7 @@ package cofh.lib.api.item;
 import cofh.core.common.item.IMultiModeItem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
+import cofh.core.util.helpers.ItemHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
@@ -67,22 +68,22 @@ public interface ICoFHItem extends IItemExtension {
 
     default boolean isActive(ItemStack stack) {
 
-        return stack.getOrCreateTag().getBoolean(TAG_ACTIVE);
+        return ItemHelper.getCustomData(stack).getBoolean(TAG_ACTIVE);
     }
 
     default void setActive(ItemStack stack, boolean state) {
 
-        stack.getOrCreateTag().putBoolean(TAG_ACTIVE, state);
+        ItemHelper.mutateCustomData(stack, tag -> tag.putBoolean(TAG_ACTIVE, state));
     }
 
     default boolean hasActiveTag(ItemStack stack) {
 
-        return stack.getOrCreateTag().contains(TAG_ACTIVE);
+        return ItemHelper.getCustomData(stack).contains(TAG_ACTIVE);
     }
 
     default void setActive(ItemStack stack, LivingEntity entity) {
 
-        stack.getOrCreateTag().putLong(TAG_ACTIVE, entity.level.getGameTime() + 20);
+        ItemHelper.mutateCustomData(stack, tag -> tag.putLong(TAG_ACTIVE, entity.level().getGameTime() + 20));
     }
 
 }

@@ -5,6 +5,7 @@ import cofh.lib.api.control.ISecurable.AccessMode;
 import com.google.common.base.Strings;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
+import cofh.core.util.helpers.ItemHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.OldUsersConverter;
@@ -85,7 +86,7 @@ public final class SecurityHelper {
     // region ITEM HELPERS
     public static void createSecurityTag(ItemStack stack) {
 
-        stack.getOrCreateTagElement(TAG_SECURITY);
+        ItemHelper.setCustomSubTag(stack, TAG_SECURITY, new CompoundTag());
     }
 
     public static boolean isItemClaimable(ItemStack stack) {
@@ -105,11 +106,12 @@ public final class SecurityHelper {
 
     public static CompoundTag getSecurityTag(ItemStack stack) {
 
-        CompoundTag nbt = stack.getTagElement(TAG_BLOCK_ENTITY);
-        if (nbt != null) {
-            return nbt.contains(TAG_SECURITY) ? nbt.getCompound(TAG_SECURITY) : null;
+        // Block items carry their security in the block entity data vanilla restores on placement.
+        CompoundTag blockEntityData = ItemHelper.getBlockEntityData(stack);
+        if (!blockEntityData.isEmpty()) {
+            return blockEntityData.contains(TAG_SECURITY) ? blockEntityData.getCompound(TAG_SECURITY) : null;
         }
-        return stack.getTagElement(TAG_SECURITY);
+        return ItemHelper.hasCustomSubTag(stack, TAG_SECURITY) ? ItemHelper.getCustomSubTag(stack, TAG_SECURITY) : null;
     }
 
     public static boolean hasSecurity(ItemStack stack) {

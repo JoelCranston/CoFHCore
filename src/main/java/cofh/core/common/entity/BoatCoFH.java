@@ -1,12 +1,15 @@
 package cofh.core.common.entity;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -22,7 +25,7 @@ import static net.minecraft.nbt.Tag.TAG_COMPOUND;
 
 public class BoatCoFH extends Boat implements IOnPlaced {
 
-    protected ListTag enchantments = new ListTag();
+    protected ItemEnchantments enchantments = ItemEnchantments.EMPTY;
 
     public BoatCoFH(EntityType<? extends Boat> type, Level worldIn) {
 
@@ -40,7 +43,7 @@ public class BoatCoFH extends Boat implements IOnPlaced {
 
     public BoatCoFH onPlaced(ItemStack stack) {
 
-        this.enchantments = stack.getEnchantmentTags();
+        this.enchantments = stack.getEnchantments();
         return this;
     }
 
@@ -53,10 +56,10 @@ public class BoatCoFH extends Boat implements IOnPlaced {
     public ItemStack createItemStackTag(ItemStack stack) {
 
         if (this.hasCustomName()) {
-            stack.setHoverName(this.getCustomName());
+            stack.set(DataComponents.CUSTOM_NAME, this.getCustomName());
         }
         if (!this.enchantments.isEmpty()) {
-            stack.addTagElement(TAG_ENCHANTMENTS, enchantments);
+            stack.set(DataComponents.ENCHANTMENTS, this.enchantments);
         }
         return stack;
     }
@@ -66,7 +69,9 @@ public class BoatCoFH extends Boat implements IOnPlaced {
 
         super.readAdditionalSaveData(compound);
 
-        enchantments = compound.getList(TAG_ENCHANTMENTS, TAG_COMPOUND);
+        enchantments = ItemEnchantments.CODEC
+                .parse(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), compound.get(TAG_ENCHANTMENTS))
+                .result().orElse(ItemEnchantments.EMPTY);
     }
 
     @Override
@@ -74,7 +79,11 @@ public class BoatCoFH extends Boat implements IOnPlaced {
 
         super.addAdditionalSaveData(compound);
 
-        compound.put(TAG_ENCHANTMENTS, enchantments);
+        if (!enchantments.isEmpty()) {
+            ItemEnchantments.CODEC
+                    .encodeStart(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), enchantments)
+                    .result().ifPresent(tag -> compound.put(TAG_ENCHANTMENTS, tag));
+        }
     }
 
     @Override

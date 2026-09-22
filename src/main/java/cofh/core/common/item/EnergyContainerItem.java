@@ -87,10 +87,8 @@ public abstract class EnergyContainerItem extends ItemCoFH implements IEnergyCon
     @Override
     public int getBarWidth(ItemStack stack) {
 
-        if (stack.getTag() == null) {
-            return 0;
-        }
-        return (int) Math.round(13.0D * getEnergyStored(stack) / (double) getMaxEnergyStored(stack));
+        int max = getMaxEnergyStored(stack);
+        return max <= 0 ? 0 : (int) Math.round(13.0D * getEnergyStored(stack) / (double) max);
     }
 
     // region IEnergyContainerItem

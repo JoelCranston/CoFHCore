@@ -5,6 +5,7 @@ import cofh.core.common.item.IMultiModeItem;
 import com.google.common.base.Strings;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -12,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.Block;
 
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public final class ItemHelper {
@@ -103,6 +105,78 @@ public final class ItemHelper {
             container.set(DataComponents.CUSTOM_DATA, CustomData.of(other.get(DataComponents.CUSTOM_DATA).copyTag()));
         }
         return container;
+    }
+
+    /**
+     * The mod-attached NBT blob, as a copy. {@link CustomData} is immutable and hands out copies -
+     * mutating what this returns does not touch the stack. Empty rather than null when absent.
+     */
+    public static CompoundTag getCustomData(ItemStack stack) {
+
+        return stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+    }
+
+    public static boolean hasCustomData(ItemStack stack) {
+
+        return stack.has(DataComponents.CUSTOM_DATA) && !stack.get(DataComponents.CUSTOM_DATA).isEmpty();
+    }
+
+    public static void setCustomData(ItemStack stack, CompoundTag tag) {
+
+        if (tag == null || tag.isEmpty()) {
+            stack.remove(DataComponents.CUSTOM_DATA);
+        } else {
+            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        }
+    }
+
+    /**
+     * Read-modify-write of the mod-attached blob; the replacement for the old
+     * {@code stack.getOrCreateTag().putX(...)} pattern, which mutated a live tag in place.
+     */
+    public static void mutateCustomData(ItemStack stack, Consumer<CompoundTag> mutator) {
+
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, mutator);
+    }
+
+    /**
+     * A sub-compound of the mod-attached blob, as a copy - the old {@code getTagElement}. Empty
+     * rather than null when absent, so callers can read without a null check.
+     */
+    public static CompoundTag getCustomSubTag(ItemStack stack, String key) {
+
+        return getCustomData(stack).getCompound(key);
+    }
+
+    public static boolean hasCustomSubTag(ItemStack stack, String key) {
+
+        return getCustomData(stack).contains(key, Tag.TAG_COMPOUND);
+    }
+
+    /**
+     * Writes a sub-compound into the mod-attached blob - the old {@code addTagElement}.
+     */
+    public static void setCustomSubTag(ItemStack stack, String key, Tag value) {
+
+        mutateCustomData(stack, tag -> tag.put(key, value));
+    }
+
+    /**
+     * The block entity data vanilla itself writes to a stack; its own component since 1.20.5,
+     * not part of the mod-attached blob.
+     */
+    public static CompoundTag getBlockEntityData(ItemStack stack) {
+
+        return stack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).copyTag();
+    }
+
+    public static void setBlockEntityData(ItemStack stack, CompoundTag tag) {
+
+        if (tag == null || tag.isEmpty()) {
+            stack.remove(DataComponents.BLOCK_ENTITY_DATA);
+        } else {
+            stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        }
     }
 
     public static CompoundTag setItemStackTagName(CompoundTag tag, String name) {

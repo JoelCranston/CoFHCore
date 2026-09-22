@@ -14,6 +14,7 @@ import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -84,7 +85,7 @@ public class BoatItemCoFH extends ItemCoFH {
     protected Boat createBoat(ItemStack stack, Level level, float rotation, double posX, double posY, double posZ) {
 
         var boat = factory.createBoat(type, level, posX, posY, posZ);
-        if (stack.hasCustomHoverName()) {
+        if (stack.has(DataComponents.CUSTOM_NAME)) {
             boat.setCustomName(stack.getHoverName());
         }
         if (boat instanceof IOnPlaced placedBoat) {

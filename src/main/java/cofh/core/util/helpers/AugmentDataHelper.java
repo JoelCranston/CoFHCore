@@ -28,11 +28,10 @@ public final class AugmentDataHelper {
     @Nullable
     public static CompoundTag getAugmentData(ItemStack augment) {
 
-        CompoundTag augmentData = augment.getTagElement(TAG_AUGMENT_DATA);
-        if (augmentData == null && isAugmentItem(augment)) {
-            return ((IAugmentItem) augment.getItem()).getAugmentData(augment);
+        if (ItemHelper.hasCustomSubTag(augment, TAG_AUGMENT_DATA)) {
+            return ItemHelper.getCustomSubTag(augment, TAG_AUGMENT_DATA);
         }
-        return augmentData;
+        return isAugmentItem(augment) ? ((IAugmentItem) augment.getItem()).getAugmentData(augment) : null;
     }
 
     public static String getAugmentType(ItemStack augment) {

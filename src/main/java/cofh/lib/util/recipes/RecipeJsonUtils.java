@@ -6,12 +6,14 @@ import cofh.lib.util.crafting.IngredientWithCount;
 import com.google.gson.*;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -214,7 +216,7 @@ public abstract class RecipeJsonUtils {
                     } else {
                         nbt = TagParser.parseTag(GsonHelper.convertToString(nbtElement, NBT));
                     }
-                    stack.setTag(nbt);
+                    stack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
                 } catch (Exception e) {
                     LOG.debug("Invalid ItemStack - using EMPTY instead!", e);
                     return ItemStack.EMPTY;
@@ -265,7 +267,7 @@ public abstract class RecipeJsonUtils {
                     } else {
                         nbt = TagParser.parseTag(GsonHelper.convertToString(nbtElement, NBT));
                     }
-                    stack.setTag(nbt);
+                    stack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
                 } catch (Exception e) {
                     LOG.debug("Invalid FluidStack - using EMPTY instead!", e);
                     return FluidStack.EMPTY;

@@ -3,6 +3,7 @@ package cofh.core.common.block.entity;
 import cofh.core.util.control.ISecurableTile;
 import cofh.core.util.control.SecurityControlModule;
 import net.minecraft.core.BlockPos;
+import cofh.core.util.helpers.ItemHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
@@ -23,13 +24,11 @@ public class SecurableBlockEntity extends BlockEntityCoFH implements ISecurableT
     @Override
     public ItemStack createItemStackTag(ItemStack stack) {
 
-        CompoundTag nbt = stack.getOrCreateTagElement(TAG_BLOCK_ENTITY);
+        CompoundTag nbt = ItemHelper.getBlockEntityData(stack);
         if (hasSecurity()) {
             securityControl().write(nbt);
         }
-        if (!nbt.isEmpty()) {
-            stack.addTagElement(TAG_BLOCK_ENTITY, nbt);
-        }
+        ItemHelper.setBlockEntityData(stack, nbt);
         return super.createItemStackTag(stack);
     }
 

@@ -1,6 +1,7 @@
 package cofh.lib.util.crafting;
 
 import net.minecraft.nbt.CompoundTag;
+import cofh.core.util.helpers.ItemHelper;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -18,8 +19,8 @@ public class ComparableItemStackNBT extends ComparableItemStack {
 
         super(stack);
 
-        if (!stack.isEmpty() && stack.getTag() != null) {
-            tag = stack.getTag().copy();
+        if (!stack.isEmpty() && ItemHelper.hasCustomData(stack)) {
+            tag = ItemHelper.getCustomData(stack);
         }
     }
 
@@ -40,7 +41,7 @@ public class ComparableItemStackNBT extends ComparableItemStack {
         ItemStack ret = super.toItemStack();
 
         if (!ret.isEmpty() && tag != null) {
-            ret.setTag(tag.copy());
+            ItemHelper.setCustomData(ret, tag.copy());
         }
         return ret;
     }

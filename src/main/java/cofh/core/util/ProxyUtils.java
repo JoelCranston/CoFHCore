@@ -4,13 +4,17 @@ import cofh.core.CoFHCore;
 import cofh.core.common.network.packet.client.OverlayMessagePacket;
 import cofh.lib.api.IProxyItemPropertyGetter;
 import cofh.lib.api.block.entity.IAreaEffectTile;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 public class ProxyUtils {
 
@@ -44,6 +48,24 @@ public class ProxyUtils {
     public static Level getClientWorld() {
 
         return CoFHCore.PROXY.getClientWorld();
+    }
+
+    /**
+     * The registry lookup needed to (de)serialize an {@link net.minecraft.world.item.ItemStack}
+     * since 1.20.5. Several CoFH APIs persist stacks from an {@code ItemStack}-only context with
+     * no registry access threaded in (augments, container-item inventories); those read/write only
+     * while a world is loaded, so the running server's - or, client-side, the client level's -
+     * registries are the correct source. Falls back to {@link RegistryAccess#EMPTY} rather than
+     * throwing, which loses component data referencing registries but keeps plain stacks working.
+     */
+    public static HolderLookup.Provider registryAccess() {
+
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server != null) {
+            return server.registryAccess();
+        }
+        Level clientLevel = isClient() ? getClientWorld() : null;
+        return clientLevel != null ? clientLevel.registryAccess() : RegistryAccess.EMPTY;
     }
 
     public static boolean isClient() {

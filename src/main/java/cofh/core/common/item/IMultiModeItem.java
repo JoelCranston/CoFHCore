@@ -1,5 +1,6 @@
 package cofh.core.common.item;
 
+import cofh.core.util.helpers.ItemHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -14,9 +15,18 @@ import static cofh.lib.util.constants.NBTTags.TAG_MODE;
  */
 public interface IMultiModeItem {
 
-    default CompoundTag getOrCreateModeTag(ItemStack stack) {
+    /**
+     * The mod-attached blob the mode lives in. 1.20.5+: this is a copy - mutating it does nothing
+     * to the stack, so writes go through {@link #setModeTag}.
+     */
+    default CompoundTag getModeTag(ItemStack stack) {
 
-        return stack.getOrCreateTag();
+        return ItemHelper.getCustomData(stack);
+    }
+
+    default void setModeTag(ItemStack stack, int mode) {
+
+        ItemHelper.mutateCustomData(stack, tag -> tag.putInt(TAG_MODE, mode));
     }
 
     /**
@@ -24,7 +34,7 @@ public interface IMultiModeItem {
      */
     default int getMode(ItemStack stack) {
 
-        return getOrCreateModeTag(stack).getInt(TAG_MODE);
+        return getModeTag(stack).getInt(TAG_MODE);
     }
 
     /**
@@ -40,7 +50,7 @@ public interface IMultiModeItem {
             mode = 0;
         }
         if (mode < getNumModes(stack)) {
-            getOrCreateModeTag(stack).putInt(TAG_MODE, mode);
+            setModeTag(stack, mode);
             return true;
         }
         return false;
@@ -59,7 +69,7 @@ public interface IMultiModeItem {
         if (curMode >= getNumModes(stack)) {
             curMode = 0;
         }
-        getOrCreateModeTag(stack).putInt(TAG_MODE, curMode);
+        setModeTag(stack, curMode);
         return true;
     }
 
@@ -77,7 +87,7 @@ public interface IMultiModeItem {
         if (curMode < 0) {
             curMode = getNumModes(stack) - 1;
         }
-        getOrCreateModeTag(stack).putInt(TAG_MODE, curMode);
+        setModeTag(stack, curMode);
         return true;
     }
 

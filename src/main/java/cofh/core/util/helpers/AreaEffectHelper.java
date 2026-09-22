@@ -55,8 +55,8 @@ public final class AreaEffectHelper {
     public static ImmutableList<BlockPos> getAreaEffectBlocks(ItemStack stack, BlockPos pos, Player player) {
 
         int encExcavating = getItemEnchantmentLevel(getEnchantment(ID_ENSORCELLATION, ID_EXCAVATING), stack);
-        if (!stack.isEmpty() && stack.hasTag()) {
-            CompoundTag tag = stack.getTag();
+        if (!stack.isEmpty() && ItemHelper.hasCustomData(stack)) {
+            CompoundTag tag = ItemHelper.getCustomData(stack);
             if (tag.contains(TAG_INFUSION_ENCHANT, Tag.TAG_LIST)) {
                 ListTag list = tag.getList(TAG_INFUSION_ENCHANT, Tag.TAG_COMPOUND);
                 for (int i = 0; i < list.size(); ++i) {

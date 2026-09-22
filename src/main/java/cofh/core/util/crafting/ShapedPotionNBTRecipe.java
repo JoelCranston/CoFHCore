@@ -7,6 +7,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
@@ -50,8 +51,8 @@ public class ShapedPotionNBTRecipe implements CraftingRecipe, IShapedRecipe<Craf
 
         for (int i = 0; i < inv.getContainerSize(); ++i) {
             ItemStack stack = inv.getItem(i);
-            if (stack.getItem() == Items.POTION && stack.getTag() != null) {
-                result.setTag(stack.getTag().copy());
+            if (stack.getItem() == Items.POTION && stack.has(DataComponents.POTION_CONTENTS)) {
+                result.set(DataComponents.POTION_CONTENTS, stack.get(DataComponents.POTION_CONTENTS));
                 break;
             }
         }
