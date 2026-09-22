@@ -1,12 +1,13 @@
 package cofh.lib.common.entity;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
@@ -83,19 +84,19 @@ public abstract class AbstractFieldSpell extends AbstractAoESpell implements IEn
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag tag) {
+    protected void addAdditionalSaveData(ValueOutput output) {
 
-        super.addAdditionalSaveData(tag);
-        tag.putInt(TAG_DURATION, duration);
-        tag.putFloat(TAG_AUGMENT_RADIUS, getRadius());
+        super.addAdditionalSaveData(output);
+        output.putInt(TAG_DURATION, duration);
+        output.putFloat(TAG_AUGMENT_RADIUS, getRadius());
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag tag) {
+    protected void readAdditionalSaveData(ValueInput input) {
 
-        super.readAdditionalSaveData(tag);
-        this.duration = tag.getInt(TAG_DURATION);
-        setRadius(tag.getFloat(TAG_AUGMENT_RADIUS));
+        super.readAdditionalSaveData(input);
+        this.duration = input.getIntOr(TAG_DURATION, 0);
+        setRadius(input.getFloatOr(TAG_AUGMENT_RADIUS, 0.0F));
     }
 
 }

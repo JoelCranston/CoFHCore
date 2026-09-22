@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import static cofh.lib.util.constants.NBTTags.*;
-import static net.minecraft.nbt.Tag.TAG_COMPOUND;
 
 public class BaseItemFilter implements IFilter, IFilterOptions {
 
@@ -85,7 +84,7 @@ public class BaseItemFilter implements IFilter, IFilterOptions {
     @Override
     public IFilter read(HolderLookup.Provider provider, CompoundTag nbt) {
 
-        CompoundTag subTag = nbt.getCompound(TAG_FILTER);
+        CompoundTag subTag = nbt.getCompoundOrEmpty(TAG_FILTER);
         //        int size = subTag.getInt(TAG_SLOTS);
         //        if (size > 0) {
         //            items = new ArrayList<>(size);
@@ -93,16 +92,16 @@ public class BaseItemFilter implements IFilter, IFilterOptions {
         //                items.add(ItemStack.EMPTY);
         //            }
         //        }
-        ListTag list = subTag.getList(TAG_ITEM_INV, TAG_COMPOUND);
+        ListTag list = subTag.getListOrEmpty(TAG_ITEM_INV);
         for (int i = 0; i < list.size(); ++i) {
-            CompoundTag slotTag = list.getCompound(i);
-            int slot = slotTag.getByte(TAG_SLOT);
+            CompoundTag slotTag = list.getCompoundOrEmpty(i);
+            int slot = slotTag.getByteOr(TAG_SLOT, (byte) 0);
             if (slot >= 0 && slot < items.size()) {
-                items.set(slot, ItemStack.parseOptional(provider, slotTag));
+                items.set(slot, ItemHelper.parseOptional(provider, slotTag));
             }
         }
-        allowList = subTag.getBoolean(TAG_FILTER_OPT_LIST);
-        checkNBT = subTag.getBoolean(TAG_FILTER_OPT_NBT);
+        allowList = subTag.getBooleanOr(TAG_FILTER_OPT_LIST, false);
+        checkNBT = subTag.getBooleanOr(TAG_FILTER_OPT_NBT, false);
         return this;
     }
 
@@ -118,7 +117,7 @@ public class BaseItemFilter implements IFilter, IFilterOptions {
             if (!items.get(i).isEmpty()) {
                 CompoundTag slotTag = new CompoundTag();
                 slotTag.putByte(TAG_SLOT, (byte) i);
-                Tag saved = items.get(i).save(provider);
+                Tag saved = ItemHelper.saveOptional(provider, items.get(i));
                 if (saved instanceof CompoundTag savedTag) {
                     slotTag.merge(savedTag);
                 }

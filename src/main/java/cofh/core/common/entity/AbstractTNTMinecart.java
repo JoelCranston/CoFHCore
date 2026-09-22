@@ -3,7 +3,6 @@ package cofh.core.common.entity;
 import cofh.lib.api.IDetonatable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
@@ -20,6 +19,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import static cofh.lib.util.constants.NBTTags.TAG_FUSE;
 
@@ -139,21 +140,19 @@ public abstract class AbstractTNTMinecart extends AbstractMinecartCoFH implement
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag compound) {
+    public void readAdditionalSaveData(ValueInput input) {
 
-        super.readAdditionalSaveData(compound);
+        super.readAdditionalSaveData(input);
 
-        if (compound.contains(TAG_FUSE, 99)) {
-            this.fuse = compound.getInt(TAG_FUSE);
-        }
+        this.fuse = input.getIntOr(TAG_FUSE, this.fuse);
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag compound) {
+    public void addAdditionalSaveData(ValueOutput output) {
 
-        super.addAdditionalSaveData(compound);
+        super.addAdditionalSaveData(output);
 
-        compound.putInt(TAG_FUSE, this.fuse);
+        output.putInt(TAG_FUSE, this.fuse);
     }
 
     @Override

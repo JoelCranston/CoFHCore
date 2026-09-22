@@ -37,7 +37,7 @@ public final class AugmentDataHelper {
     public static String getAugmentType(ItemStack augment) {
 
         CompoundTag augmentTag = getAugmentData(augment);
-        return augmentTag != null ? augmentTag.getString(TAG_TYPE) : "";
+        return augmentTag != null ? augmentTag.getStringOr(TAG_TYPE, "") : "";
     }
 
     public static Builder builder() {

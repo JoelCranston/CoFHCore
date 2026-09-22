@@ -48,7 +48,7 @@ public interface IEnergyContainerItem extends IContainerItem {
      */
     default int getEnergyStored(ItemStack container) {
 
-        return Math.min(getEnergyTag(container).getInt(TAG_ENERGY), getMaxEnergyStored(container));
+        return Math.min(getEnergyTag(container).getIntOr(TAG_ENERGY, 0), getMaxEnergyStored(container));
     }
 
     int getExtract(ItemStack container);

@@ -7,6 +7,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
 
 import java.util.Collection;
 import java.util.function.Supplier;
@@ -31,18 +32,18 @@ public class SubCommandFriend {
                         .executes((context) -> clearFriends(context.getSource().getPlayerOrException())));
     }
 
-    private static int addFriends(ServerPlayer user, Collection<GameProfile> players) {
+    private static int addFriends(ServerPlayer user, Collection<NameAndId> players) {
 
-        for (GameProfile player : players) {
-            SocialUtils.addFriend(user, player);
+        for (NameAndId player : players) {
+            SocialUtils.addFriend(user, new GameProfile(player.id(), player.name()));
         }
         return players.size();
     }
 
-    private static int removeFriends(ServerPlayer user, Collection<GameProfile> players) {
+    private static int removeFriends(ServerPlayer user, Collection<NameAndId> players) {
 
-        for (GameProfile player : players) {
-            SocialUtils.removeFriend(user, player);
+        for (NameAndId player : players) {
+            SocialUtils.removeFriend(user, new GameProfile(player.id(), player.name()));
         }
         return players.size();
     }

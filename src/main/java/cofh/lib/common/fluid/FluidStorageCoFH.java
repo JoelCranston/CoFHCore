@@ -1,5 +1,6 @@
 package cofh.lib.common.fluid;
 
+import cofh.core.util.helpers.FluidHelper;
 import cofh.lib.api.IResourceStorage;
 import cofh.lib.api.fluid.IFluidStackHolder;
 import cofh.lib.util.helpers.MathHelper;
@@ -116,7 +117,7 @@ public class FluidStorageCoFH implements IFluidHandler, IFluidStackHolder, IReso
     // region NBT
     public FluidStorageCoFH read(HolderLookup.Provider provider, CompoundTag nbt) {
 
-        FluidStack fluid = FluidStack.parseOptional(provider, nbt);
+        FluidStack fluid = FluidHelper.parseOptional(provider, nbt);
         setFluidStack(fluid);
         return this;
     }
@@ -124,7 +125,7 @@ public class FluidStorageCoFH implements IFluidHandler, IFluidStackHolder, IReso
     public CompoundTag write(HolderLookup.Provider provider, CompoundTag nbt) {
 
         // save() throws on an empty stack.
-        if (fluid.saveOptional(provider) instanceof CompoundTag savedTag) {
+        if (FluidHelper.saveOptional(provider, fluid) instanceof CompoundTag savedTag) {
             nbt.merge(savedTag);
         }
         nbt.putInt(TAG_CAPACITY, baseCapacity);

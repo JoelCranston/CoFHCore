@@ -4,7 +4,6 @@ import cofh.core.util.helpers.ArcheryHelper;
 import cofh.lib.util.constants.NBTTags;
 import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -17,6 +16,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Portal;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -218,17 +219,17 @@ public class ProjectileCoFH extends Projectile {
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag tag) {
+    protected void addAdditionalSaveData(ValueOutput output) {
 
-        super.addAdditionalSaveData(tag);
-        tag.putFloat(NBTTags.TAG_POWER, this.power);
+        super.addAdditionalSaveData(output);
+        output.putFloat(NBTTags.TAG_POWER, this.power);
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag tag) {
+    protected void readAdditionalSaveData(ValueInput input) {
 
-        super.readAdditionalSaveData(tag);
-        this.power = tag.getFloat(NBTTags.TAG_POWER);
+        super.readAdditionalSaveData(input);
+        this.power = input.getFloatOr(NBTTags.TAG_POWER, 0.0F);
     }
 
 }

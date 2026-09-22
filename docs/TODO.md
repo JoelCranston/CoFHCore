@@ -2,7 +2,7 @@
 
 Phase A (1.21.1) is **code-complete**: all four repos build clean and boot headless on
 NeoForge 21.1.251, and `runData` now runs in all four. Phase B (26.1.2) is under way on the
-`26.1.2` branch: B.0-B.2 done, **1537 errors** left in CoFHCore. See
+`26.1.2` branch: B.0-B.3 done, **1364 errors** left in CoFHCore. See
 [api-notes-1.21.1.md](api-notes-1.21.1.md) / [api-notes-26.1.2.md](api-notes-26.1.2.md) for
 confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 
@@ -37,13 +37,14 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 | B.0 build bump + forced AT sweep (B.9's AT half) | `6eb201f` | 2445 / 318 files (baseline) |
 | B.1 mechanical renames | `6f0c7a7`, stragglers `e7896aa` | 1537 |
 | B.2 registration | `f02ba1b` | (included above) |
-| **B.3 persistence** — `BlockEntityCoFH` family, entities, `IFilter`, storages, `SavedData` → `ValueInput`/`ValueOutput` | next | |
-| B.4 transfer API (XL) · B.5 items/tools/armour · B.6 recipes · B.7 client (XL) · B.8 resources · B.9 mixins · B.10 dependents | | |
+| B.3 persistence — bridged at `BlockEntityCoFH`, entities native, `SavedDataType`, tag getters | (this commit) | 1364 |
+| **B.4 transfer API** (XL) — CoFHCore storage stack, then every capability site | next | |
+| B.5 items/tools/armour · B.6 recipes · B.7 client (XL) · B.8 resources · B.9 mixins · B.10 dependents | | |
 
 [port-plan.md](port-plan.md) §6 has each category's contents. Carry-overs into Phase B:
 
 - **B.1 table rows not yet swept**, each owned by its later category: `Screen.hasShiftDown` (7
-  files), `Ingredient.EMPTY`/`getItems()` (5, B.6), `INBTSerializable` (3, B.3),
+  files), `Ingredient.EMPTY`/`getItems()` (5, B.6),
   `getStillTexture`/`getFlowingTexture` (5, B.7e), the reload/shader events (4, B.7),
   `ClickType` → `ContainerInput` (1), `getCraftingRemainingItem` (1), `DeferredSpawnEggItem` (1),
   `RenderType.*` → `RenderTypes` (1). `javax.annotation` (95 files) still resolves; leave it.
@@ -52,6 +53,10 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
   (`PostChain#addToFrame`, `LevelRenderer.java:547`). The `PostChain#process(F)` call it injects
   before is gone, and the depth-mask workaround may no longer be needed at all. The 1.21.1 fix
   (`fa87214`) is on the `1.21.1` branch only.
+- **B.10 inherits from B.3**: TC/TD block entities keep their `(CompoundTag, Provider)` overrides
+  if they extend `BlockEntityCoFH` (check TD's `DuctBlockEntity`); their entities convert natively;
+  TD drops `INBTSerializable` from its grid classes and moves `GridContainer` to `SavedDataType`.
+  Friend lists and grid data won't carry over from 1.21.1 worlds (the saved-data file paths moved).
 - **B.8: regenerate, don't hand-migrate.** The `26.1.2` branch predates the 1.21.1 `runData`
   commits, so its `src/main/generated` still has the stale 1.20 layout. On 26.1 the data run is
   `clientData()`, which the 26.1.2 `build.gradle` already declares. ThermalExpansion's

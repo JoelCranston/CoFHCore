@@ -3,8 +3,10 @@ package cofh.core.util.helpers;
 import cofh.core.common.item.ILeftClickHandlerItem;
 import cofh.core.common.item.IMultiModeItem;
 import com.google.common.base.Strings;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -134,12 +136,12 @@ public final class ItemHelper {
 
     public static CompoundTag getCustomSubTag(ItemStack stack, String key) {
 
-        return getCustomData(stack).getCompound(key);
+        return getCustomData(stack).getCompoundOrEmpty(key);
     }
 
     public static boolean hasCustomSubTag(ItemStack stack, String key) {
 
-        return getCustomData(stack).contains(key, Tag.TAG_COMPOUND);
+        return getCustomData(stack).contains(key);
     }
 
     public static void setCustomSubTag(ItemStack stack, String key, Tag value) {
@@ -172,8 +174,18 @@ public final class ItemHelper {
         if (!tag.contains("display")) {
             tag.put("display", new CompoundTag());
         }
-        tag.getCompound("display").putString("Name", name);
+        tag.getCompoundOrEmpty("display").putString("Name", name);
         return tag;
+    }
+
+    public static ItemStack parseOptional(HolderLookup.Provider provider, Tag nbt) {
+
+        return ItemStack.OPTIONAL_CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), nbt).result().orElse(ItemStack.EMPTY);
+    }
+
+    public static Tag saveOptional(HolderLookup.Provider provider, ItemStack stack) {
+
+        return ItemStack.OPTIONAL_CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), stack).getOrThrow();
     }
     // endregion
 
@@ -218,13 +230,13 @@ public final class ItemHelper {
         if (tagA.isEmpty() && tagB.isEmpty()) {
             return true;
         }
-        int numberOfKeys = tagA.getAllKeys().size();
-        if (numberOfKeys != tagB.getAllKeys().size()) {
+        int numberOfKeys = tagA.keySet().size();
+        if (numberOfKeys != tagB.keySet().size()) {
             return false;
         }
 
         String[] keys = new String[numberOfKeys];
-        keys = tagA.getAllKeys().toArray(keys);
+        keys = tagA.keySet().toArray(keys);
 
         a:
         for (int i = 0; i < numberOfKeys; ++i) {
@@ -233,7 +245,7 @@ public final class ItemHelper {
                     continue a;
                 }
             }
-            if (!tagA.getCompound(keys[i]).equals(tagB.getCompound(keys[i]))) {
+            if (!tagA.getCompoundOrEmpty(keys[i]).equals(tagB.getCompoundOrEmpty(keys[i]))) {
                 return false;
             }
         }

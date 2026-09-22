@@ -24,7 +24,7 @@ public interface ISecurable {
 
     default String getOwnerName() {
 
-        return getOwner().getName();
+        return getOwner().name();
     }
 
     default boolean canAccess(Entity entity) {
@@ -53,7 +53,7 @@ public interface ISecurable {
 
         public boolean matches(GameProfile owner, Entity entity) {
 
-            UUID ownerID = owner.getId();
+            UUID ownerID = owner.id();
             if (isDefaultUUID(ownerID)) {
                 return true;
             }
@@ -71,7 +71,7 @@ public interface ISecurable {
                     if (team == null) {
                         return false;
                     }
-                    return team.getPlayers().contains(owner.getName());
+                    return team.getPlayers().contains(owner.name());
                 default:
                     return true;
             }

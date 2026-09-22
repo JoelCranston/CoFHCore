@@ -1,8 +1,6 @@
 package cofh.core.common.entity;
 
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -12,6 +10,8 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -63,24 +63,20 @@ public class BoatCoFH extends Boat implements IOnPlaced {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag compound) {
+    public void readAdditionalSaveData(ValueInput input) {
 
-        super.readAdditionalSaveData(compound);
+        super.readAdditionalSaveData(input);
 
-        enchantments = ItemEnchantments.CODEC
-                .parse(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), compound.get(TAG_ENCHANTMENTS))
-                .result().orElse(ItemEnchantments.EMPTY);
+        enchantments = input.read(TAG_ENCHANTMENTS, ItemEnchantments.CODEC).orElse(ItemEnchantments.EMPTY);
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag compound) {
+    public void addAdditionalSaveData(ValueOutput output) {
 
-        super.addAdditionalSaveData(compound);
+        super.addAdditionalSaveData(output);
 
         if (!enchantments.isEmpty()) {
-            ItemEnchantments.CODEC
-                    .encodeStart(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), enchantments)
-                    .result().ifPresent(tag -> compound.put(TAG_ENCHANTMENTS, tag));
+            output.store(TAG_ENCHANTMENTS, ItemEnchantments.CODEC, enchantments);
         }
     }
 

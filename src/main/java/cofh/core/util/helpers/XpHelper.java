@@ -71,7 +71,7 @@ public final class XpHelper {
     public static void attemptStoreXP(Player player, ExperienceOrb orb) {
 
         // Xp Storage Items
-        if (player.level.getGameTime() - player.getPersistentData().getLong(TAG_XP_TIMER) <= 40) {
+        if (player.level.getGameTime() - player.getPersistentData().getLongOr(TAG_XP_TIMER, 0L) <= 40) {
             Inventory inventory = player.getInventory();
             for (int i = 0; i < inventory.getContainerSize(); ++i) {
                 ItemStack stack = inventory.getItem(i);

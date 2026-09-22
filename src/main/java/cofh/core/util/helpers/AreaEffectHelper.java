@@ -8,7 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DiggerItem;
@@ -57,12 +56,12 @@ public final class AreaEffectHelper {
         int encExcavating = getItemEnchantmentLevel(getEnchantment(ID_ENSORCELLATION, ID_EXCAVATING), stack);
         if (!stack.isEmpty() && ItemHelper.hasCustomData(stack)) {
             CompoundTag tag = ItemHelper.getCustomData(stack);
-            if (tag.contains(TAG_INFUSION_ENCHANT, Tag.TAG_LIST)) {
-                ListTag list = tag.getList(TAG_INFUSION_ENCHANT, Tag.TAG_COMPOUND);
+            if (tag.contains(TAG_INFUSION_ENCHANT)) {
+                ListTag list = tag.getListOrEmpty(TAG_INFUSION_ENCHANT);
                 for (int i = 0; i < list.size(); ++i) {
-                    CompoundTag enchant = list.getCompound(i);
-                    if (enchant.getString(TAG_ID).equals("thaumcraft:destructive")) {
-                        encExcavating += enchant.getInt(TAG_LEVEL);
+                    CompoundTag enchant = list.getCompoundOrEmpty(i);
+                    if (enchant.getStringOr(TAG_ID, "").equals("thaumcraft:destructive")) {
+                        encExcavating += enchant.getIntOr(TAG_LEVEL, 0);
                     }
                 }
             }

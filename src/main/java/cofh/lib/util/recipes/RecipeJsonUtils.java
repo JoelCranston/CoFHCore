@@ -191,7 +191,7 @@ public abstract class RecipeJsonUtils {
         int count = 1;
 
         if (element.isJsonPrimitive()) {
-            item = BuiltInRegistries.ITEM.get(Identifier.parse(element.getAsString()));
+            item = BuiltInRegistries.ITEM.getValue(Identifier.parse(element.getAsString()));
             return item == null ? ItemStack.EMPTY : new ItemStack(item);
         } else {
             JsonObject itemObject = element.getAsJsonObject();
@@ -205,7 +205,7 @@ public abstract class RecipeJsonUtils {
 
             /* ITEM */
             if (itemObject.has(ITEM)) {
-                item = BuiltInRegistries.ITEM.get(Identifier.parse(itemObject.get(ITEM).getAsString()));
+                item = BuiltInRegistries.ITEM.getValue(Identifier.parse(itemObject.get(ITEM).getAsString()));
             }
             if (item == null) {
                 return ItemStack.EMPTY;
@@ -242,7 +242,7 @@ public abstract class RecipeJsonUtils {
         int amount = BUCKET_VOLUME;
 
         if (element.isJsonPrimitive()) {
-            fluid = BuiltInRegistries.FLUID.get(Identifier.parse(element.getAsString()));
+            fluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(element.getAsString()));
             return fluid == null ? FluidStack.EMPTY : new FluidStack(fluid, amount);
         } else {
             JsonObject fluidObject = element.getAsJsonObject();
@@ -256,7 +256,7 @@ public abstract class RecipeJsonUtils {
 
             /* FLUID */
             if (fluidObject.has(FLUID)) {
-                fluid = BuiltInRegistries.FLUID.get(Identifier.parse(fluidObject.get(FLUID).getAsString()));
+                fluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(fluidObject.get(FLUID).getAsString()));
             }
             if (fluid == null) {
                 return FluidStack.EMPTY;
@@ -304,7 +304,7 @@ public abstract class RecipeJsonUtils {
         }
         Block block;
 
-        block = BuiltInRegistries.BLOCK.get(Identifier.parse(element.getAsString()));
+        block = BuiltInRegistries.BLOCK.getValue(Identifier.parse(element.getAsString()));
         return block == null ? Blocks.AIR : block;
     }
 

@@ -15,8 +15,6 @@ import java.util.List;
 
 import static cofh.lib.util.Constants.MAX_AUGMENTS;
 import static cofh.lib.util.constants.NBTTags.*;
-import static net.minecraft.nbt.Tag.TAG_COMPOUND;
-import static net.minecraft.nbt.Tag.TAG_LIST;
 
 public final class AugmentableHelper {
 
@@ -98,22 +96,22 @@ public final class AugmentableHelper {
 
     public static float getAttributeMod(CompoundTag augmentData, String key) {
 
-        return augmentData.getFloat(key);
+        return augmentData.getFloatOr(key, 0.0F);
     }
 
     public static String getAttributeModString(CompoundTag augmentData, String key) {
 
-        return augmentData.getString(key);
+        return augmentData.getStringOr(key, "");
     }
 
     public static float getAttributeModWithDefault(CompoundTag augmentData, String key, float defaultValue) {
 
-        return augmentData.contains(key) ? augmentData.getFloat(key) : defaultValue;
+        return augmentData.getFloatOr(key, defaultValue);
     }
 
     public static String getAttributeModWithDefault(CompoundTag augmentData, String key, String defaultValue) {
 
-        return augmentData.contains(key) ? augmentData.getString(key) : defaultValue;
+        return augmentData.getStringOr(key, defaultValue);
     }
 
     public static float getPropertyWithDefault(ItemStack container, String key, float defaultValue) {
@@ -146,7 +144,7 @@ public final class AugmentableHelper {
         HolderLookup.Provider provider = ProxyUtils.registryAccess();
         ArrayList<ItemStack> ret = new ArrayList<>();
         for (int i = 0; i < list.size(); ++i) {
-            ret.add(ItemStack.parseOptional(provider, list.getCompound(i)));
+            ret.add(ItemHelper.parseOptional(provider, list.getCompoundOrEmpty(i)));
         }
         return ret.isEmpty() ? Collections.emptyList() : ret;
     }
@@ -154,10 +152,10 @@ public final class AugmentableHelper {
     private static ListTag getAugmentNBT(ItemStack stack) {
 
         CompoundTag blockEntityData = ItemHelper.getBlockEntityData(stack);
-        if (blockEntityData.contains(TAG_AUGMENTS, TAG_LIST)) {
-            return blockEntityData.getList(TAG_AUGMENTS, TAG_COMPOUND);
+        if (blockEntityData.contains(TAG_AUGMENTS)) {
+            return blockEntityData.getListOrEmpty(TAG_AUGMENTS);
         }
-        return ItemHelper.getCustomData(stack).getList(TAG_AUGMENTS, TAG_COMPOUND);
+        return ItemHelper.getCustomData(stack).getListOrEmpty(TAG_AUGMENTS);
     }
 
     private static ListTag convertAugments(List<ItemStack> augments) {
@@ -166,7 +164,7 @@ public final class AugmentableHelper {
         for (ItemStack augment : augments) {
             // Empty slots are intentionally written.
             //if (!augment.isEmpty()) {
-            list.add(augment.isEmpty() ? new CompoundTag() : augment.save(ProxyUtils.registryAccess()));
+            list.add(augment.isEmpty() ? new CompoundTag() : ItemHelper.saveOptional(ProxyUtils.registryAccess(), augment));
             //}
         }
         return list;

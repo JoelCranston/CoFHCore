@@ -149,7 +149,7 @@ public class BlockIngredient implements Predicate<BlockState> {
             if (!BuiltInRegistries.BLOCK.containsKey(resLoc)) {
                 throw new JsonSyntaxException("Unknown block '" + resLoc + "'");
             }
-            BlockState state = BuiltInRegistries.BLOCK.get(resLoc).defaultBlockState();
+            BlockState state = BuiltInRegistries.BLOCK.getValue(resLoc).defaultBlockState();
             JsonElement element = jsonObject.get(RecipeJsonUtils.PROPERTIES);
             if (element != null && element.isJsonObject()) {
                 Collection<Property<?>> variable = new ArrayList<>();

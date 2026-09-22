@@ -21,7 +21,7 @@ public interface IXpContainerItem extends IContainerItem {
 
     default int getStoredXp(ItemStack stack) {
 
-        return ItemHelper.getCustomData(stack).getInt(TAG_XP);
+        return ItemHelper.getCustomData(stack).getIntOr(TAG_XP, 0);
     }
 
     default int getSpaceXp(ItemStack stack) {

@@ -1,6 +1,7 @@
 package cofh.lib.api.item;
 
 import cofh.core.util.ProxyUtils;
+import cofh.core.util.helpers.FluidHelper;
 import cofh.core.util.helpers.ItemHelper;
 import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -38,12 +39,12 @@ public interface IFluidContainerItem extends IContainerItem {
 
     default FluidStack loadFluid(CompoundTag tankTag) {
 
-        return FluidStack.parseOptional(ProxyUtils.registryAccess(), tankTag.getCompound(TAG_FLUID));
+        return FluidHelper.parseOptional(ProxyUtils.registryAccess(), tankTag.getCompoundOrEmpty(TAG_FLUID));
     }
 
     default CompoundTag saveFluid(FluidStack stack) {
 
-        return (CompoundTag) stack.save(ProxyUtils.registryAccess(), new CompoundTag());
+        return (CompoundTag) FluidHelper.saveOptional(ProxyUtils.registryAccess(), stack);
     }
 
     default int getSpace(ItemStack container) {

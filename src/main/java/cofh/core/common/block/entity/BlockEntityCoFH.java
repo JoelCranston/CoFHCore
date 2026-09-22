@@ -8,8 +8,10 @@ import cofh.lib.api.block.entity.IAreaEffectTile;
 import cofh.lib.api.block.entity.IPacketHandlerTile;
 import cofh.lib.api.block.entity.ITileCallback;
 import cofh.lib.util.Utils;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,6 +23,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.util.FakePlayer;
@@ -56,6 +60,41 @@ public class BlockEntityCoFH extends BlockEntity implements ITileCallback, IPack
         }
         super.setRemoved();
     }
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+
+        if (level != null) {
+            onReplaced(state, level, pos, level.getBlockState(pos));
+        }
+    }
+
+    // region NBT
+    @SuppressWarnings ("deprecation")
+    @Override
+    protected final void loadAdditional(ValueInput input) {
+
+        super.loadAdditional(input);
+        loadAdditional(input.read(MapCodec.assumeMapUnsafe(CompoundTag.CODEC)).orElseGet(CompoundTag::new), input.lookup());
+    }
+
+    @Override
+    protected final void saveAdditional(ValueOutput output) {
+
+        super.saveAdditional(output);
+        CompoundTag nbt = new CompoundTag();
+        saveAdditional(nbt, level != null ? level.registryAccess() : RegistryAccess.EMPTY);
+        output.store(nbt);
+    }
+
+    protected void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+
+    }
+
+    protected void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+
+    }
+    // endregion
 
     public void markChunkUnsaved() {
 

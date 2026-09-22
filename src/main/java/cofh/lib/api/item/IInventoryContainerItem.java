@@ -17,7 +17,7 @@ public interface IInventoryContainerItem { // extends IContainerItem {
     // Returns a copy; writes to it are not saved to the stack.
     default CompoundTag getOrCreateInvTag(ItemStack container) {
 
-        return container.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getCompound(TAG_ITEM_INV);
+        return container.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getCompoundOrEmpty(TAG_ITEM_INV);
     }
 
     SimpleItemInv getContainerInventory(ItemStack container);

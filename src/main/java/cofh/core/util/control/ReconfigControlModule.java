@@ -102,7 +102,7 @@ public class ReconfigControlModule implements IReconfigurable {
     // region NBT
     public ReconfigControlModule read(CompoundTag nbt) {
 
-        byte[] bSides = nbt.getByteArray(TAG_SIDES);
+        byte[] bSides = nbt.getByteArray(TAG_SIDES).orElse(new byte[0]);
 
         if (bSides.length == 6) {
             sides[BlockHelper.below(facing).get3DDataValue()] = SideConfig.VALUES[bSides[0]];

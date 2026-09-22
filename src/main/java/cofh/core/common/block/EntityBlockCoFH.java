@@ -139,18 +139,6 @@ public class EntityBlockCoFH extends Block implements EntityBlock, IDismantleabl
     }
 
     @Override
-    public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-
-        if (state.getBlock() != newState.getBlock()) {
-            BlockEntity tile = worldIn.getBlockEntity(pos);
-            if (tile instanceof BlockEntityCoFH) {
-                ((BlockEntityCoFH) tile).onReplaced(state, worldIn, pos, newState);
-            }
-            super.onRemove(state, worldIn, pos, newState, isMoving);
-        }
-    }
-
-    @Override
     public int getAnalogOutputSignal(BlockState blockState, Level worldIn, BlockPos pos) {
 
         BlockEntity tile = worldIn.getBlockEntity(pos);

@@ -70,11 +70,11 @@ public class TransferControlModule implements ITransferControllable {
     // region NBT
     public TransferControlModule read(CompoundTag nbt) {
 
-        CompoundTag subTag = nbt.getCompound(TAG_XFER);
+        CompoundTag subTag = nbt.getCompoundOrEmpty(TAG_XFER);
 
         if (!subTag.isEmpty()) {
-            enableAutoInput = subTag.getBoolean(TAG_XFER_IN);
-            enableAutoOutput = subTag.getBoolean(TAG_XFER_OUT);
+            enableAutoInput = subTag.getBooleanOr(TAG_XFER_IN, false);
+            enableAutoOutput = subTag.getBooleanOr(TAG_XFER_OUT, false);
         }
         return this;
     }

@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import static cofh.lib.util.constants.NBTTags.*;
-import static net.minecraft.nbt.Tag.TAG_COMPOUND;
 
 public class BaseFluidFilter implements IFilter, IFilterOptions {
 
@@ -85,7 +84,7 @@ public class BaseFluidFilter implements IFilter, IFilterOptions {
     @Override
     public IFilter read(HolderLookup.Provider provider, CompoundTag nbt) {
 
-        CompoundTag subTag = nbt.getCompound(TAG_FILTER);
+        CompoundTag subTag = nbt.getCompoundOrEmpty(TAG_FILTER);
         //        int size = subTag.getInt(TAG_TANKS);
         //        if (size > 0) {
         //            fluids = new ArrayList<>(size);
@@ -93,16 +92,16 @@ public class BaseFluidFilter implements IFilter, IFilterOptions {
         //                fluids.add(FluidStack.EMPTY);
         //            }
         //        }
-        ListTag list = subTag.getList(TAG_TANK_INV, TAG_COMPOUND);
+        ListTag list = subTag.getListOrEmpty(TAG_TANK_INV);
         for (int i = 0; i < list.size(); ++i) {
-            CompoundTag tankTag = list.getCompound(i);
-            int tank = tankTag.getByte(TAG_TANK);
+            CompoundTag tankTag = list.getCompoundOrEmpty(i);
+            int tank = tankTag.getByteOr(TAG_TANK, (byte) 0);
             if (tank >= 0 && tank < fluids.size()) {
-                fluids.set(tank, FluidStack.parseOptional(provider, tankTag));
+                fluids.set(tank, FluidHelper.parseOptional(provider, tankTag));
             }
         }
-        allowList = subTag.getBoolean(TAG_FILTER_OPT_LIST);
-        checkNBT = subTag.getBoolean(TAG_FILTER_OPT_NBT);
+        allowList = subTag.getBooleanOr(TAG_FILTER_OPT_LIST, false);
+        checkNBT = subTag.getBooleanOr(TAG_FILTER_OPT_NBT, false);
         return this;
     }
 
@@ -115,7 +114,7 @@ public class BaseFluidFilter implements IFilter, IFilterOptions {
             if (!fluids.get(i).isEmpty()) {
                 CompoundTag tankTag = new CompoundTag();
                 tankTag.putByte(TAG_TANK, (byte) i);
-                Tag saved = fluids.get(i).save(provider);
+                Tag saved = FluidHelper.saveOptional(provider, fluids.get(i));
                 if (saved instanceof CompoundTag savedTag) {
                     tankTag.merge(savedTag);
                 }

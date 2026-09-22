@@ -33,7 +33,7 @@ public interface IMultiModeItem {
      */
     default int getMode(ItemStack stack) {
 
-        return getModeTag(stack).getInt(TAG_MODE);
+        return getModeTag(stack).getIntOr(TAG_MODE, 0);
     }
 
     /**

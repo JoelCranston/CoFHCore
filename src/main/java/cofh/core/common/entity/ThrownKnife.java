@@ -4,7 +4,6 @@ import cofh.core.common.item.KnifeItem;
 import cofh.lib.util.Utils;
 import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -25,6 +24,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -34,7 +35,6 @@ import javax.annotation.Nullable;
 
 import static cofh.core.init.CoreEntities.THROWN_KNIFE;
 import static cofh.lib.util.constants.ModIds.ID_COFH_CORE;
-import static net.minecraft.nbt.Tag.TAG_COMPOUND;
 
 public class ThrownKnife extends AbstractArrow {
 
@@ -188,21 +188,19 @@ public class ThrownKnife extends AbstractArrow {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag nbt) {
+    public void readAdditionalSaveData(ValueInput input) {
 
-        super.readAdditionalSaveData(nbt);
-        if (nbt.contains("Knife", TAG_COMPOUND)) {
-            this.entityData.set(DATA_ITEM_STACK, ItemStack.parseOptional(this.registryAccess(), nbt.getCompound("Knife")));
-        }
-        this.hitTime = nbt.getInt("HitTime");
+        super.readAdditionalSaveData(input);
+        input.read("Knife", ItemStack.OPTIONAL_CODEC).ifPresent(stack -> this.entityData.set(DATA_ITEM_STACK, stack));
+        this.hitTime = input.getIntOr("HitTime", 0);
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag nbt) {
+    public void addAdditionalSaveData(ValueOutput output) {
 
-        super.addAdditionalSaveData(nbt);
-        nbt.put("Knife", getPickupItem().save(this.registryAccess()));
-        nbt.putInt("HitTime", this.hitTime);
+        super.addAdditionalSaveData(output);
+        output.store("Knife", ItemStack.OPTIONAL_CODEC, getPickupItem());
+        output.putInt("HitTime", this.hitTime);
     }
 
     @Override

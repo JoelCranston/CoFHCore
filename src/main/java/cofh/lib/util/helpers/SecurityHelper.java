@@ -47,7 +47,7 @@ public final class SecurityHelper {
         }
         if (entity instanceof Player player) {
             if (player instanceof ServerPlayer) {
-                return player.getGameProfile().getId();
+                return player.getGameProfile().id();
             }
             return getClientID(player);
         }
@@ -57,10 +57,10 @@ public final class SecurityHelper {
     private static UUID getClientID(Player player) {
 
         if (player != Minecraft.getInstance().player) {
-            return player.getGameProfile().getId();
+            return player.getGameProfile().id();
         }
         if (cachedId == null) {
-            cachedId = Minecraft.getInstance().player.getGameProfile().getId();
+            cachedId = Minecraft.getInstance().player.getGameProfile().id();
         }
         return cachedId;
     }
@@ -109,7 +109,7 @@ public final class SecurityHelper {
         // Block items carry their security in the block entity data vanilla restores on placement.
         CompoundTag blockEntityData = ItemHelper.getBlockEntityData(stack);
         if (!blockEntityData.isEmpty()) {
-            return blockEntityData.contains(TAG_SECURITY) ? blockEntityData.getCompound(TAG_SECURITY) : null;
+            return blockEntityData.contains(TAG_SECURITY) ? blockEntityData.getCompoundOrEmpty(TAG_SECURITY) : null;
         }
         return ItemHelper.hasCustomSubTag(stack, TAG_SECURITY) ? ItemHelper.getCustomSubTag(stack, TAG_SECURITY) : null;
     }
@@ -131,8 +131,8 @@ public final class SecurityHelper {
 
         CompoundTag secureTag = getSecurityTag(stack);
         if (secureTag != null) {
-            secureTag.putString(TAG_SEC_OWNER_UUID, profile.getId().toString());
-            secureTag.putString(TAG_SEC_OWNER_NAME, profile.getName());
+            secureTag.putString(TAG_SEC_OWNER_UUID, profile.id().toString());
+            secureTag.putString(TAG_SEC_OWNER_NAME, profile.name());
         }
     }
 
@@ -140,7 +140,7 @@ public final class SecurityHelper {
 
         CompoundTag secureTag = getSecurityTag(stack);
         if (secureTag != null && secureTag.contains(TAG_SEC_ACCESS)) {
-            return AccessMode.VALUES[secureTag.getByte(TAG_SEC_ACCESS)];
+            return AccessMode.VALUES[secureTag.getByteOr(TAG_SEC_ACCESS, (byte) 0)];
         }
         return AccessMode.PUBLIC;
     }
@@ -149,8 +149,8 @@ public final class SecurityHelper {
 
         CompoundTag secureTag = getSecurityTag(stack);
         if (secureTag != null) {
-            String uuid = secureTag.getString(TAG_SEC_OWNER_UUID);
-            String name = secureTag.getString(TAG_SEC_OWNER_NAME);
+            String uuid = secureTag.getStringOr(TAG_SEC_OWNER_UUID, "");
+            String name = secureTag.getStringOr(TAG_SEC_OWNER_NAME, "");
             if (!Strings.isNullOrEmpty(uuid)) {
                 return new GameProfile(UUID.fromString(uuid), name);
             } else if (!Strings.isNullOrEmpty(name)) {
@@ -164,7 +164,7 @@ public final class SecurityHelper {
 
         CompoundTag secureTag = getSecurityTag(stack);
         if (secureTag != null) {
-            String name = secureTag.getString(TAG_SEC_OWNER_NAME);
+            String name = secureTag.getStringOr(TAG_SEC_OWNER_NAME, "");
             if (!Strings.isNullOrEmpty(name)) {
                 return name;
             }

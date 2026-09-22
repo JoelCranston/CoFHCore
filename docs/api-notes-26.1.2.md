@@ -186,3 +186,121 @@ A category is `KeyMapping.Category`, a record over an `Identifier`, not a free s
 
 `CoreRecipeSerializers` (the `RecipeSerializer` record and the `RecipeType` `minecraft:` prefix) is
 B.6, and `CoreShaders` is B.7g. Both still fail to compile after B.2.
+
+---
+
+## B.3 Persistence
+
+**Decision (Joel, 2026-09-22): bridge at the edge, don't convert the chain.** CoFH's controls,
+storages, filters and augments all `read`/`write` a `CompoundTag`, and they keep doing so. Only
+the vanilla hooks change. This keeps the upstream diff small and the on-disk layout identical to
+1.21.1's.
+
+### Block entities: `BlockEntityCoFH` owns the bridge
+
+```java
+@SuppressWarnings ("deprecation")
+@Override
+protected final void loadAdditional(ValueInput input) {
+
+    super.loadAdditional(input);
+    loadAdditional(input.read(MapCodec.assumeMapUnsafe(CompoundTag.CODEC)).orElseGet(CompoundTag::new), input.lookup());
+}
+
+@Override
+protected final void saveAdditional(ValueOutput output) {
+
+    super.saveAdditional(output);
+    CompoundTag nbt = new CompoundTag();
+    saveAdditional(nbt, level != null ? level.registryAccess() : RegistryAccess.EMPTY);
+    output.store(nbt);
+}
+```
+
+- **Subclasses keep their 1.21.1 overrides unchanged**: `loadAdditional(CompoundTag,
+  HolderLookup.Provider)` and `saveAdditional(CompoundTag, HolderLookup.Provider)` are now CoFH
+  overloads. ThermalCore's 26 and TD's block entities need no edits if they extend
+  `BlockEntityCoFH`; any that extend `BlockEntity` directly need the same bridge.
+- `ValueOutputExtension#store(CompoundTag)` (NeoForge) writes a tag's entries at the output's
+  root. Reading the whole root back needs `MapCodec.assumeMapUnsafe(CompoundTag.CODEC)`, which is
+  deprecated; NeoForge's own `ValueInputExtension#keySet()` uses it the same way.
+- `ValueOutput` has no `lookup()`. The registries for the save side come from
+  `level.registryAccess()`, falling back to `RegistryAccess.EMPTY`, which is exactly what
+  `BlockEntity#saveAdditional` itself does (`BlockEntity.java:117`).
+- `getUpdateTag(HolderLookup.Provider)` / `saveWithoutMetadata(HolderLookup.Provider)` are
+  unchanged. `onDataPacket`/`handleUpdateTag` default to `loadWithComponents(ValueInput)`, which
+  reaches the bridge.
+
+### `onRemove` → `BlockEntity#preRemoveSideEffects(BlockPos, BlockState oldState)`
+
+`LevelChunk#setBlockState` (`:311`) calls it only when the block changes, on the server, just
+before removing the block entity. That's the same guard `EntityBlockCoFH#onRemove` had
+(`state.getBlock() != newState.getBlock()`). By then the chunk already holds the new state, so
+`BlockEntityCoFH` passes `level.getBlockState(pos)` as `newState`, and
+**`ITileCallback#onReplaced` keeps its signature**. The base implementation only drops `Container`
+contents; no CoFH block entity is a `Container`, so it isn't called. `EntityBlockCoFH#onRemove` is
+gone.
+
+### Entities: converted natively (no common CoFH base)
+
+| 1.21.1 | 26.1.2 |
+|---|---|
+| `readAdditionalSaveData(CompoundTag)` / `addAdditionalSaveData(CompoundTag)` | `(ValueInput input)` / `(ValueOutput output)` |
+| `tag.getInt(k)` etc. | `input.getIntOr(k, 0)`, `getFloatOr`, … |
+| `putUUID` / `hasUUID` / `getUUID` | `output.storeNullable(k, UUIDUtil.CODEC, uuid)` / `input.read(k, UUIDUtil.CODEC)`. Same int-array format |
+| codec + `registryAccess().createSerializationContext(NbtOps.INSTANCE)` | `input.read(k, CODEC)` / `output.store(k, CODEC, v)`. The ValueIO already carries registry ops |
+| `stack.save(registries)` / `ItemStack.parseOptional(registries, tag)` | `output.store(k, ItemStack.OPTIONAL_CODEC, stack)` / `input.read(k, ItemStack.OPTIONAL_CODEC)` |
+
+### `SavedData`
+
+`new SavedData.Factory<>(ctor, (nbt, registries) -> …)` and `computeIfAbsent(factory, "name")`
+became `SavedDataType<T>(Identifier id, Supplier<T>, Codec<T>[, DataFixTypes])` and
+`computeIfAbsent(TYPE)`. `SavedData#save` is no longer abstract. Minimal bridge:
+`CompoundTag.CODEC.xmap(T::new, data -> data.save(new CompoundTag()))`.
+
+**The file path comes from the id**: `id.withSuffix(".dat")` resolved under `data/`
+(`SavedDataStorage#getDataFile`). `cofh:friends` is now `data/cofh/friends.dat`, where 1.21.1
+wrote `data/cofh:friends.dat`, so **friend lists from a 1.21.1 world don't carry over**.
+`ServerPlayer#serverLevel()` is gone; `ServerPlayer#level()` returns `ServerLevel`.
+
+### `CompoundTag` / `ListTag` getters return `Optional`
+
+`getInt(k)` → `getIntOr(k, 0)` (likewise `Byte`/`Short`/`Long`/`Float`/`Double`/`Boolean`/`String`
+with the old absent-key default), `getCompound(k)` → `getCompoundOrEmpty(k)`,
+`getList(k, TAG_X)` → `getListOrEmpty(k)` (no element-type argument), `ListTag#getCompound(i)` →
+`getCompoundOrEmpty(i)`, `getByteArray(k)` → `Optional<byte[]>` (`.orElse(new byte[0])`),
+`getAllKeys()` → `keySet()`, and `contains(k, TAG_X)` → `contains(k)`. The UUID helpers are gone.
+
+**A leftover `Optional` getter can still compile** wherever an `Object` is accepted: in a ternary
+or string concatenation it yields `"Optional[…]"` at runtime. javac reports the ternary case as
+"bad type in conditional expression", not "incompatible types".
+
+### Stacks ↔ `CompoundTag`
+
+`ItemStack`/`FluidStack` `parseOptional(registries, tag)`, `save(registries[, prefix])` and
+`saveOptional(registries)` are gone; only the codecs remain. CoFH wraps them as
+`ItemHelper`/`FluidHelper` `parseOptional(provider, tag)` / `saveOptional(provider, stack)`:
+`OPTIONAL_CODEC` through `provider.createSerializationContext(NbtOps.INSTANCE)`. Extra keys in
+the tag (a slot index) are ignored on parse, as before, and an empty stack round-trips as `{}`.
+
+### `INBTSerializable` is deleted
+
+NeoForge 26.1.2 has only `ValueIOSerializable` (`serialize(ValueOutput)` /
+`deserialize(ValueInput)`). Every `serializeNBT`/`deserializeNBT` caller in the family is CoFH or
+TD code, so the interface is simply dropped from `IFilter`, `EnergyStorageCoFH` and `XpStorage`,
+and the methods stay as plain CoFH API. TD's `Grid`, `GridNode`, `IAttachment`, `EnergyGridStorage`
+and `FluidGridStorage` take the same treatment in B.10.
+
+### authlib 7: `GameProfile` is a record
+
+`getId()`/`getName()` → `id()`/`name()`, and **`equals` now compares `properties()` too**. A
+logged-in player's profile carries textures while a stored or command-built one doesn't, so
+`set.contains(player.getGameProfile())` silently fails. Compare
+`new GameProfile(profile.id(), profile.name())` instead (`SocialUtils`).
+`GameProfileArgument.getGameProfiles` returns `Collection<NameAndId>` (`record NameAndId(UUID id,
+String name)`).
+
+### B.1 stragglers found here
+
+`Registry#get(Identifier)` returns `Optional<Holder.Reference<T>>`; the plain lookup is
+`getValue(Identifier)` (8 sites).

@@ -8,8 +8,11 @@ import cofh.lib.util.helpers.BlockHelper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -536,17 +539,29 @@ public final class FluidHelper {
     }
     // endregion
 
+    // region NBT
+    public static FluidStack parseOptional(HolderLookup.Provider provider, Tag nbt) {
+
+        return FluidStack.OPTIONAL_CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), nbt).result().orElse(FluidStack.EMPTY);
+    }
+
+    public static Tag saveOptional(HolderLookup.Provider provider, FluidStack stack) {
+
+        return FluidStack.OPTIONAL_CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), stack).getOrThrow();
+    }
+    // endregion
+
     // region NETWORK
     // For plain buffers; FluidStack.STREAM_CODEC needs a RegistryFriendlyByteBuf.
     public static void writeFluidStack(FriendlyByteBuf buffer, FluidStack stack) {
 
-        buffer.writeNbt(stack.isEmpty() ? null : (CompoundTag) stack.save(ProxyUtils.registryAccess()));
+        buffer.writeNbt(stack.isEmpty() ? null : (CompoundTag) saveOptional(ProxyUtils.registryAccess(), stack));
     }
 
     public static FluidStack readFluidStack(FriendlyByteBuf buffer) {
 
         CompoundTag tag = buffer.readNbt();
-        return tag == null ? FluidStack.EMPTY : FluidStack.parseOptional(ProxyUtils.registryAccess(), tag);
+        return tag == null ? FluidStack.EMPTY : parseOptional(ProxyUtils.registryAccess(), tag);
     }
     // endregion
 

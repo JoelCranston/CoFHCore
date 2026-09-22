@@ -374,3 +374,32 @@ differences the agents noticed are in the TODO Inbox.
   lines; api-notes-26.1.2 records why.
 
 The error count was 1537 before and after, which confirms the merge changed no code.
+
+---
+
+## B.3 persistence (2026-09-22)
+
+Joel chose to **bridge at the edge** rather than convert the whole `CompoundTag` chain to
+`ValueInput`/`ValueOutput`. `BlockEntityCoFH` now overrides vanilla's two hooks as `final` and
+delegates to CoFH overloads with the old `(CompoundTag, HolderLookup.Provider)` signatures. Every
+subclass, including ThermalCore's 26 machines, keeps its 1.21.1 code. NeoForge made this cheap:
+`ValueOutputExtension#store(CompoundTag)` writes a tag at the root, and its `keySet()` shows how to
+read the root back. `onRemove` became `preRemoveSideEffects`, which calls the unchanged
+`onReplaced`.
+
+The 8 entity classes were converted natively. With no shared base, a bridge would have cost more
+than it saved, and the three enchanted vehicles got simpler (no hand-built `NbtOps` context). The
+~100 `CompoundTag` getter sites went through a paren-aware rewrite restricted to known tag
+receivers. Its defaults are the old getters' absent-key values, so behaviour is unchanged. The
+comment-restore step from the style pass was needed again, because the rewrite also hit
+upstream's commented-out code.
+
+Two runtime traps a compile wouldn't have shown:
+- `GameProfile` is a record in authlib 7, so `equals` includes the property map. The friend check
+  compared a live profile (with textures) against stored ones (without), so every friend would
+  have been refused.
+- The friend `SavedData` file moves from `data/cofh:friends.dat` to `data/cofh/friends.dat`
+  because the type is keyed by an `Identifier`. Old worlds lose their friend lists.
+
+1537 → 1364 errors (1411 after the hooks and entities, the rest from getters, stack helpers and
+stragglers). Next is B.4, the transfer API.

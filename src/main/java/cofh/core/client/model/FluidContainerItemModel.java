@@ -119,7 +119,7 @@ public final class FluidContainerItemModel implements IUnbakedGeometry<FluidCont
             FluidStack stack = FluidStack.EMPTY;
             if (jsonObject.has("fluid")) {
                 Identifier fluidName = Identifier.parse(jsonObject.get("fluid").getAsString());
-                Fluid fluid = BuiltInRegistries.FLUID.get(fluidName);
+                Fluid fluid = BuiltInRegistries.FLUID.getValue(fluidName);
                 if (fluid != null) {
                     stack = new FluidStack(fluid, BUCKET_VOLUME);
                 }

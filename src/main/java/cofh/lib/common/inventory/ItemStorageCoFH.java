@@ -139,9 +139,9 @@ public class ItemStorageCoFH implements IItemHandler, IItemStackHolder, IResourc
 
     public static ItemStack loadItemStack(HolderLookup.Provider provider, CompoundTag nbt) {
 
-        ItemStack retStack = ItemStack.parseOptional(provider, nbt);
+        ItemStack retStack = ItemHelper.parseOptional(provider, nbt);
         if (nbt.contains("IntCount")) {
-            int storedCount = nbt.getInt("IntCount");
+            int storedCount = nbt.getIntOr("IntCount", 0);
             if (retStack.getCount() < storedCount) {
                 retStack.setCount(storedCount);
             }
@@ -152,7 +152,7 @@ public class ItemStorageCoFH implements IItemHandler, IItemStackHolder, IResourc
     protected final void saveItemStack(HolderLookup.Provider provider, ItemStack stack, CompoundTag nbt) {
 
         // save() throws on an empty stack.
-        if (stack.saveOptional(provider) instanceof CompoundTag savedTag) {
+        if (ItemHelper.saveOptional(provider, stack) instanceof CompoundTag savedTag) {
             nbt.merge(savedTag);
         }
         if (stack.getCount() > Byte.MAX_VALUE) {

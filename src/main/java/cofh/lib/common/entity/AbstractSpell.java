@@ -1,6 +1,6 @@
 package cofh.lib.common.entity;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
@@ -9,6 +9,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TraceableEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
@@ -108,23 +110,19 @@ public abstract class AbstractSpell extends Entity implements TraceableEntity {
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag tag) {
+    protected void addAdditionalSaveData(ValueOutput output) {
 
-        if (ownerUUID != null) {
-            tag.putUUID(TAG_OWNER, ownerUUID);
-        }
-        tag.putFloat(TAG_POWER, this.power);
-        tag.putInt(TAG_AGE, this.tickCount);
+        output.storeNullable(TAG_OWNER, UUIDUtil.CODEC, ownerUUID);
+        output.putFloat(TAG_POWER, this.power);
+        output.putInt(TAG_AGE, this.tickCount);
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag tag) {
+    protected void readAdditionalSaveData(ValueInput input) {
 
-        if (tag.hasUUID(TAG_OWNER)) {
-            this.ownerUUID = tag.getUUID(TAG_OWNER);
-        }
-        this.power = tag.getFloat(TAG_POWER);
-        this.tickCount = tag.getInt(TAG_AGE);
+        input.read(TAG_OWNER, UUIDUtil.CODEC).ifPresent(uuid -> this.ownerUUID = uuid);
+        this.power = input.getFloatOr(TAG_POWER, 0.0F);
+        this.tickCount = input.getIntOr(TAG_AGE, 0);
     }
 
     public boolean shouldRenderAtSqrDistance(double distSqr) {

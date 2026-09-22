@@ -5,7 +5,6 @@ import cofh.lib.util.helpers.MathHelper;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.neoforged.neoforge.common.util.INBTSerializable;
 
 import java.util.function.Supplier;
 
@@ -20,7 +19,7 @@ import static cofh.lib.util.helpers.StringHelper.localize;
  *
  * @author King Lemming
  */
-public class XpStorage implements IXpStorage, IResourceStorage, INBTSerializable<CompoundTag> {
+public class XpStorage implements IXpStorage, IResourceStorage {
 
     protected final int baseCapacity;
 
@@ -87,7 +86,7 @@ public class XpStorage implements IXpStorage, IResourceStorage, INBTSerializable
     // region NBT
     public XpStorage read(CompoundTag nbt) {
 
-        this.xp = nbt.getInt(TAG_XP);
+        this.xp = nbt.getIntOr(TAG_XP, 0);
         if (xp > capacity) {
             xp = capacity;
         }
@@ -113,13 +112,11 @@ public class XpStorage implements IXpStorage, IResourceStorage, INBTSerializable
         return nbt;
     }
 
-    @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
 
         return write(new CompoundTag());
     }
 
-    @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
 
         read(nbt);

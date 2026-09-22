@@ -68,7 +68,7 @@ public interface ICoFHItem extends IItemExtension {
 
     default boolean isActive(ItemStack stack) {
 
-        return ItemHelper.getCustomData(stack).getBoolean(TAG_ACTIVE);
+        return ItemHelper.getCustomData(stack).getBooleanOr(TAG_ACTIVE, false);
     }
 
     default void setActive(ItemStack stack, boolean state) {

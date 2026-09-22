@@ -50,24 +50,24 @@ public class SecurityControlModule implements ISecurable {
     public void writeToBuffer(FriendlyByteBuf buffer) {
 
         buffer.writeByte(access.ordinal());
-        buffer.writeUUID(owner.getId());
-        buffer.writeUtf(owner.getName());
+        buffer.writeUUID(owner.id());
+        buffer.writeUtf(owner.name());
     }
     // endregion
 
     // region NBT
     public SecurityControlModule read(CompoundTag nbt) {
 
-        CompoundTag subTag = nbt.getCompound(TAG_SECURITY);
+        CompoundTag subTag = nbt.getCompoundOrEmpty(TAG_SECURITY);
 
         if (subTag.contains(TAG_SEC_OWNER_UUID)) {
-            String uuid = subTag.getString(TAG_SEC_OWNER_UUID);
-            String name = subTag.getString(TAG_SEC_OWNER_NAME);
+            String uuid = subTag.getStringOr(TAG_SEC_OWNER_UUID, "");
+            String name = subTag.getStringOr(TAG_SEC_OWNER_NAME, "");
             owner = new GameProfile(UUID.fromString(uuid), name);
         } else {
             owner = SecurityHelper.DEFAULT_GAME_PROFILE;
         }
-        access = isSecurable() ? AccessMode.VALUES[subTag.getByte(TAG_SEC_ACCESS)] : AccessMode.PUBLIC;
+        access = isSecurable() ? AccessMode.VALUES[subTag.getByteOr(TAG_SEC_ACCESS, (byte) 0)] : AccessMode.PUBLIC;
 
         return this;
     }
@@ -77,8 +77,8 @@ public class SecurityControlModule implements ISecurable {
         if (isSecurable()) {
             CompoundTag subTag = new CompoundTag();
 
-            subTag.putString(TAG_SEC_OWNER_UUID, owner.getId().toString());
-            subTag.putString(TAG_SEC_OWNER_NAME, owner.getName());
+            subTag.putString(TAG_SEC_OWNER_UUID, owner.id().toString());
+            subTag.putString(TAG_SEC_OWNER_NAME, owner.name());
             subTag.putByte(TAG_SEC_ACCESS, (byte) access.ordinal());
 
             nbt.put(TAG_SECURITY, subTag);
