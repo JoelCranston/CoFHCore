@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static cofh.lib.util.helpers.StringHelper.decompose;
@@ -47,6 +48,20 @@ public class DeferredRegisterCoFH<T> {
     public synchronized <I extends T> DeferredHolder<T, I> register(final String name, final Supplier<? extends I> sup) {
 
         DeferredHolder<T, I> ret = wrappedRegister.register(name, sup);
+        registryObjects.put(ret.getId(), ret);
+
+        return ret;
+    }
+
+    /**
+     * 26.1.2: BlockBehaviour.Properties and Item.Properties both require an explicit setId before the
+     * constructor runs, so a registration has to see its own id. NeoForge's DeferredRegister offers a
+     * Function<Identifier, I> overload for exactly this; mirror it here rather than making every caller
+     * reach past the wrapper. See docs/api-notes-26.1.2.md, B.2.
+     */
+    public synchronized <I extends T> DeferredHolder<T, I> register(final String name, final Function<Identifier, ? extends I> func) {
+
+        DeferredHolder<T, I> ret = wrappedRegister.register(name, func);
         registryObjects.put(ret.getId(), ret);
 
         return ret;

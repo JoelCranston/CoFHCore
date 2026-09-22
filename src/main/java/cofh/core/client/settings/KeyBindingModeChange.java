@@ -8,7 +8,7 @@ public class KeyBindingModeChange extends KeyMapping {
 
     protected boolean isPressed; // Not strictly necessary but avoids an AT at this time.
 
-    public KeyBindingModeChange(String description, int keyCode, String category) {
+    public KeyBindingModeChange(String description, int keyCode, KeyMapping.Category category) {
 
         super(description, keyCode, category);
         setKeyConflictContext(KeyConflictContext.IN_GAME);
@@ -22,7 +22,7 @@ public class KeyBindingModeChange extends KeyMapping {
 
     public static class Increment extends KeyBindingModeChange {
 
-        public Increment(String description, int keyCode, String category) {
+        public Increment(String description, int keyCode, KeyMapping.Category category) {
 
             super(description, keyCode, category);
         }
@@ -42,7 +42,7 @@ public class KeyBindingModeChange extends KeyMapping {
 
     public static class Decrement extends KeyBindingModeChange {
 
-        public Decrement(String description, int keyCode, String category) {
+        public Decrement(String description, int keyCode, KeyMapping.Category category) {
 
             super(description, keyCode, category);
         }

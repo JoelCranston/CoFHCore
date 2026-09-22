@@ -36,6 +36,7 @@ public class CoreClientSetupEvents {
     @SubscribeEvent
     public static void registerKeyMappings(final RegisterKeyMappingsEvent event) {
 
+        event.registerCategory(cofh.core.client.CoreKeys.CATEGORY);
         event.register(MULTIMODE_INCREMENT);
         event.register(MULTIMODE_DECREMENT);
     }

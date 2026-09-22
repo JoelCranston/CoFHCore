@@ -22,9 +22,9 @@ public class CoreBlockEntities {
 
     }
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SignalAirTile>> SIGNAL_AIR_TILE = TILE_ENTITIES.register(ID_SIGNAL_AIR, () -> BlockEntityType.Builder.of(SignalAirTile::new, SIGNAL_AIR.get()).build(null));
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GlowAirBlockEntity>> GLOW_AIR_TILE = TILE_ENTITIES.register(ID_GLOW_AIR, () -> BlockEntityType.Builder.of(GlowAirBlockEntity::new, GLOW_AIR.get()).build(null));
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderAirBlockEntity>> ENDER_AIR_TILE = TILE_ENTITIES.register(ID_ENDER_AIR, () -> BlockEntityType.Builder.of(EnderAirBlockEntity::new, ENDER_AIR.get()).build(null));
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<LightningAirBlockEntity>> LIGHTNING_AIR_TILE = TILE_ENTITIES.register(ID_LIGHTNING_AIR, () -> BlockEntityType.Builder.of(LightningAirBlockEntity::new, LIGHTNING_AIR.get()).build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SignalAirTile>> SIGNAL_AIR_TILE = TILE_ENTITIES.register(ID_SIGNAL_AIR, () -> new BlockEntityType<>(SignalAirTile::new, SIGNAL_AIR.get()));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GlowAirBlockEntity>> GLOW_AIR_TILE = TILE_ENTITIES.register(ID_GLOW_AIR, () -> new BlockEntityType<>(GlowAirBlockEntity::new, GLOW_AIR.get()));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderAirBlockEntity>> ENDER_AIR_TILE = TILE_ENTITIES.register(ID_ENDER_AIR, () -> new BlockEntityType<>(EnderAirBlockEntity::new, ENDER_AIR.get()));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<LightningAirBlockEntity>> LIGHTNING_AIR_TILE = TILE_ENTITIES.register(ID_LIGHTNING_AIR, () -> new BlockEntityType<>(LightningAirBlockEntity::new, LIGHTNING_AIR.get()));
 
 }
