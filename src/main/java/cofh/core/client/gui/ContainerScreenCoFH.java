@@ -75,7 +75,7 @@ public class ContainerScreenCoFH<T extends AbstractContainerMenu> extends Abstra
 
         super.extractBackground(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
 
-        drawTexturedModalRect(pGuiGraphics, texture, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+        drawBackgroundTexture(pGuiGraphics);
 
         pGuiGraphics.pose().pushMatrix();
         pGuiGraphics.pose().translate(leftPos, topPos);
@@ -84,6 +84,11 @@ public class ContainerScreenCoFH<T extends AbstractContainerMenu> extends Abstra
         drawElements(pGuiGraphics, false);
 
         pGuiGraphics.pose().popMatrix();
+    }
+
+    protected void drawBackgroundTexture(GuiGraphicsExtractor pGuiGraphics) {
+
+        drawTexturedModalRect(pGuiGraphics, texture, leftPos, topPos, 0, 0, imageWidth, imageHeight);
     }
 
     @Override
