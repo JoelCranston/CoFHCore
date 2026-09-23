@@ -828,3 +828,161 @@ breaking list; true invisibility reads a render-state flag set by a modifier in 
 
 ATs: `validateAccessTransformers` passes; `LevelRenderer#renderHitOutline` and `renderBuffers`,
 `ParticleResources#spriteSets`, `MultiPlayerGameMode#destroyProgress` were already retargeted in B.0.
+
+---
+
+## B.10 ThermalCore
+
+Shapes ThermalCore's port confirmed that CoFHCore's categories did not cover. Same jar oracles;
+NeoForge classes are in `neoforge-26.1.2.109-sources.jar`.
+
+### Registration (B.2, again)
+
+- `Item`/`Block` throw at construction without an id (`itemIdOrThrow`, "Block id not set"), so every
+  `register(name, () -> new X(of()…))` supplier is a boot failure, not a compile error. ThermalCore's
+  `RegistrationHelper` gained `blockProperties(Identifier)`, `itemProperties(Identifier)` (CoFH's
+  `Utils.itemProperties()` plus `setId`), `blockItemProperties(Identifier)` (adds
+  `useBlockDescriptionPrefix()`, which is what vanilla's `Items.registerBlock` applies) and
+  `Function<Identifier, …>` overloads of `registerBlock`/`registerBlockOnly`/`registerAugmentableBlock`/
+  `registerItem`; the `Supplier` overloads stay. Fluid classes register their block and bucket the same way.
+- `Blocks.woodenButton` is gone (`new ButtonBlock(BlockSetType, 30, props)`); `Blocks.buttonProperties()` is public.
+- `HoneyBottleItem` is gone: `new ItemCoFH(props.craftRemainder(GLASS_BOTTLE).food(Foods.HONEY_BOTTLE,
+  Consumables.HONEY_BOTTLE).usingConvertsTo(GLASS_BOTTLE).stacksTo(16))`; `Item.Properties#food(FoodProperties, Consumable)`.
+- `MobSpawnSettings.SpawnerData(type, minCount, maxCount)` — the weight moved to `Weighted<SpawnerData>`;
+  `BiomeModifiers.AddSpawnsBiomeModifier.singleSpawn(HolderSet<Biome>, Weighted<SpawnerData>)`,
+  `WeightedList.of(Weighted<E>...)` (`net.minecraft.util.random`).
+- `Registry#get(TagKey)` → `Optional<HolderSet.Named<T>>` replaces `getTag`; `Registry#listElements()` replaces `holders()`.
+
+### Items and blocks (B.5, again)
+
+- `Item#inventoryTick(ItemStack, ServerLevel, Entity, @Nullable EquipmentSlot)` — server-only now;
+  `Item#hurtEnemy` returns `void` (`postHurtEnemy` exists); `Item#getCraftingRemainder()` is final and
+  `IItemExtension#getCraftingRemainder(ItemInstance)` returns `@Nullable ItemStackTemplate` (`new ItemStackTemplate(item)`).
+- Per-stack enchantability: `Enchantable(int)` throws for ≤ 0; NeoForge's enchanting-table filter calls
+  `isPrimaryItemFor`. `ItemStack#getPrototype()` is the item's default component map.
+- Armour materials are static records built by `ArmorMaterialCoFH.create(durability, int[], ench, sound, tough, kb,
+  TagKey<Item> repair, ResourceKey<EquipmentAsset>)` with `EquipmentAssets.ROOT_ID`; the asset JSON lives at
+  `assets/<ns>/equipment/<name>.json` with `humanoid`/`humanoid_leggings` layers, and
+  `EquipmentClientInfo.Layer#getTextureLocation` resolves to `textures/entity/equipment/<layer>/<path>.png`
+  (the old `models/armor/<n>_layer_1/2.png` move there).
+- `NbtUtils.writeBlockPos/readBlockPos` are gone: `BlockPos.CODEC` with `NbtOps` is the same int-array layout.
+- `ItemEntityPickupEvent.Pre#canPickup()` returns `net.minecraft.util.TriState`; `Inventory#getSelectedSlot()`.
+- Energy on items: `ItemAccess.forStack(stack).getCapability(Capabilities.Energy.ITEM)` (throws on an empty stack),
+  wrapped with `IEnergyStorage.of(cap)`; `EnergyHandler` is in `net.neoforged.neoforge.transfer.energy`,
+  `ItemAccess` in `…transfer.access`. Fluids on items: `FluidUtil.getFluidHandler(stack)`.
+
+### Entities (B.5, again)
+
+- `net.minecraft.world.entity.projectile.hurtingprojectile.AbstractHurtingProjectile` (package move); its
+  `tick()` applies inertia first and `getLiquidInertia()` replaces `getWaterInertia()`. `Projectile#checkLeftOwner()`
+  is `public void` with a public `leftOwnerChecked` flag reset each tick. `Entity#applyEffectsFromBlocks()`
+  replaces `checkInsideBlocks()`.
+- `Entity#hurtOrSimulate(DamageSource, float)` when the boolean is needed; `LivingEntity#isInvulnerableTo(ServerLevel, DamageSource)`;
+  `Mob#doHurtTarget(ServerLevel, Entity)` with `Goal.getServerLevel(Entity)`; `Mob#getPickResult()` replaces
+  NeoForge's `getPickedResult(HitResult)`; `Entity#getBoundingBoxForCulling()` is gone — it is
+  `EntityRenderer#getBoundingBoxForCulling(T)` now; `causeFallDamage(double, float, DamageSource)`.
+- `PathType.DANGER_FIRE/DAMAGE_FIRE` → `FIRE_IN_NEIGHBOR/FIRE`. `SpawnPlacements.SpawnPredicate<T>#test(EntityType<T>,
+  ServerLevelAccessor, EntitySpawnReason, BlockPos, RandomSource)`; `Monster.checkMonsterSpawnRules` takes the same.
+- `ThrowableItemProjectile` constructors want a trailing `ItemStack`; CoFH's `AbstractGrenade` shape
+  (`super(type, level); setPos(...)`, then `setOwner`) avoids it.
+- `AreaEffectCloud#setCustomParticle(@Nullable ParticleOptions)`; `ParticleTypes.EFFECT`/`INSTANT_EFFECT` are
+  `ParticleType<SpellParticleOption>` — `SpellParticleOption.create(type, int argb, float power)` or
+  `(type, r, g, b, power)`; `power` 1.0 is velocity-neutral. `ClientLevel#addParticle(options, x, y, z, xd, yd, zd)`
+  applies `getType().getOverrideLimiter()`, which is what the removed `LevelRenderer#addParticleInternal` did.
+- `Explosion` is an interface: `new ServerExplosion(ServerLevel, @Nullable Entity, @Nullable DamageSource,
+  @Nullable ExplosionDamageCalculator, Vec3, float, boolean fire, Explosion.BlockInteraction)` and static
+  `ServerExplosion.getSeenPercent(Vec3, Entity)`.
+- `Capabilities.Fluid.ENTITY` is `EntityCapability<ResourceHandler<FluidResource>, @Nullable Direction>`; an
+  entity's `read/addAdditionalSaveData` take `ValueInput`/`ValueOutput` and bridge like `BlockEntityCoFH`
+  (`input.read(MapCodec.assumeMapUnsafe(CompoundTag.CODEC))` / `output.store(nbt)`).
+
+### Entity renderers (B.7c, again)
+
+- `EntityModel<S extends EntityRenderState>` with `protected EntityModel(ModelPart)` (default
+  `RenderTypes::entityCutout`) or `(ModelPart, Function<Identifier, RenderType>)`; `Model#root()` and
+  `renderToBuffer` are final; `setupAnim(S)` resets the pose first; `HierarchicalModel` is gone.
+  `RenderTypes.entityCutoutNoCull` no longer exists (vanilla's `BlazeModel` went to `entityCutout` too).
+- `MobRenderer<T extends Mob, S extends LivingEntityRenderState, M extends EntityModel<? super S>>`:
+  `getBlockLightLevel(T, BlockPos)` still takes the entity, `getTextureLocation(S)` is abstract on
+  `LivingEntityRenderer`, `createRenderState()`/`extractRenderState(T, S, float)`. `LivingEntityRenderState`
+  carries `bodyRot/yRot/xRot/ageInTicks/scale`; `EntityRenderState.partialTick/boundingBoxHeight`.
+- `RenderLayer<S, M>#submit(PoseStack, SubmitNodeCollector, int light, S state, float yRot, float xRot)`.
+  `OrderedSubmitNodeCollector#submitModel` ten-arg form: `(Model<? super S>, S, PoseStack, RenderType, light,
+  overlay, int tint, @Nullable TextureAtlasSprite, outlineColor, @Nullable CrumblingOverlay)`;
+  `ModelFeatureRenderer` calls `setupAnim(state)` at draw time. `Context#bakeLayer(ModelLayerLocation)`.
+- `RenderType`/`RenderTypes` live in `net.minecraft.client.renderer.rendertype`.
+
+### Client (B.7, again)
+
+- `IClientFluidTypeExtensions` keeps only `getRenderOverlayTexture(Minecraft)`, `renderOverlay(...)`,
+  `modifyFogColor(Camera, float, ClientLevel, int, float, Vector4f)` and
+  `modifyFogRender(Camera, @Nullable FogEnvironment, float renderDistanceInChunks, float partialTick, FogData)`;
+  `FluidType#initializeClient` is gone and extensions register on `RegisterClientExtensionsEvent#registerFluidType`.
+  `FogData` has public `environmentalStart/End`, `renderDistanceStart/End`, `skyEnd`, `cloudEnd`; there is no
+  `FogShape`.
+- `FluidModel.Unbaked` has two four-arg constructors (`FluidTintSource` vs `BlockTintSource`), so a literal `null`
+  tint needs a cast. `IBlockGetterExtension#getModelData(BlockPos)` is on `BlockGetter` (default `ModelData.EMPTY`).
+- Blockstate variants take `"type": "<ns>:<loader>"` next to `"model"` (`NeoForgeExtraCodecs.dispatchMapOrElse`
+  keys on `type`); the `"loader"` key in block models is dead. Item models: `items/<n>.json` with
+  `{"model": {"type": "<ns>:<loader>", "model": "<ns>:block/<n>"}}` for a `SimpleItemModel.Loader`.
+- `RegisterColorHandlersEvent.BlockTintSources#register(List<BlockTintSource>, Block...)`.
+- `AbstractContainerScreen#checkHotbarKeyPressed(KeyEvent)`; `imageWidth/imageHeight` are set through the
+  `ContainerScreenCoFH` constructor (final); `ContainerScreenCoFH#drawBackgroundTexture(GuiGraphicsExtractor)`
+  is the hook for a screen that layers a second background texture.
+- `BlockBehaviour.Properties#noCollission()` → `noCollision()`.
+
+### Datagen (B.6, again)
+
+- `GatherDataEvent#addProvider(T)`/`createProvider(...)` return the provider; `getLookupProvider()` only reflects
+  modded datapack entries after `createDatapackRegistryObjects(...)`, so a CoFH `DatapackBuiltinEntriesProvider`
+  subclass hands its `getRegistryProvider()` to later providers by hand.
+- `EntityTypeTagsProvider(PackOutput, CompletableFuture<Provider>, String modId)` — vanilla, no `ExistingFileHelper`.
+- `RecipeProvider.Runner`: `protected Runner(PackOutput, CompletableFuture<Provider>)`, abstract
+  `createRecipeProvider(HolderLookup.Provider, RecipeOutput)` and `getName()`.
+- `Tags.Items.SLIME_BALLS` (was `SLIMEBALLS`); `GUNPOWDERS`, `OBSIDIANS`, `SANDS`, `STRINGS`, `DUSTS_*`, `ENDER_PEARLS`,
+  `INGOTS_COPPER`, `GEMS_QUARTZ` unchanged.
+- Hand-written vanilla recipe JSON: ingredients are strings (`"minecraft:sand"`, `"#c:slag"`), never
+  `{"item": …}`/`{"tag": …}` objects (those fail with "List is too short: 0"); a result with data is
+  `"components": {…}`, not `"nbt"`.
+
+### Recipes (B.6, again) — parse-time stacks are a boot failure
+
+- **Item and fluid default components are bound after the datapack reload**, in
+  `ReloadableServerResources#updateComponentsAndStaticRegistryTags()` (tags apply → `TagsUpdatedEvent.ServerDataLoad`
+  → `DataComponentInitializers` apply → `DefaultDataComponentsBoundEvent`). Recipes are parsed before that, so on a
+  server's first load `new ItemStack(...)`/`new FluidStack(...)` in a recipe codec NPEs in `Holder.Reference#components()`
+  ("Components not bound yet") and `ItemStack.CODEC`/`FluidStack.CODEC` return a DataResult error ("does not have
+  components yet") that silently drops the recipe. CoFHCore's B.6 note that `ItemStack` fields could stay was wrong at runtime.
+- The bridge: recipes hold `ItemStackTemplate` / `FluidStackTemplate` (`net.neoforged.neoforge.fluids.FluidStackTemplate`:
+  `(Holder<Fluid>|Fluid, int amount[, DataComponentPatch])`, `MAP_CODEC`/`CODEC`/`STREAM_CODEC`, `fromNonEmptyStack`,
+  `withAmount`, `create()`; throws for an empty fluid or amount ≤ 0) and materialize stacks lazily in the getters.
+  `RecipeJsonUtils.parseItemStackTemplate/parseFluidStackTemplate/parseOutputTemplates` are the JSON side;
+  `ThermalRecipe#getOutputItems()/getOutputFluids()` keep their signatures and cache the created stacks.
+  `ItemStackTemplate` throws for air or count 0; `withCount(int)`.
+- `FluidIngredient.SingleFluidList` holds a template for the same reason; `TagList` already resolved lazily.
+- **Managers refresh on `DefaultDataComponentsBoundEvent`** (`getUpdateCause() == SERVER_DATA_LOAD`), the first point at
+  which `create()` / `SingleItemRecipe#result().create()` work; `TagsUpdatedEvent.ServerDataLoad` only captures the
+  `RecipeManager`. The client keeps `RecipesReceivedEvent` (`RegistryDataCollector` binds client components in the
+  configuration phase, before recipes arrive).
+- **`Ingredient.CODEC` needs `RegistryOps`**: `HolderSetCodec` decodes strings and `#tags` only through
+  `RegistryOps#getter`, so `Ingredient.CODEC.parse(JsonOps.INSTANCE, …)` fails for every string form. CoFH's re-parse of
+  recipe JSON goes through `JsonMapCodec.of(fromJson, toJson)`, which keeps the recipe manager's ops in
+  `RecipeJsonUtils.withOps` while `fromJson` runs; `RecipeJsonUtils.jsonOps()` hands out `registryOps.withParent(JsonOps.INSTANCE)`
+  (static-registry ops as the fallback). `RecipeJsonUtils.INGREDIENT_CODEC` is the ops-carrying `Codec<Ingredient>` for
+  `RecordCodecBuilder` recipes; it also accepts the pre-1.21.2 `{"item"}`/`{"tag"}` objects (`legacyIngredient`), so
+  existing datapacks and TE's hand-written recipes keep loading.
+- A tag an ingredient references must exist: `HolderSetCodec.lookupTag` errors on a missing tag where 1.21.1 matched
+  nothing. ThermalCore's tag provider now emits the 24 compat `c:` tags empty.
+- `ModConfigSpec#validateSpec` runs at `registerConfig` and calls every value's default supplier: a `define(key, otherConfigValue)`
+  throws "Cannot get config value before config is loaded" (ThermalCore's "Festive Vanilla Mobs" did that).
+- `RecipeMap` (`byType`, `byKey`, `values()`, `EMPTY`), `RecipeManager#recipeMap()`, `Registries.RECIPE`;
+  `RecipesReceivedEvent#getRecipeMap()`; `OnDatapackSyncEvent#sendRecipes(RecipeType<?>...)`; `AddReloadListenerEvent`
+  is `AddServerReloadListenersEvent#addListener(Identifier, PreparableReloadListener)`.
+- `AbstractCookingRecipe`/`SingleItemRecipe`: `input()`, `result()` (`ItemStackTemplate`), `experience()`, `cookingTime()`;
+  `ShapedRecipe#getIngredients() → List<Optional<Ingredient>>`; `RecipeDisplay#result()`, `SlotDisplay#resolveForFirstStack(ContextMap)`.
+- `IItemStackExtension#getBurnTime(@Nullable RecipeType<?>, FuelValues)`, `MinecraftServer#fuelValues()`;
+  `FoodProperties(nutrition, saturation, canAlwaysEat)` with effects on `Consumable` (`ApplyStatusEffectsConsumeEffect#effects()`,
+  `consumeTicks()`); `EnchantmentHelper.createBook(EnchantmentInstance)`.
+- JEI 29: `IRecipeCategory#getWidth()/getHeight()`, `draw(T, IRecipeSlotsView, GuiGraphicsExtractor, double, double)`,
+  `getTooltip(ITooltipBuilder, …)`; `IRecipeSlotBuilder#addRichTooltipCallback`; JEI starts after `RecipesReceivedEvent`, so a
+  HIGH-priority handler fills the CoFH caches first. Patchouli 26.1-94's processor API is unchanged from 1.21.1.

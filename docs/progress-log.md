@@ -526,3 +526,35 @@ boots to `Done` on 26.1.2 with no CoFH errors and 1516 recipes loaded. The boot 
 latent problem: the mixin config was only declared in the jar manifest, so no dev run on either
 branch had ever applied CoFHCore's mixins. `neoforge.mods.toml` now declares it, and the log shows
 `LivingEntityMixin` and `ShearsItemMixin` applying. B.10 is next.
+
+## B.10 ThermalCore — compiles, boots, data regenerated (2026-09-22)
+
+The recipe from CLAUDE.md, applied once: branch `26.1.2` from `1.21.1`, B.0 (versions, CoFHCore's
+26.1.2 AT, Patchouli 26.1-94 from `libs/`), the B.1 rename script from CoFHCore (2142 → 1758 errors),
+then five agents by exclusive file group — datagen, recipes/JEI/Patchouli, core (registries, items,
+blocks, block entities), entities and renderers, client (models, fluids, screens, events) — each with
+the api-notes, the "B.10 inherits from" bullets and the jar as oracle. 1758 → 0 in one pass, with two
+cross-file requests worth recording: the recipes agent's `RegistrationHelper` id-taking overloads
+(every `() -> new X(of()…)` is a "Block id not set" boot failure on 26.1, invisible to the compiler),
+and the client agent's `ContainerScreenCoFH#drawBackgroundTexture` hook (added in CoFHCore).
+ThermalDynamics and ThermalExpansion got the same B.0/B.1 commits in the meantime, uncompiled.
+
+The headless boot then found what the compiler cannot:
+- **Item and fluid components bind after the reload**, so any `ItemStack`/`FluidStack` built while a
+  recipe parses NPEs on first load. Recipes now hold `ItemStackTemplate`/`FluidStackTemplate` and
+  hand out stacks lazily; managers refresh on `DefaultDataComponentsBoundEvent`. `FluidIngredient`
+  had the same bug in CoFHCore.
+- **`Ingredient.CODEC` needs `RegistryOps`** for every string form, and CoFH re-parses recipe JSON with
+  plain `JsonOps`. `JsonMapCodec.of` now keeps the recipe manager's ops around for `RecipeJsonUtils`,
+  which also accepts the old `{"item"}`/`{"tag"}` objects so datapacks and TE's recipes keep loading.
+- A missing tag is a hard recipe error, so the 24 undefined compat `c:` tags are emitted empty.
+- `validateSpec` at `registerConfig` exposed an upstream config slip ("Festive Vanilla Mobs").
+- The fluid classes registered their block and bucket without ids.
+
+Resources (B.8 for ThermalCore): `items/*.json` for all 251 items, including the property dispatches
+and the florb's `neoforge:fluid_container`; the generated assets moved into `resources` (unowned files
+would be purged by the next `HashCache` run); 17 hand-written vanilla recipes and the guidebook recipe
+on the 26.1 JSON shapes; `render_type` stripped. `runData` rewrote 242 generated recipes and added the
+three armour-repair tags; the boot is clean: 0 data errors, 1760 recipes, mixins applied.
+
+Next: ThermalDynamics and ThermalExpansion, against the recipe notes in api-notes "B.10 ThermalCore".

@@ -15,6 +15,7 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStackTemplate;
 import net.neoforged.neoforge.fluids.FluidType;
 
 import javax.annotation.Nullable;
@@ -188,7 +189,7 @@ public class FluidIngredient implements Predicate<FluidStack> {
             } else if (jsonObject.has("count")) {
                 amount = jsonObject.get("count").getAsInt();
             }
-            return new FluidIngredient.SingleFluidList(new FluidStack(fluid, amount));
+            return new FluidIngredient.SingleFluidList(new FluidStackTemplate(fluid, amount));
         } else if (jsonObject.has("fluid_tag")) {
             Identifier resourcelocation = Identifier.parse(GsonHelper.getAsString(jsonObject, "fluid_tag"));
             TagKey<Fluid> key = FluidTags.create(resourcelocation);
@@ -214,23 +215,32 @@ public class FluidIngredient implements Predicate<FluidStack> {
 
     public static class SingleFluidList implements FluidIngredient.IFluidList {
 
-        private final FluidStack fluid;
+        // A template, not a stack: recipes are parsed before fluid components are bound.
+        @Nullable
+        private final FluidStackTemplate fluid;
 
-        public SingleFluidList(FluidStack fluid) {
+        public SingleFluidList(@Nullable FluidStackTemplate fluid) {
 
             this.fluid = fluid;
         }
 
+        public SingleFluidList(FluidStack fluid) {
+
+            this(fluid.isEmpty() ? null : FluidStackTemplate.fromNonEmptyStack(fluid));
+        }
+
         public Collection<FluidStack> getFluids() {
 
-            return Collections.singleton(this.fluid);
+            return Collections.singleton(this.fluid == null ? FluidStack.EMPTY : this.fluid.create());
         }
 
         public JsonObject serialize() {
 
             JsonObject jsonobject = new JsonObject();
-            jsonobject.addProperty("fluid", BuiltInRegistries.FLUID.getKey(this.fluid.getFluid()).toString());
-            jsonobject.addProperty("amount", this.fluid.getAmount());
+            if (this.fluid != null) {
+                jsonobject.addProperty("fluid", this.fluid.fluid().getRegisteredName());
+                jsonobject.addProperty("amount", this.fluid.amount());
+            }
             return jsonobject;
         }
 

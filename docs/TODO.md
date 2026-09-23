@@ -2,8 +2,8 @@
 
 Phase A (1.21.1) is **code-complete**: all four repos build clean and boot headless on
 NeoForge 21.1.251, and `runData` now runs in all four. Phase B (26.1.2) is under way on the
-`26.1.2` branch: **CoFHCore compiles on 26.1.2 (0 errors)** — B.0-B.9 done; B.8's `runData` regeneration
-and B.10 (the Thermal repos) remain. See
+`26.1.2` branch: **CoFHCore and ThermalCore compile and boot on 26.1.2**; B.10 for ThermalDynamics and
+ThermalExpansion remains. See
 [api-notes-1.21.1.md](api-notes-1.21.1.md) / [api-notes-26.1.2.md](api-notes-26.1.2.md) for
 confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 
@@ -46,7 +46,8 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 | B.8 CoFHCore resources (recipe folder, item definition, render_type; shaders in B.7) | `789370c` | — |
 | B.9 mixins | `f89000a` | **0** |
 | B.8 `runData` (output identical to what is committed) and a headless boot: `Done`, mixins applied | `mods.toml` fix below | 0 |
-| **B.10 dependents** | next | |
+| **B.10 ThermalCore** — five parallel agents, then the recipe-template bridge, resources, `runData`, headless boot | `3884e7f` + follow-up | **0**, boots to `Done`, 1760 recipes |
+| **B.10 ThermalDynamics / ThermalExpansion** | next (B.0 + B.1 committed on their `26.1.2` branches) | |
 
 [port-plan.md](port-plan.md) §6 has each category's contents. Carry-overs into Phase B:
 
@@ -205,6 +206,46 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
     reads on 26.1 (item-form data is `BLOCK_ENTITY_DATA`). No table in the four repos uses it.
   - `IDismantleable#dismantleBlock` passes `includeData = false` to `getCloneItemStack`, matching
     the old default (`state.getCloneItemStack(level, pos)` carried no data).
+
+- **B.10 ThermalCore behaviour changes the new API forced (2026-09-22)**, each to confirm in play:
+  - **The Beekeeper/Diving/Hazmat full-suit model is gone** (`IClientItemExtensions#getHumanoidArmorModel`
+    no longer exists); the three suits render through the standard humanoid equipment layer from
+    `assets/thermal/equipment/*.json`. Restoring the one-piece look needs a custom `EquipmentLayerRenderer`.
+  - **Armour repairs by item tag** (`thermal:repairs_{beekeeper,diving,hazmat}_armor`, generated), not by ingredient.
+  - **Augmentable item enchantability is a per-stack `ENCHANTABLE` component** written when augments change
+    (was computed live). Florbs carry `ENCHANTABLE` (from `FluidContainerItem`'s `enchantable(5)`) but block it
+    via `isPrimaryItemFor`/`supportsEnchantment`.
+  - **Diving/Hazmat/XP-crystal `inventoryTick` runs server-side only** (vanilla signature).
+  - **Charge and Tinker benches only see items exposing `Capabilities.Energy.ITEM`** — CoFH's own container
+    items still register none ("After the port", item 1).
+  - **Entity models render on `entityCutout`** (`entityCutoutNoCull` no longer exists; vanilla's Blaze made the
+    same move); Basalz's culling-box inflate lives in its renderer; `DetonateUtils.nuke` casts to `ServerLevel`
+    for the `ServerExplosion` resistance probe; Blitz trail / potion-diffuser particles carry an explicit
+    colour and power (`SpellParticleOption`).
+  - **Fog in ender/redstone/crude oil**: no cylinder shape; sky and cloud fog end at the fluid's far distance,
+    as vanilla water does.
+  - **Operational-area wireframes** ignore depth in every pass (`OVERLAY_LINES` is `LINES_NO_DEPTH`); the old
+    "outside" pass may have been depth-tested — check visually. Line width is `THICK_LINES` per vertex.
+  - **Gourmand fuel** reads `CONSUMABLE` for effects and eat time (items with `FOOD` but no `CONSUMABLE` count
+    as effect-free, normal eat time); converted dynamo fuels and pulverizer ingot conversions use
+    `Ingredient.of(item)`, so the JEI entry for a converted enchanted book shows a plain book.
+  - **`CrafterRecipeManager` uses `Recipe#display()` for the result**: a special recipe with no display is rejected.
+  - **Only Thermal recipe types plus `CRAFTING`/`SMELTING`/`BLASTING` are sent to the client**
+    (`OnDatapackSyncEvent#sendRecipes`); a manager reading any other type client-side sees nothing.
+  - **Recipe outputs are templates, materialized lazily**: empty or invalid output entries are dropped at parse
+    instead of stored as EMPTY; `getOutputItems()`/`getOutputFluids()` cache their stacks (mutating a returned stack
+    mutates the cache, as before). The Insolator's default water ingredient materializes on first use.
+  - **Managers refresh later** (`DefaultDataComponentsBoundEvent`, after tags), and the client refresh no longer runs
+    from `TagsUpdatedEvent`.
+  - **The 24 compat `c:` tags are now emitted empty** (`data/c/tags/item/…`) because a missing tag is a hard recipe
+    error on 26.1; recipes using them load and match nothing, as on 1.21.1.
+  - **Florbs show no fluid tint** until CoFH fluid-container items expose `Capabilities.Fluid.ITEM`
+    (`neoforge:fluid_container` reads `FluidUtil.getFirstStackContained`) — "After the port", item 1.
+  - **Item JSONs** are written for every ThermalCore item (`items/*.json`, count/`thrown`/`stored`/`primed`/`armed`/
+    `color`/`has_data` as `range_dispatch`); the generated assets moved from `src/main/generated/assets` into
+    `resources`, since no provider owns them and `HashCache` deletes unowned files on the next run.
+  - **Upstream slip fixed**: `ThermalClientConfig` defined "Festive Vanilla Mobs" with `festiveMobs` as its default
+    supplier, which 26.1's `validateSpec` rejects at registration.
 
 - **Behaviour differences the style pass found (2026-09-22), left alone because that pass was
   not allowed to change behaviour.** Each is a 1.21.1 fix to decide on:

@@ -6,24 +6,37 @@ import cofh.lib.util.crafting.EmptyIngredient;
 import cofh.lib.util.crafting.IngredientWithCount;
 import com.google.gson.*;
 import com.mojang.logging.LogUtils;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStackTemplate;
 import org.slf4j.Logger;
 
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static cofh.lib.util.Constants.BASE_CHANCE_LOCKED;
 import static cofh.lib.util.Constants.BUCKET_VOLUME;
@@ -33,14 +46,82 @@ public abstract class RecipeJsonUtils {
     private static final Logger LOG = LogUtils.getLogger();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
+    // Ingredient codec that accepts the CoFH shapes (count, value, legacy item/tag objects).
+    public static final Codec<Ingredient> INGREDIENT_CODEC = new Codec<>() {
+
+        @Override
+        public <T> DataResult<Pair<Ingredient, T>> decode(DynamicOps<T> ops, T input) {
+
+            return withOps(ops, () -> DataResult.success(Pair.of(parseIngredient(ops.convertTo(JsonOps.INSTANCE, input)), ops.empty())));
+        }
+
+        @Override
+        public <T> DataResult<T> encode(Ingredient input, DynamicOps<T> ops, T prefix) {
+
+            return Ingredient.CODEC.encode(input, ops, prefix);
+        }
+    };
+
+    private static final ThreadLocal<DynamicOps<?>> OPS = new ThreadLocal<>();
+    private static RegistryOps<JsonElement> staticOps;
+
     private RecipeJsonUtils() {
 
+    }
+
+    // Runs a parse with the caller's ops, so registry-aware codecs (ingredients) can resolve holders and tags.
+    public static <R> R withOps(DynamicOps<?> ops, Supplier<R> parse) {
+
+        DynamicOps<?> previous = OPS.get();
+        OPS.set(ops);
+        try {
+            return parse.get();
+        } finally {
+            if (previous == null) {
+                OPS.remove();
+            } else {
+                OPS.set(previous);
+            }
+        }
+    }
+
+    public static DynamicOps<JsonElement> jsonOps() {
+
+        if (OPS.get() instanceof RegistryOps<?> registryOps) {
+            return registryOps.withParent(JsonOps.INSTANCE);
+        }
+        if (staticOps == null) {
+            staticOps = RegistryOps.create(JsonOps.INSTANCE, RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY));
+        }
+        return staticOps;
     }
 
     // region HELPERS
     private static Ingredient ingredientFromJson(JsonElement element) {
 
-        return Ingredient.CODEC.parse(JsonOps.INSTANCE, element).getOrThrow(JsonParseException::new);
+        return Ingredient.CODEC.parse(jsonOps(), legacyIngredient(element)).getOrThrow(JsonParseException::new);
+    }
+
+    // Pre-1.21.2 datapacks wrote {"item": id} and {"tag": id}; vanilla now wants "id" and "#id".
+    private static JsonElement legacyIngredient(JsonElement element) {
+
+        if (element.isJsonArray()) {
+            JsonArray array = new JsonArray();
+            for (JsonElement arrayElement : element.getAsJsonArray()) {
+                array.add(legacyIngredient(arrayElement));
+            }
+            return array;
+        }
+        if (element.isJsonObject()) {
+            JsonObject object = element.getAsJsonObject();
+            if (object.has(ITEM) && object.get(ITEM).isJsonPrimitive()) {
+                return object.get(ITEM);
+            }
+            if (object.has(TAG) && object.get(TAG).isJsonPrimitive()) {
+                return new JsonPrimitive("#" + object.get(TAG).getAsString());
+            }
+        }
+        return element;
     }
 
     public static Ingredient parseIngredient(JsonElement element) {
@@ -180,6 +261,142 @@ public abstract class RecipeJsonUtils {
                 chances.add(parseItemChance(element));
             }
         }
+    }
+
+    public static void parseOutputTemplates(List<ItemStackTemplate> items, List<Float> chances, List<FluidStackTemplate> fluids, JsonElement element) {
+
+        if (element == null) {
+            return;
+        }
+        if (element.isJsonArray()) {
+            for (JsonElement arrayElement : element.getAsJsonArray()) {
+                if (arrayElement.getAsJsonObject().has(FLUID)) {
+                    FluidStackTemplate fluid = parseFluidStackTemplate(arrayElement);
+                    if (fluid != null) {
+                        fluids.add(fluid);
+                    }
+                } else {
+                    ItemStackTemplate item = parseItemStackTemplate(arrayElement);
+                    if (item != null) {
+                        items.add(item);
+                        chances.add(parseItemChance(arrayElement));
+                    }
+                }
+            }
+        } else if (element.getAsJsonObject().has(FLUID)) {
+            FluidStackTemplate fluid = parseFluidStackTemplate(element);
+            if (fluid != null) {
+                fluids.add(fluid);
+            }
+        } else {
+            ItemStackTemplate item = parseItemStackTemplate(element);
+            if (item != null) {
+                items.add(item);
+                chances.add(parseItemChance(element));
+            }
+        }
+    }
+
+    @Nullable
+    public static ItemStackTemplate parseItemStackTemplate(JsonElement element) {
+
+        if (element == null || element.isJsonNull()) {
+            return null;
+        }
+        Item item = null;
+        int count = 1;
+        DataComponentPatch components = DataComponentPatch.EMPTY;
+
+        if (element.isJsonPrimitive()) {
+            item = BuiltInRegistries.ITEM.getValue(Identifier.parse(element.getAsString()));
+            return item == null || item == Items.AIR ? null : new ItemStackTemplate(item);
+        } else {
+            JsonObject itemObject = element.getAsJsonObject();
+
+            /* COUNT */
+            if (itemObject.has(COUNT)) {
+                count = itemObject.get(COUNT).getAsInt();
+            } else if (itemObject.has(AMOUNT)) {
+                count = itemObject.get(AMOUNT).getAsInt();
+            }
+
+            /* ITEM */
+            if (itemObject.has(ITEM)) {
+                item = BuiltInRegistries.ITEM.getValue(Identifier.parse(itemObject.get(ITEM).getAsString()));
+            }
+            if (item == null || item == Items.AIR || count <= 0) {
+                return null;
+            }
+
+            /* NBT */
+            if (itemObject.has(NBT)) {
+                JsonElement nbtElement = itemObject.get(NBT);
+                CompoundTag nbt;
+                try {
+                    if (nbtElement.isJsonObject()) {
+                        nbt = TagParser.parseCompoundFully(GSON.toJson(nbtElement));
+                    } else {
+                        nbt = TagParser.parseCompoundFully(GsonHelper.convertToString(nbtElement, NBT));
+                    }
+                    components = DataComponentPatch.builder().set(DataComponents.CUSTOM_DATA, CustomData.of(nbt)).build();
+                } catch (Exception e) {
+                    LOG.debug("Invalid ItemStack - using EMPTY instead!", e);
+                    return null;
+                }
+            }
+        }
+        return new ItemStackTemplate(item, count, components);
+    }
+
+    @Nullable
+    public static FluidStackTemplate parseFluidStackTemplate(JsonElement element) {
+
+        if (element == null || element.isJsonNull()) {
+            return null;
+        }
+        Fluid fluid = null;
+        int amount = BUCKET_VOLUME;
+        DataComponentPatch components = DataComponentPatch.EMPTY;
+
+        if (element.isJsonPrimitive()) {
+            fluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(element.getAsString()));
+            return fluid == null || fluid == Fluids.EMPTY ? null : new FluidStackTemplate(fluid, amount);
+        } else {
+            JsonObject fluidObject = element.getAsJsonObject();
+
+            /* AMOUNT */
+            if (fluidObject.has(AMOUNT)) {
+                amount = fluidObject.get(AMOUNT).getAsInt();
+            } else if (fluidObject.has(COUNT)) {
+                amount = fluidObject.get(COUNT).getAsInt();
+            }
+
+            /* FLUID */
+            if (fluidObject.has(FLUID)) {
+                fluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(fluidObject.get(FLUID).getAsString()));
+            }
+            if (fluid == null || fluid == Fluids.EMPTY || amount <= 0) {
+                return null;
+            }
+
+            /* NBT */
+            if (fluidObject.has(NBT)) {
+                JsonElement nbtElement = fluidObject.get(NBT);
+                CompoundTag nbt;
+                try {
+                    if (nbtElement.isJsonObject()) {
+                        nbt = TagParser.parseCompoundFully(GSON.toJson(nbtElement));
+                    } else {
+                        nbt = TagParser.parseCompoundFully(GsonHelper.convertToString(nbtElement, NBT));
+                    }
+                    components = DataComponentPatch.builder().set(DataComponents.CUSTOM_DATA, CustomData.of(nbt)).build();
+                } catch (Exception e) {
+                    LOG.debug("Invalid FluidStack - using EMPTY instead!", e);
+                    return null;
+                }
+            }
+        }
+        return new FluidStackTemplate(fluid, amount, components);
     }
 
     public static ItemStack parseItemStack(JsonElement element) {

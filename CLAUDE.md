@@ -80,15 +80,15 @@ It is a *reference* here, never a dependency.
 
 ## Current state
 
-**Phase A (1.21.1) is code-complete; Phase B (26.1.2): CoFHCore compiles, the Thermal repos are next.** (2026-09-22)
+**Phase A (1.21.1) is code-complete; Phase B (26.1.2): CoFHCore and ThermalCore compile and boot; ThermalDynamics and ThermalExpansion are next.** (2026-09-22)
 
 | Repo | Branch | State |
 |---|---|---|
-| CoFHCore | `26.1.2` | **0 errors** (baseline 2445), B.0-B.9 done; `runData` clean, boots headless with mixins applied. **Next: B.10** |
-| CoFHCore | `1.21.1` | 0 errors, boots headless, `runData` clean |
-| ThermalCore | `1.21.1` | 0 errors, boots headless, `runData` clean. Waits for CoFHCore 26.1.2 (B.10) |
-| ThermalDynamics | `1.21.1` | same |
-| ThermalExpansion | `1.21.1` | same; its run loads CoFHCore + ThermalCore + ThermalExpansion together |
+| CoFHCore | `26.1.2` | **0 errors** (baseline 2445), B.0-B.9 done; `runData` clean, boots headless with mixins applied. B.10 added the recipe-template bridge (`RecipeJsonUtils`, `JsonMapCodec.of`, `FluidIngredient`) |
+| ThermalCore | `26.1.2` | **0 errors** (baseline 2142), boots headless to `Done` with 1760 recipes, `runData` clean. Resources on the 26.1 layout |
+| ThermalDynamics | `26.1.2` | B.0 + B.1 committed, **not yet compiled** (needs ThermalCore, which now compiles). **Next** |
+| ThermalExpansion | `26.1.2` | same. **Next**, after ThermalDynamics or in parallel |
+| all four | `1.21.1` | 0 errors, boot headless, `runData` clean (Phase A) |
 
 All repos build with **ModDevGradle 2.0.147**. Shape oracles differ by branch:
 `build/moddev/artifacts/minecraft-patched-26.1.2.109-sources.jar` on `26.1.2`,
@@ -123,14 +123,19 @@ now; the Thermal repos' `1.21.1` branches need CoFHCore on `1.21.1` to build.
   prompt, and an explicit contract (kept names/signatures) wherever two areas touch. Review their
   behaviour decisions afterwards; some belong in the TODO Inbox. Condensed reports from the B.7 agents
   are in `../ThermalExpansion/docs/context/subagents-2026-09-22-c/*-report.md`.
-- **B.10 is next** (port plan §B.10). CoFHCore is done: 0 errors, `runData` clean, boots headless with
-  mixins applied. For each Thermal repo: branch `26.1.2` from `1.21.1`; bump the build the way CoFHCore's
-  B.0 did (`6eb201f`: MDG 2.0.147, `neo_version` 26.1.2.109, Java 25, `clientData()` run, AT sweep);
-  then follow the same working method against the new CoFHCore, using the per-repo recipes under
-  "B.10 inherits from …" in [docs/TODO.md](docs/TODO.md). Order: **ThermalCore first** (TD and TE depend
-  on it), then ThermalDynamics and ThermalExpansion in parallel. Keep `mixins`/`[[mixins]]` in each
-  `neoforge.mods.toml` (the manifest-only declaration never loaded in dev). Reference forks for the
-  Thermal repos: `../Thermal*ForNeoForge` (1.21.1), Pyronetics (26.1.2).
+- **B.10: ThermalCore is done; ThermalDynamics and ThermalExpansion are next**, in parallel. Both already
+  have a `26.1.2` branch with B.0 (versions, AT, `clientData()`) and the B.1 rename sweep committed, uncompiled.
+  For each: compile, group errors, then split by file group across agents exactly as ThermalCore was
+  (see the progress log's B.10 entry and `docs/TODO.md`'s "B.10 inherits from …" bullets). **Read
+  api-notes "B.10 ThermalCore" first**: it holds the recipe-template rule (no `ItemStack`/`FluidStack`
+  at parse time; `ThermalRecipe` constructors and `MachineRecipeSerializer.IFactory` take
+  `List<ItemStackTemplate>`/`List<FluidStackTemplate>`), the id-before-construction rule for every
+  `registerBlock`/`registerItem`, the entity/renderer/model/fluid/screen shapes, and the resource rules
+  (`items/*.json` for every item, generated assets live in `resources`). TE must send its own recipe types
+  on `OnDatapackSyncEvent` (or add them to ThermalCore's list). After compiling: `runData`, then
+  `../Pyronetics/scripts/verify_runserver.sh` — the boot finds what the compiler cannot (id-less
+  registrations, parse-time stacks, missing tags, config defaults). Reference forks: `../Thermal*ForNeoForge`
+  (1.21.1), Pyronetics (26.1.2). Keep `[[mixins]]` in each `neoforge.mods.toml`.
 
 **Phase A's one owed item is the client pass** (port plan §A.4), which is Joel's to run. The
 `runData` pass already found and fixed one client crash (`LevelRendererMixin`), and
