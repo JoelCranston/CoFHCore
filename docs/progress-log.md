@@ -576,7 +576,7 @@ Every repo: 0 errors, `runData` clean, dedicated server boots to `Done` with no 
 Owed: Joel's client pass (port plan §A.4 / §B.10 checklist, everything client-side is unverified on
 both hops), B.4 at runtime (a pipe mod or a GameTest, including aborted simulations), and the Inbox.
 
-### 2026-09-23: boot script moved into CoFHCore
+## Boot script moved into CoFHCore (2026-09-23)
 
 The headless boot check was `../Pyronetics/scripts/verify_runserver.sh`, which made the port depend on
 an unrelated repo that upstream reviewers won't have. It now lives at `scripts/verify_runserver.sh`
