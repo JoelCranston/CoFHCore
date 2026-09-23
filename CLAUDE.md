@@ -80,14 +80,14 @@ It is a *reference* here, never a dependency.
 
 ## Current state
 
-**Phase A (1.21.1) is code-complete; Phase B (26.1.2): CoFHCore and ThermalCore compile and boot; ThermalDynamics and ThermalExpansion are next.** (2026-09-22)
+**Phase A (1.21.1) and Phase B (26.1.2) are both code-complete: all four repos compile and boot headless on 26.1.2. Owed: Joel's client pass.** (2026-09-22)
 
 | Repo | Branch | State |
 |---|---|---|
 | CoFHCore | `26.1.2` | **0 errors** (baseline 2445), B.0-B.9 done; `runData` clean, boots headless with mixins applied. B.10 added the recipe-template bridge (`RecipeJsonUtils`, `JsonMapCodec.of`, `FluidIngredient`) |
 | ThermalCore | `26.1.2` | **0 errors** (baseline 2142), boots headless to `Done` with 1760 recipes, `runData` clean. Resources on the 26.1 layout |
-| ThermalDynamics | `26.1.2` | B.0 + B.1 committed, **not yet compiled** (needs ThermalCore, which now compiles). **Next** |
-| ThermalExpansion | `26.1.2` | same. **Next**, after ThermalDynamics or in parallel |
+| ThermalDynamics | `26.1.2` | **0 errors** (baseline 368), boots headless to `Done` with 1770 recipes, `runData` clean |
+| ThermalExpansion | `26.1.2` | **0 errors** (baseline 243), boots headless to `Done` with 2287 recipes (loads all three mods), `runData` clean |
 | all four | `1.21.1` | 0 errors, boot headless, `runData` clean (Phase A) |
 
 All repos build with **ModDevGradle 2.0.147**. Shape oracles differ by branch:
@@ -123,19 +123,15 @@ now; the Thermal repos' `1.21.1` branches need CoFHCore on `1.21.1` to build.
   prompt, and an explicit contract (kept names/signatures) wherever two areas touch. Review their
   behaviour decisions afterwards; some belong in the TODO Inbox. Condensed reports from the B.7 agents
   are in `../ThermalExpansion/docs/context/subagents-2026-09-22-c/*-report.md`.
-- **B.10: ThermalCore is done; ThermalDynamics and ThermalExpansion are next**, in parallel. Both already
-  have a `26.1.2` branch with B.0 (versions, AT, `clientData()`) and the B.1 rename sweep committed, uncompiled.
-  For each: compile, group errors, then split by file group across agents exactly as ThermalCore was
-  (see the progress log's B.10 entry and `docs/TODO.md`'s "B.10 inherits from …" bullets). **Read
-  api-notes "B.10 ThermalCore" first**: it holds the recipe-template rule (no `ItemStack`/`FluidStack`
-  at parse time; `ThermalRecipe` constructors and `MachineRecipeSerializer.IFactory` take
-  `List<ItemStackTemplate>`/`List<FluidStackTemplate>`), the id-before-construction rule for every
-  `registerBlock`/`registerItem`, the entity/renderer/model/fluid/screen shapes, and the resource rules
-  (`items/*.json` for every item, generated assets live in `resources`). TE must send its own recipe types
-  on `OnDatapackSyncEvent` (or add them to ThermalCore's list). After compiling: `runData`, then
-  `../Pyronetics/scripts/verify_runserver.sh` — the boot finds what the compiler cannot (id-less
-  registrations, parse-time stacks, missing tags, config defaults). Reference forks: `../Thermal*ForNeoForge`
-  (1.21.1), Pyronetics (26.1.2). Keep `[[mixins]]` in each `neoforge.mods.toml`.
+- **B.10 is done for all three Thermal repos** (2026-09-22). What is left is verification, not porting:
+  Joel's client pass (port plan §A.4 / §B.10 checklist — everything client-side is unverified on both hops),
+  B.4 at runtime (a pipe mod or a GameTest, including an aborted simulation), and the Inbox in
+  [docs/TODO.md](docs/TODO.md) (behaviour changes the new API forced, per repo). The boot-only lessons
+  (id-before-construction, no stacks at recipe-parse time, `RegistryOps` for ingredients, missing tags are
+  hard errors, `validateSpec` on config defaults, generated assets in `resources`) are in api-notes
+  "B.10 ThermalCore" and "B.10 ThermalExpansion and ThermalDynamics". To boot any repo:
+  `../Pyronetics/scripts/verify_runserver.sh <repo> <log> 300` (kill a stale `devlaunch.Main` and delete
+  `run/world/session.lock` first).
 
 **Phase A's one owed item is the client pass** (port plan §A.4), which is Joel's to run. The
 `runData` pass already found and fixed one client crash (`LevelRendererMixin`), and

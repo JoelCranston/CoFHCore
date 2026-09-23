@@ -558,3 +558,20 @@ on the 26.1 JSON shapes; `render_type` stripped. `runData` rewrote 242 generated
 three armour-repair tags; the boot is clean: 0 data errors, 1760 recipes, mixins applied.
 
 Next: ThermalDynamics and ThermalExpansion, against the recipe notes in api-notes "B.10 ThermalCore".
+
+## B.10 ThermalExpansion and ThermalDynamics — Phase B code-complete (2026-09-22)
+
+Same recipe as ThermalCore, two agents per repo (TE: code / datagen; TD: client / common), all four
+running at once. 243 → 0 and 368 → 0 in one pass each. The boots then found the last of the
+run-time-only changes: a CoFH ingredient *union* (`value: [{tag}, {tag}]`) is not a vanilla list on
+26.1 and becomes a `neoforge:compound` ingredient; `MachineCatalystSerializer` needed the ops-carrying
+ingredient codec; fourteen more compat `c:` tags are emitted empty; `--existing-mod` no longer exists;
+a screen sizes itself only through the constructor. TD's one design question — the ducts used the
+neighbour's position, which `neighborChanged` no longer has — is answered by `updateShape`, which still
+carries the neighbour and fires for every default `setBlock`; the behaviour differences are in the
+Inbox. TD's grids moved to a level-aware `SavedDataType` (new file path, no carry-over).
+
+Every repo: 0 errors, `runData` clean, dedicated server boots to `Done` with no data errors
+(ThermalExpansion's run loads all three mods: 2287 recipes; TD: 1770). **Phase B is code-complete.**
+Owed: Joel's client pass (port plan §A.4 / §B.10 checklist, everything client-side is unverified on
+both hops), B.4 at runtime (a pipe mod or a GameTest, including aborted simulations), and the Inbox.

@@ -986,3 +986,75 @@ NeoForge classes are in `neoforge-26.1.2.109-sources.jar`.
 - JEI 29: `IRecipeCategory#getWidth()/getHeight()`, `draw(T, IRecipeSlotsView, GuiGraphicsExtractor, double, double)`,
   `getTooltip(ITooltipBuilder, …)`; `IRecipeSlotBuilder#addRichTooltipCallback`; JEI starts after `RecipesReceivedEvent`, so a
   HIGH-priority handler fills the CoFH caches first. Patchouli 26.1-94's processor API is unchanged from 1.21.1.
+
+---
+
+## B.10 ThermalExpansion and ThermalDynamics
+
+Only what ThermalCore's section did not already cover.
+
+### Recipes and JEI (ThermalExpansion)
+
+- A CoFH ingredient union — `"value": [{"tag": …}, {"tag": …}]` — is not a vanilla list any more (a list holds
+  item ids only); `RecipeJsonUtils.legacyIngredient` rewrites a list containing a tag into
+  `{"neoforge:ingredient_type": "neoforge:compound", "children": […]}`. `MachineCatalystSerializer` (a
+  `RecordCodecBuilder` codec) uses `RecipeJsonUtils.INGREDIENT_CODEC` for the same reason as the device boosts.
+- `RecipeMap#getRecipesFor(RecipeType<T>, I input, Level) → Stream<RecipeHolder<T>>` is the client-side substitute
+  for `RecipeManager#getRecipeFor`; `Level#recipeAccess()` is the abstract `RecipeAccess` (`propertySet`,
+  `stonecutterRecipes`), `ServerLevel#recipeAccess()` is the `RecipeManager`. `ResultContainer#getRecipeUsed/setRecipeUsed(@Nullable RecipeHolder<?>)`;
+  `FriendlyByteBuf#writeResourceKey/readResourceKey(ResourceKey<? extends Registry<T>>)` carries a recipe id.
+- JEI 29 `IRecipeManagerPlugin`: `<V> List<IRecipeType<?>> getRecipeTypes(IFocus<V>)`, `<T, V> List<T> getRecipes(IRecipeType<T>, IFocus<V>)`,
+  `<T> List<T> getRecipes(IRecipeType<T>)`; `IRecipeType` is `mezz.jei.api.recipe.types.IRecipeType` and `RecipeType`
+  implements it; a category's type is `RecipeHolder<…>`, so synthesized recipes need a synthetic key.
+- `FluidStack implements MutableDataComponentHolder` (`getOrDefault`, `has`); `PotionContents.EMPTY`,
+  `potion() → Optional<Holder<Potion>>`; `Holder#unwrapKey()`.
+- A data run has no `--existing-mod` option (there is no `ExistingFileHelper`); drop it from `build.gradle`.
+- `AbstractContainerScreen.imageWidth/imageHeight` are `protected final`: a subclass sizes itself only through the
+  5-arg constructor, so `MachineScreen`/`AugmentableTileScreen` gained `(…, int imageWidth, int imageHeight)` overloads.
+
+### Custom geometry loader (ThermalDynamics duct model)
+
+- `net.neoforged.neoforge.client.model.DelegateUnbakedModel(UnbakedModel)` is the idiom for a loader that keeps
+  vanilla's parse (`ctx.deserialize(json, CuboidModel.class)`) and adds data (NeoForge `NewModelLoaderTest`).
+- Renames: `BlockElement` → `net.minecraft.client.resources.model.cuboid.CuboidModelElement` (record `from/to Vector3fc`,
+  `faces Map<Direction, CuboidFace>`, `rotation CuboidRotation`, `shade`, `lightEmission`), `BlockElementFace` →
+  `CuboidFace` (`cullForDirection`, `tintIndex`, `texture`, `uvs`, `rotation Quadrant`), `BlockModel` → `CuboidModel`
+  (`GSON` registers both deserializers; also parses `visibility`/`transform`).
+- `FaceBakery.bakeQuad(ModelBaker, Vector3fc from, Vector3fc to, CuboidFace, Material.Baked, Direction, ModelState,
+  @Nullable CuboidRotation, boolean shade, int lightEmission)` replaces `BlockModel.bakeFace`.
+  `MaterialBaker#resolveSlot(TextureSlots, String reference, ModelDebugName)` takes the raw `"#0"` reference.
+- `ResolvedModel`: `wrapped()`, `parent()`, `getTopTextureSlots()`, `getTopAmbientOcclusion()`,
+  `resolveParticleMaterial(TextureSlots, ModelBaker)`; NeoForge `getTopAdditionalProperties()` →
+  `ContextMap#getOrDefault(NeoForgeModelProperties.PART_VISIBILITY, Map.of())` is where `"visibility"` lives.
+- A `CustomUnbakedBlockStateModel` that needs the model id wraps a `Variant` (`modelLocation()`, `modelState().asModelState()`,
+  `MAP_CODEC`, `resolveDependencies`); the item half is an `ItemModel.Unbaked` baking with `BlockModelRotation.IDENTITY`.
+  `ModelBaker#missingBlockModelPart()` is the fallback part; `BakedQuad.MaterialInfo#flags()` feeds a hand-built
+  `BlockStateModel#materialFlags()`. `BlockStateModel#collectParts` receives the position, so `level.getModelData(pos)`
+  is read there.
+- Blockstate JSON for a custom model is a single variant object with `"type": "<ns>:<loader>"`, not a one-element list.
+- `RenderPipelines.DEBUG_QUADS` (no cull, translucent, depth-tested, no write) is the drop-in for a translucent
+  `POSITION_COLOR` quad type; `LayeringTransform.VIEW_OFFSET_Z_LAYERING` via `RenderSetupBuilder#setLayeringTransform`.
+  `Direction#getNormal()` → `getUnitVec3i()` (also `getUnitVec3()`, `getUnitVec3f()`).
+
+### Persistence, transfer, blocks (ThermalDynamics)
+
+- NeoForge's `SavedDataType` has level-aware overloads: `SavedDataType(Identifier, Factory<T>, Factory<Codec<T>>)` with
+  `Factory<T>#create(@Nullable ServerLevel)`; `SavedDataStorage` passes its `ServerLevel` to both factories and
+  encodes under a `"data"` key with `registries.createSerializationContext(NbtOps.INSTANCE)`. `SavedData` is only the
+  dirty flag. The file moves to `data/<id-path>.dat` (TD's grids: `thermal_dynamics/grids.dat`).
+- `CompoundTag#store(String, Codec<T>, T)` / `read(String, Codec<T>)` default to `NbtOps` — the replacement for
+  `NbtUtils.writeBlockPos/readBlockPos` and `putUUID/getUUID` (`BlockPos.CODEC`, `UUIDUtil.CODEC`).
+  `ChunkPos#pack()` / `ChunkPos.pack(int, int)` replace `toLong()` / `asLong(int, int)`.
+- `Level#markAndNotifyBlock`: `updateNeighborsAt(pos, oldState.getBlock())` when flag 1 is set (so
+  `neighborChanged`'s `Block` is the notifier's *old* block), `updateNeighbourShapes` unless flag 16 — a default
+  `setBlock` reaches the neighbours' `updateShape(state, LevelReader, ScheduledTickAccess, pos, direction, neighbourPos,
+  neighbourState, random)`, which is where a block that needs the changed side (TD's ducts) gets it.
+  `ScheduledTickAccess#scheduleTick(BlockPos, Block|Fluid, int[, TickPriority])`.
+- `LevelChunk#setBlockState` calls `preRemoveSideEffects` only when `!oldState.is(newBlock)`, server side, and
+  `(flags & 256) == 0` — narrower than `onRemove` was.
+- `IBlockExtension#getCloneItemStack(LevelReader, BlockPos, BlockState, boolean includeData, Player)`.
+- Transfer: `TransferPreconditions.checkNonEmptyNonNegative(resource, amount)`, `FluidResource#toStack(int)`/`matches`/`isEmpty()`;
+  a CoFH wrapper that must serve both worlds implements `IFluidHandler, ResourceHandler<FluidResource>` (or
+  `IEnergyStorage, EnergyHandler`) over the new handler and exposes the legacy view through `IFluidHandler.of` /
+  `IEnergyStorage.of`; grid storages carry a `SnapshotJournal`.
+- `ClientPacketDistributor.sendToServer` for client → server packets.

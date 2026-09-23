@@ -2,8 +2,8 @@
 
 Phase A (1.21.1) is **code-complete**: all four repos build clean and boot headless on
 NeoForge 21.1.251, and `runData` now runs in all four. Phase B (26.1.2) is under way on the
-`26.1.2` branch: **CoFHCore and ThermalCore compile and boot on 26.1.2**; B.10 for ThermalDynamics and
-ThermalExpansion remains. See
+`26.1.2` branch: **all four repos compile and boot headless on 26.1.2** (B.0–B.10 done). What remains is
+Joel's client pass and the Inbox below. See
 [api-notes-1.21.1.md](api-notes-1.21.1.md) / [api-notes-26.1.2.md](api-notes-26.1.2.md) for
 confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 
@@ -47,7 +47,8 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 | B.9 mixins | `f89000a` | **0** |
 | B.8 `runData` (output identical to what is committed) and a headless boot: `Done`, mixins applied | `mods.toml` fix below | 0 |
 | **B.10 ThermalCore** — five parallel agents, then the recipe-template bridge, resources, `runData`, headless boot | `3884e7f` + follow-up | **0**, boots to `Done`, 1760 recipes |
-| **B.10 ThermalDynamics / ThermalExpansion** | next (B.0 + B.1 committed on their `26.1.2` branches) | |
+| **B.10 ThermalExpansion** — two agents (code; datagen), boot | `0bf2bea` | **0**, boots to `Done`, 2287 recipes |
+| **B.10 ThermalDynamics** — two agents (client; common), boot | TD `26.1.2` head | **0**, boots to `Done`, 1770 recipes |
 
 [port-plan.md](port-plan.md) §6 has each category's contents. Carry-overs into Phase B:
 
@@ -246,6 +247,30 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
     `resources`, since no provider owns them and `HashCache` deletes unowned files on the next run.
   - **Upstream slip fixed**: `ThermalClientConfig` defined "Festive Vanilla Mobs" with `festiveMobs` as its default
     supplier, which 26.1's `validateSpec` rejects at registration.
+
+- **B.10 ThermalExpansion / ThermalDynamics behaviour changes (2026-09-22)**, to confirm in play:
+  - **Dynamo items render through the plain block model** (ThermalCore has no `thermal:dynamo` item loader; 1.21.1
+    routed items through the block loader). Machine items use the `thermal:reconfigurable` item loader.
+  - **JEI potion-bottler entries** are `RecipeHolder`s keyed `thermal:bottler_potion_<potion>` (custom-effect potions
+    share `…_custom`); the plugin reads the client `RecipeMap` instead of bailing without a level.
+  - **TE sends no recipe types of its own**: every machine/dynamo type lives in `ThermalCore.RECIPE_TYPES`, which
+    `TCoreCommonSetupEvents#datapackSync` sends, plus `CRAFTING` for the crafter's client path.
+  - **The insolator rubberwood-sapling recipe errors at load** (its item is not registered, so the output list is
+    empty now that empties are dropped); the centrifuge oil-sand recipes get empty ingredients for the same reason.
+    Pre-existing dead recipes; decide whether to delete them.
+  - **Fourteen more compat `c:` tags are emitted empty** (`ores/{apatite,cinnabar,niter,ruby,sapphire,sulfur}`,
+    `dusts/{bronze,constantan,electrum,invar}`, `gears/invar`, `ingots/{bronze,constantan}`, `plates/bronze`,
+    `storage_blocks/quartz`) for TE's compat recipes.
+  - **Ducts read the changed side from `updateShape`** (`neighborChanged` has no neighbour position): on a neighbour
+    `setBlock` both hooks fire, so the redstone refresh and `TileRedstonePacket` run twice; a duct's own
+    `updateNeighborsAt` no longer invalidates the adjacent duct's attachment facing it (refreshes on the next block
+    change or grid `refreshCapabilities`); flag-2 `setBlock`s now invalidate attachments too.
+  - **Grid saved data moved** to `data/thermal_dynamics/grids.dat`; 1.21.1 grids don't carry over.
+    `onRemove` → `preRemoveSideEffects`: attachments drop and the grid updates server-side only, not for flag-256 sets.
+  - **Grid storages are transactional** (`SnapshotJournal`); other mods' new-API inserts/extracts on a duct reach the
+    grid through the attachment wrappers; B.4 is unverified at runtime here too (servo/limiter/filter, aborted simulations).
+  - **Duct quads pick their chunk layer per quad from the sprite alpha**; the debug laser line no longer writes depth.
+    `DuctModel.bakedModels` still grows on every reload and `DuctModelData.equals` still ignores `fillColor` (both pre-existing).
 
 - **Behaviour differences the style pass found (2026-09-22), left alone because that pass was
   not allowed to change behaviour.** Each is a 1.21.1 fix to decide on:
