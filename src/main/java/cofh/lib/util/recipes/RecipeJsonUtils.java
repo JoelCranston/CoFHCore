@@ -107,10 +107,20 @@ public abstract class RecipeJsonUtils {
 
         if (element.isJsonArray()) {
             JsonArray array = new JsonArray();
+            boolean tags = false;
             for (JsonElement arrayElement : element.getAsJsonArray()) {
-                array.add(legacyIngredient(arrayElement));
+                JsonElement converted = legacyIngredient(arrayElement);
+                tags |= !converted.isJsonPrimitive() || converted.getAsString().startsWith("#");
+                array.add(converted);
             }
-            return array;
+            if (!tags) {
+                return array;
+            }
+            // A union with tags is a compound ingredient now; a plain list only holds item ids.
+            JsonObject compound = new JsonObject();
+            compound.addProperty("neoforge:ingredient_type", "neoforge:compound");
+            compound.add("children", array);
+            return compound;
         }
         if (element.isJsonObject()) {
             JsonObject object = element.getAsJsonObject();
