@@ -94,8 +94,8 @@ All repos build with **ModDevGradle 2.0.147**. Shape oracles differ by branch:
 `build/moddev/artifacts/minecraft-patched-26.1.2.109-sources.jar` on `26.1.2`,
 `neoforge-21.1.251-sources.jar` on `1.21.1`. MDG keeps both in `build/moddev/artifacts/`, so
 switching branches doesn't rebuild them. The Thermal repos `includeBuild('../CoFHCore')`, so
-**whatever branch CoFHCore has checked out is what they compile against**. Put CoFHCore on
-`1.21.1` to build or run any of them until B.10.
+**whatever branch CoFHCore has checked out is what they compile against**. CoFHCore is on `26.1.2`
+now; the Thermal repos' `1.21.1` branches need CoFHCore on `1.21.1` to build.
 
 ### Resuming Phase B: read this first
 
@@ -118,10 +118,19 @@ switching branches doesn't rebuild them. The Thermal repos `includeBuild('../CoF
      order only in files whose previous version was already sorted.
   5. Recompile; the error count should only fall.
   6. Write the shapes into api-notes, update the TODO table and progress log, commit, push.
-- **Broad, independent tails** (B.5's ~90 files) went well split across parallel agents by exclusive
-  file ownership, with the style guide, the api-notes and "verify against the jar" in the prompt.
-  Review their behaviour decisions afterwards; some belong in the TODO Inbox.
-- The Thermal repos stay on `1.21.1` until CoFHCore compiles on 26.1.2 (B.10).
+- **Broad, independent tails** (B.5's ~90 files, all of B.7) went well split across parallel agents by
+  exclusive file ownership, with the style guide, the api-notes and "verify against the jar" in the
+  prompt, and an explicit contract (kept names/signatures) wherever two areas touch. Review their
+  behaviour decisions afterwards; some belong in the TODO Inbox. Condensed reports from the B.7 agents
+  are in `../ThermalExpansion/docs/context/subagents-2026-09-22-c/*-report.md`.
+- **B.10 is next** (port plan §B.10). CoFHCore is done: 0 errors, `runData` clean, boots headless with
+  mixins applied. For each Thermal repo: branch `26.1.2` from `1.21.1`; bump the build the way CoFHCore's
+  B.0 did (`6eb201f`: MDG 2.0.147, `neo_version` 26.1.2.109, Java 25, `clientData()` run, AT sweep);
+  then follow the same working method against the new CoFHCore, using the per-repo recipes under
+  "B.10 inherits from …" in [docs/TODO.md](docs/TODO.md). Order: **ThermalCore first** (TD and TE depend
+  on it), then ThermalDynamics and ThermalExpansion in parallel. Keep `mixins`/`[[mixins]]` in each
+  `neoforge.mods.toml` (the manifest-only declaration never loaded in dev). Reference forks for the
+  Thermal repos: `../Thermal*ForNeoForge` (1.21.1), Pyronetics (26.1.2).
 
 **Phase A's one owed item is the client pass** (port plan §A.4), which is Joel's to run. The
 `runData` pass already found and fixed one client crash (`LevelRendererMixin`), and
