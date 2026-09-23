@@ -395,7 +395,7 @@ Confirm every exact signature in `build/moddev/artifacts/minecraft-patched-21.1.
 16. **Curios** (S). `CuriosIntegration` against Curios 9.5.1 API — read
     `top/theillusivec4/curios/api/CuriosApi` in the resolved jar; stub if the API moved.
 
-Exit criteria: `./gradlew build` clean; `../Pyronetics/scripts/verify_runserver.sh ../CoFHCore /tmp/cofh-server.log`
+Exit criteria: `./gradlew build` clean; `scripts/verify_runserver.sh . /tmp/cofh-server.log`
 prints "SERVER STARTED SUCCESSFULLY" with `cofh_core` constructed; a `runClient` boot to the
 title screen and into a world (Joel runs it); write `docs/api-notes-1.21.1.md` in the same
 style as the 1.20.6 file; commit per category with `1.21.1: <category>` messages.
@@ -850,8 +850,8 @@ effects, exotic particles) updated; merge/tag as `26.1.2`.
 ## 8. Verification
 
 - Compile: `./gradlew compileJava` per repo, `./gradlew build` at phase end.
-- Headless: `../Pyronetics/scripts/verify_runserver.sh <repo> /tmp/<repo>.log 240` (already
-  handles MDG's `devlaunch.Main` process). Look for `constructed`/`Done (` and no `LanguageLoadingProvider`,
+- Headless: `../CoFHCore/scripts/verify_runserver.sh <repo> /tmp/<repo>.log 240` (stops
+  only that repo's `devlaunch.Main`, clears its `session.lock`). Look for `constructed`/`Done (` and no `LanguageLoadingProvider`,
   registry, or model errors in the log; a headless boot cannot see model/texture/GUI breakage.
 - Client (Joel): the checklists in §A.4 and §B.10. Client-only work is "owed verification" until then.
 - Registry sanity after B.2: no "Block id not set", no unbound `DeferredHolder` on first access.

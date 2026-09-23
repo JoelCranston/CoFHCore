@@ -575,3 +575,12 @@ Every repo: 0 errors, `runData` clean, dedicated server boots to `Done` with no 
 (ThermalExpansion's run loads all three mods: 2287 recipes; TD: 1770). **Phase B is code-complete.**
 Owed: Joel's client pass (port plan §A.4 / §B.10 checklist, everything client-side is unverified on
 both hops), B.4 at runtime (a pipe mod or a GameTest, including aborted simulations), and the Inbox.
+
+### 2026-09-23: boot script moved into CoFHCore
+
+The headless boot check was `../Pyronetics/scripts/verify_runserver.sh`, which made the port depend on
+an unrelated repo that upstream reviewers won't have. It now lives at `scripts/verify_runserver.sh`
+(the Thermal repos call `../CoFHCore/scripts/...`). Changed on the way: it stops only the game JVM
+whose working directory is that repo's `run/`, where the old one killed the first `devlaunch.Main` it
+found; it clears a stale server and `run/world/session.lock` before and after the run, which had been a
+manual step; and it exits non-zero unless the server reaches `Done`. Checked on CoFHCore and ThermalDynamics.

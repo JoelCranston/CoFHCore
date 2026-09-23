@@ -130,8 +130,8 @@ now; the Thermal repos' `1.21.1` branches need CoFHCore on `1.21.1` to build.
   (id-before-construction, no stacks at recipe-parse time, `RegistryOps` for ingredients, missing tags are
   hard errors, `validateSpec` on config defaults, generated assets in `resources`) are in api-notes
   "B.10 ThermalCore" and "B.10 ThermalExpansion and ThermalDynamics". To boot any repo:
-  `../Pyronetics/scripts/verify_runserver.sh <repo> <log> 300` (kill a stale `devlaunch.Main` and delete
-  `run/world/session.lock` first).
+  `scripts/verify_runserver.sh <repo> <log> 300` (from a Thermal repo, `../CoFHCore/scripts/...`). It clears
+  a stale server and `session.lock` for that repo itself, and exits non-zero unless the server reaches `Done`.
 
 **Phase A's one owed item is the client pass** (port plan §A.4), which is Joel's to run. The
 `runData` pass already found and fixed one client crash (`LevelRendererMixin`), and
