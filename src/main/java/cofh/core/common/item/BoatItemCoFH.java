@@ -14,7 +14,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.boat.Boat;
+import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -32,10 +32,10 @@ public class BoatItemCoFH extends ItemCoFH {
 
     protected static final Predicate<Entity> ENTITY_PREDICATE = EntitySelector.NO_SPECTATORS.and(Entity::isPickable);
 
-    protected final Supplier<EntityType<? extends Boat>> type;
-    protected final IBoatFactory<? extends Boat> factory;
+    protected final Supplier<? extends EntityType<? extends AbstractBoat>> type;
+    protected final IBoatFactory<? extends AbstractBoat> factory;
 
-    public BoatItemCoFH(Supplier<EntityType<? extends Boat>> type, IBoatFactory<? extends Boat> factory, Properties builder) {
+    public BoatItemCoFH(Supplier<? extends EntityType<? extends AbstractBoat>> type, IBoatFactory<? extends AbstractBoat> factory, Properties builder) {
 
         super(builder);
         this.type = type;
@@ -82,7 +82,7 @@ public class BoatItemCoFH extends ItemCoFH {
         }
     }
 
-    protected Boat createBoat(ItemStack stack, Level level, float rotation, double posX, double posY, double posZ) {
+    protected AbstractBoat createBoat(ItemStack stack, Level level, float rotation, double posX, double posY, double posZ) {
 
         var boat = factory.createBoat(type, level, posX, posY, posZ);
         if (stack.has(DataComponents.CUSTOM_NAME)) {
@@ -96,9 +96,9 @@ public class BoatItemCoFH extends ItemCoFH {
     }
 
     // region FACTORY
-    public interface IBoatFactory<T extends Boat> {
+    public interface IBoatFactory<T extends AbstractBoat> {
 
-        T createBoat(Supplier<EntityType<? extends Boat>> type, Level world, double posX, double posY, double posZ);
+        T createBoat(Supplier<? extends EntityType<? extends AbstractBoat>> type, Level world, double posX, double posY, double posZ);
 
     }
     // endregion

@@ -2,6 +2,9 @@ package cofh.lib.common.block;
 
 import cofh.lib.util.Utils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
@@ -20,14 +23,14 @@ public class OreBlockCoFH extends Block {
     protected int minXp = 0;
     protected int maxXp = 0;
 
-    public static OreBlockCoFH createStoneOre() {
+    public static OreBlockCoFH createStoneOre(Identifier id) {
 
-        return new OreBlockCoFH(Properties.of().mapColor(MapColor.STONE).strength(3.0F, 3.0F).sound(SoundType.STONE).requiresCorrectToolForDrops());
+        return new OreBlockCoFH(Properties.of().setId(ResourceKey.create(Registries.BLOCK, id)).mapColor(MapColor.STONE).strength(3.0F, 3.0F).sound(SoundType.STONE).requiresCorrectToolForDrops());
     }
 
-    public static OreBlockCoFH createDeepslateOre() {
+    public static OreBlockCoFH createDeepslateOre(Identifier id) {
 
-        return new OreBlockCoFH(Properties.of().mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE).requiresCorrectToolForDrops());
+        return new OreBlockCoFH(Properties.of().setId(ResourceKey.create(Registries.BLOCK, id)).mapColor(MapColor.DEEPSLATE).strength(4.5F, 3.0F).sound(SoundType.DEEPSLATE).requiresCorrectToolForDrops());
     }
 
     public OreBlockCoFH(Properties properties) {
