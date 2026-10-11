@@ -1,19 +1,19 @@
 #!/bin/bash
-# Verifies all four repos in dependency order: compile, runData (output must match what is committed),
+# Verifies all five repos in dependency order: compile, runData (output must match what is committed),
 # a headless boot, then GameTests. Stops at the first failure.
-# Usage: verify_all.sh [LOG_DIR] [REPO...]   (default: all four; logs go to LOG_DIR, default a temp dir)
+# Usage: verify_all.sh [LOG_DIR] [REPO...]   (default: all five; logs go to LOG_DIR, default a temp dir)
 set -o pipefail
 SCRIPTS="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPTS/../.." && pwd)"
 LOG_DIR="${1:-$(mktemp -d)}"
 shift 2>/dev/null
-REPOS=("${@:-CoFHCore ThermalCore ThermalDynamics ThermalExpansion}")
+REPOS=("${@:-CoFHCore ThermalCore ThermalFoundation ThermalDynamics ThermalExpansion}")
 REPOS=(${REPOS[@]})
 mkdir -p "$LOG_DIR"
 
 # The Thermal repos build against whatever CoFHCore (and ThermalCore) have checked out.
 BRANCH=$(git -C "$ROOT/CoFHCore" branch --show-current)
-for repo in CoFHCore ThermalCore ThermalDynamics ThermalExpansion; do
+for repo in CoFHCore ThermalCore ThermalFoundation ThermalDynamics ThermalExpansion; do
     b=$(git -C "$ROOT/$repo" branch --show-current)
     if [ "$b" != "$BRANCH" ]; then
         echo "FAIL: $repo is on '$b', CoFHCore is on '$BRANCH'"
