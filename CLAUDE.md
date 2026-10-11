@@ -10,7 +10,7 @@
 | [docs/api-notes-26.1.2.md](docs/api-notes-26.1.2.md) | **Writing any code against a 26.1.2 API (Phase B, in progress).** Shapes confirmed against `minecraft-patched-26.1.2.109-sources.jar`, category by category: B.0 through B.9. Check it, then Pyronetics' notes, before deriving anything. |
 | [docs/api-notes-1.21.1.md](docs/api-notes-1.21.1.md) | **Writing any code against a 1.21.1 API**, or when a 26.1 change needs its 1.21.1 starting point. Every shape confirmed during the completed 1.21.1 hop, in the port plan's category order — including the four sweeps that had to be partly reverted. |
 | [docs/api-notes-1.20.6.md](docs/api-notes-1.20.6.md) | The 1.20.5/1.20.6 predecessor (all still valid on 1.21.1, but 1.21.1's notes supersede it where they overlap). |
-| [docs/code-style.md](docs/code-style.md) | **Before writing any code, in any of the four repos.** Upstream CoFH's style, measured from the `1.20.4` code: one-line comments at most, a blank line opening every method body, `@Annotation (args)`, regions, imports over qualified names. |
+| [docs/code-style.md](docs/code-style.md) | **Before writing any code, in any of the five repos.** Upstream CoFH's style, measured from the `1.20.4` code: one-line comments at most, a blank line opening every method body, `@Annotation (args)`, regions, imports over qualified names. |
 | [docs/TODO.md](docs/TODO.md) | Picking up work. The live, current-priority list of what's still broken, by error count. **Anything noticed mid-session goes in its Inbox.** |
 | [docs/progress-log.md](docs/progress-log.md) | The story behind a decision, or the chronology of the hop so far — what's already fixed, in what order, why a number is what it is. Append-only. |
 | `docs/context/` (**local only, gitignored**) | The progress log doesn't have the detail you need. Full session transcript exports — this whole 4-repo porting effort runs in one shared session, exported under `ThermalExpansion/docs/context/` (that's the session's project directory) rather than duplicated into each repo. `grep` it, don't read it whole. |
@@ -18,9 +18,10 @@
 ## Context
 
 CoFHCore is the foundation library for the whole "Thermal Series" — **ThermalCore**,
-**ThermalDynamics**, and **ThermalExpansion** (sibling repos under
+**ThermalFoundation**, **ThermalDynamics**, and **ThermalExpansion** (sibling repos under
 `/Volumes/Mac_External/Developer/Minecraft/`) all depend on it, so its port comes first
-at every version hop and the others follow. All four repos are worked in **one shared
+at every version hop and the others follow. ThermalFoundation (the metals, gems, ores and rubberwood the other
+repos' recipes call for) joined the port on 2026-10-11, straight to 26.1.2. All five repos are worked in **one shared
 Claude Code session**, not independently — session transcripts live under
 `ThermalExpansion/docs/context/`.
 
@@ -88,7 +89,8 @@ It is a *reference* here, never a dependency.
 | ThermalCore | `26.1.2` | **0 errors** (baseline 2142), boots headless to `Done` with 1760 recipes, `runData` clean. Resources on the 26.1 layout |
 | ThermalDynamics | `26.1.2` | **0 errors** (baseline 368), boots headless to `Done` with 1770 recipes, `runData` clean |
 | ThermalExpansion | `26.1.2` | **0 errors** (baseline 243), boots headless to `Done` with 2287 recipes (loads all three mods), `runData` clean |
-| all four | `1.21.1` | 0 errors, boot headless, `runData` clean (Phase A) |
+| ThermalFoundation | `26.1.2` | **0 errors** (baseline 289, ported 1.20.4 → 26.1.2 directly, 2026-10-11), boots to `Done` with 1949 recipes, `runData` clean, 5 GameTests. TE/TD dev runs load it with `-PwithFoundation` |
+| CoFHCore, ThermalCore, ThermalDynamics, ThermalExpansion | `1.21.1` | 0 errors, boot headless, `runData` clean (Phase A). ThermalFoundation has no `1.21.1` branch |
 
 All repos build with **ModDevGradle 2.0.147**. Shape oracles differ by branch:
 `build/moddev/artifacts/minecraft-patched-26.1.2.109-sources.jar` on `26.1.2`,
@@ -132,7 +134,7 @@ now; the Thermal repos' `1.21.1` branches need CoFHCore on `1.21.1` to build.
   "B.10 ThermalCore" and "B.10 ThermalExpansion and ThermalDynamics". To boot any repo:
   `scripts/verify_runserver.sh <repo> <log> 300` (from a Thermal repo, `../CoFHCore/scripts/...`). It clears
   a stale server and `session.lock` for that repo itself, and exits non-zero unless the server reaches `Done`.
-  **To verify everything**: `scripts/verify_all.sh [log-dir]` runs all four repos in dependency order (compile,
+  **To verify everything**: `scripts/verify_all.sh [log-dir]` runs all five repos in dependency order (compile,
   `runData` must not change committed output, headless boot, GameTests) and stops at the first failure. GameTests
   live in each repo's `src/gametest` (never in the jar); shapes are in api-notes "GameTests".
 

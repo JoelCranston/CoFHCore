@@ -1114,3 +1114,29 @@ What a headless boot can't see, found in Joel's first `runClient`:
   a compound of empty tags then fails to decode, which never happens to a NeoForge client.
 - **`ItemStack.EMPTY.getMaxStackSize()` is 1** (no components), where 1.20.4's was 64. Anything that asks an empty
   slot's stack for its limit needs `Item.DEFAULT_MAX_STACK_SIZE` instead.
+
+## B.10 ThermalFoundation (2026-10-11)
+
+Shapes Foundation's port (1.20.4 → 26.1.2 directly) confirmed that the other repos did not cover:
+
+- **Wood blocks**: `Blocks.logProperties(MapColor top, MapColor side, SoundType)` + `RotatedPillarBlock` replaces
+  `Blocks.log(...)`; leaves are `TintedParticleLeavesBlock(0.01F, Blocks.leavesProperties(SoundType))` (or
+  `UntintedParticleLeavesBlock` with a fixed particle); `SaplingBlock(TreeGrower, props)`; wall signs use
+  `Blocks.wallVariant(standingBlock, true)` (loot table and name from the standing sign) in place of `lootFrom`;
+  NeoForge's `FlowerPotBlock(Supplier emptyPot, Supplier plant, props)` and `addPlant` remain. `Sheets.addWoodType`
+  still exists (a NeoForge patch); call it in client setup. `BlockBehaviour.Properties#noCollission` → `noCollision`.
+- **Boats**: `net.minecraft.world.entity.vehicle.boat.{AbstractBoat, Boat, AbstractChestBoat, ChestBoat}`; a chest
+  boat is not a `Boat`. Constructors take `(EntityType, Level, Supplier<Item> dropItem)`; vanilla bakes the drop item
+  into the entity factory and `BoatItem` takes `EntityType<? extends AbstractBoat>`. Model layers:
+  `net.minecraft.client.model.object.boat.BoatModel#createBoatModel/createChestBoatModel` (no `ChestBoatModel`).
+- **Composting reads only the `neoforge:compostables` data map** (`data/neoforge/data_maps/item/compostables.json`,
+  `{"values": {"<item>": {"chance": 0.3}}}`); `ComposterBlock.add` writes a map nothing reads. **Stripping** checks the
+  `neoforge:strippables` data map, then falls back to `AxeItem.STRIPPABLES`, so the old map still works.
+- **Trades are data**: `NeoForge`'s `WandererTradesEvent`/`VillagerTradesEvent` are gone. A trade is
+  `data/<ns>/villager_trade/<path>.json` (`wants`/`gives`/`max_uses`/`reputation_discount`/`xp`), offered through a
+  trade set's tag, e.g. `data/minecraft/tags/villager_trade/wandering_trader/uncommon.json`.
+- **Recipe conditions key is `neoforge:conditions`**; a Forge-era top-level `conditions` key is silently ignored.
+  `minecraft:chain` is `minecraft:iron_chain`.
+- Loot `match_tool` enchantment checks are `{"predicates": {"minecraft:enchantments": [{"enchantments": …, "levels": …}]}}`;
+  `BootstapContext` is `BootstrapContext`.
+- **GameTest areas are roofed unless `TestData#skyAccess`** (11-argument constructor), so a tree can't grow in one.

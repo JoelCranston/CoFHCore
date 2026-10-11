@@ -615,3 +615,13 @@ The recipe-sync test was first written as a vanilla connection (the two-argument
 flattens custom ingredients and falsely flagged ThermalCore's fire-charge alloy recipes; the conditions added for
 them were reverted once the test encoded as a NeoForge connection. Each test was checked to fail on the bug it
 guards (the `SecureRecipe` codec, a closed cell side). First full run: 16 checks, all passed.
+
+## ThermalFoundation joins the port (2026-10-11)
+
+Without Foundation, the metals, gems and rubberwood that ThermalCore and ThermalExpansion recipes call for don't
+exist, so most machines can't be crafted. Joel asked for it to be ported too. Forked to `JoelCranston/ThermalFoundation`
+and ported from upstream's NeoForge 1.20.4 branch straight to 26.1.2 (no `1.21.1` branch): 289 compile errors to 0,
+resources on the 26.1 layout, 1949 recipes on its own, 5 GameTests. CoFHCore gained an id-taking `OreBlockCoFH`
+factory and an `AbstractBoat`-wide `BoatItemCoFH`. ThermalExpansion and ThermalDynamics load it in dev runs with
+`-PwithFoundation`; TE with Foundation and Dynamics loads 2550 recipes with no data errors. `verify_all.sh` covers
+five repos. Details in ThermalFoundation's own progress log and api-notes "B.10 ThermalFoundation".
