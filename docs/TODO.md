@@ -153,58 +153,17 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
 
 ## Inbox
 
-- **Client pass findings (2026-09-26)**, from Joel's first `runClient` in ThermalExpansion:
-  - ~~Joining a world disconnected with `Failed to encode packet 'clientbound/minecraft:custom_payload'`~~
-    fixed: `SecureRecipe`'s map codec made a new instance per recipe while its stream codec was
-    `StreamCodec.unit` of a different one, so `neoforge:recipe_content` couldn't encode it. Both now share
-    `SecureRecipe.INSTANCE` (vanilla's `RepairItemRecipe` pattern). A headless boot never encodes that payload.
-  - Model warnings, all **upstream gaps, not regressions** (the textures don't exist on `1.20.4` either):
-    missing textures for `diamond_coin*`, `emerald_coin*`, `diamond_nugget`, `emerald_nugget` (the textures are
-    at `item/`, the models point at `item/nuggets/`), `area_depth_augment`, `dual_filter_augment`,
-    `upgrade_augment_4`; `upgrade_augment_4` also fails to bake (blocks and items atlas mixed). Missing
-    block model `thermal:block/chunk_loader`.
-  - ~~**An empty CoFH slot accepted one item**~~ (found by the first GameTest, 2026-10-02): `ItemStorageCoFH#getSlotLimit`
-    fell back to the held stack's max size, and on 26.1 `ItemStack.EMPTY` reports 1 (no components), where 1.20.4's
-    reported 64. Any insert of a stack into an empty uncapped slot (pipes, the transfer API) took one item. Empty
-    slots now report `Item.DEFAULT_MAX_STACK_SIZE`.
-  - ~~**Placed machines rendered solid black**~~ (2026-10-02), caused by the fix below: keeping the source layer
-    for *every* retextured quad put side-config overlays into the solid layer, where their transparent pixels draw
-    black. Now only underlays are forced to solid (`ModelUtils.retextureUnderlay`); overlays keep their sprite's
-    layer. **Re-check machines, cells and side config.**
-  - ~~**A thrown Florb placed nothing**~~ (confirmed working by Joel, 2026-10-02): `ThrownFlorb` called the legacy `FluidUtil.tryPlaceFluid(…, ItemStack, …)`,
-    which needs the item fluid capability (upstream's call had the same dependency). It now places the fluid with
-    `transfer.fluid.FluidUtil.tryPlaceFluid(FluidResource, …)`. **Re-check, and add a GameTest.**
-  - ~~**Satchels couldn't be dyed**~~ (confirmed working by Joel, 2026-10-02): 26.1 dyes through a `minecraft:crafting_dye` recipe per item; ThermalCore now
-    generates `thermal:tools/satchel_dyed`. Craft a satchel with any dye.
-  - Many crafting recipes log `can't be placed due to empty ingredients` (machine frame, most machines, augments):
-    they need tin/lead/etc. ingots, which come from Thermal Foundation, not ThermalCore. Upstream behaviour, not a
-    port bug; in a dev world without Foundation, use creative.
-  - ~~**A machine turned the colour of its fluid**~~ (Fluid Encapsulator after filling a bucket) fixed in
-    `ModelUtils.retexture`. 26.1 picks a quad's chunk layer from its sprite, so the fluid underlay (a
-    translucent sprite) went to the translucent layer, drew after the machine's cutout faces at the same
-    depth and covered them. Retextured quads now keep the source quad's layer, as every block did on 1.20
-    (cells, ducts and side-config overlays use the same helper). **Re-check fluid in machines, cells and
-    Fluiducts.**
-  - ~~**The guidebook failed to build**~~ (empty book): 36 credits entries used
-    `player_head{SkullOwner:'…'}`; now `player_head[profile='…']`. The `Unknown item 'thermal:invar_ingot'`
-    icon warnings are items from Foundation/Cultivation/Locomotion/Innovation, on entries gated by those
-    mods: upstream behaviour, harmless.
-  - ~~`insolator_rubberwood_sapling` failed to parse~~ (Cultivation's sapling isn't registered): now gated
-    on `neoforge:registered`.
-  - ~~**Spawn eggs have no texture**~~ (parent `item/template_spawn_egg`, removed in 1.21.5): CoFHCore now
-    ships its own greyscale `cofh_core:item/template_spawn_egg` (base + spots), and each Thermal egg's item
-    definition tints the two layers with `cofh_core:colorable` index 0/1, so `SpawnEggItemCoFH`'s colours
-    apply again (Joel, 2026-09-28: one tintable template over per-mob art). **Unverified in a client.**
-  - ~~**Dyed satchels rendered undyed**~~: on 26.1 item tints come only from `items/*.json`. Only two items
-    were ever colorable (1.20.4 registered colours for exactly these): the satchel now tints `satchel_color`'s
-    layer 0 with `cofh_core:colorable`.
-  - ~~**A filled Florb rendered empty**~~: B.7 had swapped CoFH's `fluid_container` loader for
-    `neoforge:fluid_container`, which finds the fluid only through `Capabilities.Fluid.ITEM`, and no CoFH item
-    registers that (upstream never did). Joel chose (2026-09-28) to keep upstream's no-capability behaviour:
-    `cofh_core:fluid_container` (`FluidContainerItemModel`) is back as a 26.1 item model, reading the fluid through
-    `FluidHelper.getFluidContainedInItem` and tinting it with `ColorableItemTint` index 1. **Unverified in a
-    client**: a headless run can't load item models, and a client can't open a window from Claude's shell.
-  - ThermalExpansion's dev runs can load ThermalDynamics with `-PwithDynamics` (opt-in, dev only).
+- **Client pass (from 2026-09-26)**: what is still open. The fixed and confirmed findings are in the progress log
+  ("Client pass and GameTests").
+  - **Re-check placed machines and side-config overlays** after `retextureUnderlay` (the black-texture fix): not yet
+    seen in a client.
+  - Model warnings, all **upstream gaps, not regressions** (the textures don't exist on `1.20.4` either): missing
+    textures for `diamond_coin*`, `emerald_coin*`, `diamond_nugget`, `emerald_nugget` (the textures are at `item/`,
+    the models point at `item/nuggets/`), `area_depth_augment`, `dual_filter_augment`, `upgrade_augment_4`
+    (which also fails to bake: block and item atlases mixed); missing block model `thermal:block/chunk_loader`.
+  - **Recipes needing Thermal Foundation's metals** (tin, lead, silver, nickel and their alloys, ruby, sapphire)
+    load but can't be crafted without Foundation: machine frame, most machines, augments, compat recipes. Upstream
+    has Foundation on NeoForge 1.20.4 (`CoFH/ThermalFoundation` branch `1.20.x`) but it isn't part of this port.
 
 - **B.5 behaviour changes the new API forced (2026-09-22)**, each to confirm in play:
   - **CoFH cake and feast blocks no longer apply food effects**, because `FoodProperties` lost them
@@ -233,8 +192,8 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
     `setTooltipForNextFrame` in a frame (vanilla's) wins.
   - **GUI fills always alpha-blend** (`drawSizedRect` was unblended); list boxes clip with scissor, not stencil.
   - **Item colours and item-property models need the item JSON** (`cofh_core:colorable` tints,
-    `range_dispatch` properties); `COLORABLE_ITEMS` in `CoreClientSetupEvents` is now write-only — drop it once
-    the Thermal repos stop calling `addColorable`, or make `ColorableItemTint` consult it.
+    `range_dispatch` properties); done for every colorable item (satchel, florb, spawn eggs). `COLORABLE_ITEMS`
+    in `CoreClientSetupEvents` is write-only: drop it once the Thermal repos stop calling `addColorable`.
   - **Particles**: `ShardParticle`'s trail and body share one batch; the sprite particles lose the `z + 0.1`
     camera nudge and sample light at the current rather than interpolated position; CoFH custom particles are
     frustum-culled by bounding box and drawn in `RenderType` first-use order; the three CoFH particle layers
@@ -298,8 +257,6 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
     from `TagsUpdatedEvent`.
   - **The 24 compat `c:` tags are now emitted empty** (`data/c/tags/item/…`) because a missing tag is a hard recipe
     error on 26.1; recipes using them load and match nothing, as on 1.21.1.
-  - **Florbs show no fluid tint** until CoFH fluid-container items expose `Capabilities.Fluid.ITEM`
-    (`neoforge:fluid_container` reads `FluidUtil.getFirstStackContained`) — "After the port", item 1.
   - **Item JSONs** are written for every ThermalCore item (`items/*.json`, count/`thrown`/`stored`/`primed`/`armed`/
     `color`/`has_data` as `range_dispatch`); the generated assets moved from `src/main/generated/assets` into
     `resources`, since no provider owns them and `HashCache` deletes unowned files on the next run.
@@ -313,9 +270,8 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
     share `…_custom`); the plugin reads the client `RecipeMap` instead of bailing without a level.
   - **TE sends no recipe types of its own**: every machine/dynamo type lives in `ThermalCore.RECIPE_TYPES`, which
     `TCoreCommonSetupEvents#datapackSync` sends, plus `CRAFTING` for the crafter's client path.
-  - **The insolator rubberwood-sapling recipe errors at load** (its item is not registered, so the output list is
-    empty now that empties are dropped); the centrifuge oil-sand recipes get empty ingredients for the same reason.
-    Pre-existing dead recipes; decide whether to delete them.
+  - **The centrifuge oil-sand recipes get empty ingredients** (their sand comes from a mod that isn't loaded).
+    Pre-existing dead recipes; gate them like the rubberwood one (`neoforge:registered`) or delete them.
   - **Fourteen more compat `c:` tags are emitted empty** (`ores/{apatite,cinnabar,niter,ruby,sapphire,sulfur}`,
     `dusts/{bronze,constantan,electrum,invar}`, `gears/invar`, `ingots/{bronze,constantan}`, `plates/bronze`,
     `storage_blocks/quartz`) for TE's compat recipes.
@@ -326,7 +282,8 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
   - **Grid saved data moved** to `data/thermal_dynamics/grids.dat`; 1.21.1 grids don't carry over.
     `onRemove` → `preRemoveSideEffects`: attachments drop and the grid updates server-side only, not for flag-256 sets.
   - **Grid storages are transactional** (`SnapshotJournal`); other mods' new-API inserts/extracts on a duct reach the
-    grid through the attachment wrappers; B.4 is unverified at runtime here too (servo/limiter/filter, aborted simulations).
+    grid through the attachment wrappers. A GameTest covers a plain Fluxduct line; servos, limiters, filters and
+    aborted simulations through attachments are still unverified.
   - **Duct quads pick their chunk layer per quad from the sprite alpha**; the debug laser line no longer writes depth.
     `DuctModel.bakedModels` still grows on every reload and `DuctModelData.equals` still ignores `fillColor` (both pre-existing).
 
@@ -345,26 +302,3 @@ confirmed shapes and [progress-log.md](progress-log.md) for the chronology.
     pattern §10 of the API notes warns about.
   - **ThermalCore `WrenchItem`** applies its attribute modifiers to every slot group via
     `MAINHAND`. Check that's intended.
-
-- ~~`RecipeManager#byType`~~ resolved: ThermalCore's 26 call sites use the public
-  `getAllRecipesFor(type)`, which returns a `List<RecipeHolder<T>>` rather than a Map.
-- MDG artifact names for 1.21.1 are `build/moddev/artifacts/neoforge-21.1.251{,-sources,-merged}.jar`
-  (Pyronetics' `minecraft-patched-<ver>` naming is the 26.1 layout). Use the `-sources` jar.
-
-- `ThermalExpansion`'s hand-written machine recipes use `{"item": …, "count": n}` /
-  `{"tag": "forge:…"}` parsed by CoFH's own `RecipeJsonUtils` — survives the 1.21.2 ingredient
-  format change, but check `RecipeJsonUtils.parseIngredient` compiles (`Ingredient.fromJson` is gone).
-- ~~`PotionColorCalculationEvent`~~ resolved in category 5: replaced by
-  `CustomParticleMobEffect#createParticleOptions` returning null (per-effect, not global).
-- ~~Cross-repo API changes ThermalCore/TD/TE must follow~~ all applied; kept here as the record
-  of what the family's own API looks like on 1.21.1 (see also api-notes-1.21.1.md):
-  `IEnergyContainerItem#getOrCreateEnergyTag` → `getEnergyTag` + `mutateEnergyTag`,
-  `IFluidContainerItem#getOrCreateTankTag` → `getTankTag` + `mutateTankTag`,
-  `IMultiModeItem#getOrCreateModeTag` → `getModeTag`/`setModeTag`, `ConfigManager#register` takes
-  the `ModContainer`, and `Constants`' `UUID_*` modifier ids are `ResourceLocation`s now.
-  TC's `EnergyCellBlockItem` overrides two of those.
-- ~~Two unlisted mixin classes~~ resolved: `ClientPacketListenerMixin` and
-  `ClientboundSetEntityMotionPacketMixin` are **entirely commented out** upstream, so leaving
-  them unlisted is correct. What did need fixing: `MultiPlayerGameModeMixin` was listed under
-  `mixins` rather than `client` and so failed to apply on a dedicated server, and
-  `compatibilityLevel` is `JAVA_21` now.

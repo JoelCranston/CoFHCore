@@ -402,3 +402,14 @@ written. They are grouped by the categories above.
 - `-Xmaxerrs 100000`: javac otherwise caps output at 100, which hides a hop's true error count.
 - Upstream's `commonManifest` was defined but never applied to the jar. Its `MixinConfigs` entry is
   what loads mixins in a production jar, so the port applies it.
+
+## 18. Cross-repo API changes the Thermal repos follow
+
+Moved from the TODO Inbox (2026-10-11), as the record of what the family's own API looks like on 1.21.1:
+`IEnergyContainerItem#getOrCreateEnergyTag` → `getEnergyTag` + `mutateEnergyTag`,
+`IFluidContainerItem#getOrCreateTankTag` → `getTankTag` + `mutateTankTag`,
+`IMultiModeItem#getOrCreateModeTag` → `getModeTag`/`setModeTag`, `ConfigManager#register` takes the
+`ModContainer`, and `Constants`' `UUID_*` modifier ids are `ResourceLocation`s. ThermalCore's
+`EnergyCellBlockItem` overrides two of those. `MultiPlayerGameModeMixin` belongs under `client` in the mixin
+config (it failed to apply on a dedicated server under `mixins`); `ClientPacketListenerMixin` and
+`ClientboundSetEntityMotionPacketMixin` are commented out upstream and correctly unlisted.

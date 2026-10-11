@@ -584,3 +584,34 @@ an unrelated repo that upstream reviewers won't have. It now lives at `scripts/v
 whose working directory is that repo's `run/`, where the old one killed the first `devlaunch.Main` it
 found; it clears a stale server and `run/world/session.lock` before and after the run, which had been a
 manual step; and it exits non-zero unless the server reaches `Done`. Checked on CoFHCore and ThermalDynamics.
+
+## Client pass and GameTests (2026-09-26 to 2026-10-02)
+
+Joel's first `runClient` sessions in ThermalExpansion (and ThermalDynamics, then both together with TE's new
+opt-in `-PwithDynamics`) found what no headless check could, each fixed and pushed:
+
+- **Joining a world disconnected**: `SecureRecipe`'s `MapCodec.unit` made a new instance per recipe while its
+  `StreamCodec.unit` only encodes one. Both share `SecureRecipe.INSTANCE`.
+- **A machine turned the colour of its fluid**, then, after a first fix, **placed machines drew black**. 26.1 picks a
+  quad's chunk layer from its sprite: the fluid underlay landed in the translucent layer and covered the face, and
+  forcing every retextured quad into its source layer put side-config overlays into solid. Only underlays are now
+  forced to solid (`ModelUtils.retextureUnderlay`).
+- **The guidebook was empty**: 36 `player_head{SkullOwner:…}` icons; now `player_head[profile=…]`.
+- **Spawn eggs had no texture** (`item/template_spawn_egg` is gone): CoFHCore ships a greyscale template tinted by
+  `cofh_core:colorable` (Joel chose one tintable template over per-mob art). Confirmed in game.
+- **Filled Florbs drew empty and placed nothing when thrown**: both went through an item fluid capability CoFH never
+  registers. Joel chose upstream's no-capability behaviour: `cofh_core:fluid_container` is back as a 26.1 item model,
+  and `ThrownFlorb` places the resource directly. Confirmed in game.
+- **Satchels couldn't be dyed** (26.1 dyes through a `crafting_dye` recipe per item) and didn't show their dye
+  (tints come only from `items/*.json`). Both fixed and confirmed in game.
+- The insolator rubberwood recipe is gated on `neoforge:registered`.
+
+The boot script moved from Pyronetics into `CoFHCore/scripts` and stops only server JVMs of its own repo.
+
+**GameTests** followed (`src/gametest` in each repo, never in the jar), 19 in all, and `scripts/verify_all.sh` runs
+compile, `runData`, boot and GameTests across the four repos. The first one found a real bug: on 26.1
+`ItemStack.EMPTY` reports a max stack size of 1, so an empty uncapped `ItemStorageCoFH` took one item per insert.
+The recipe-sync test was first written as a vanilla connection (the two-argument `RegistryFriendlyByteBuf`), which
+flattens custom ingredients and falsely flagged ThermalCore's fire-charge alloy recipes; the conditions added for
+them were reverted once the test encoded as a NeoForge connection. Each test was checked to fail on the bug it
+guards (the `SecureRecipe` codec, a closed cell side). First full run: 16 checks, all passed.
