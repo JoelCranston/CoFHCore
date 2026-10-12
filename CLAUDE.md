@@ -90,7 +90,7 @@ It is a *reference* here, never a dependency.
 | ThermalDynamics | `26.1.2` | **0 errors** (baseline 368), boots headless to `Done` with 1770 recipes, `runData` clean |
 | ThermalExpansion | `26.1.2` | **0 errors** (baseline 243), boots headless to `Done` with 2287 recipes (loads all three mods), `runData` clean |
 | ThermalFoundation | `26.1.2` | **0 errors** (baseline 289, ported 1.20.4 → 26.1.2 directly, 2026-10-11), boots to `Done` with 1949 recipes, `runData` clean, 5 GameTests. TE/TD dev runs load it with `-PwithFoundation` |
-| CoFHCore, ThermalCore, ThermalDynamics, ThermalExpansion | `1.21.1` | 0 errors, boot headless, `runData` clean (Phase A). ThermalFoundation has no `1.21.1` branch |
+| all five | `1.21.1` | 0 errors, boot headless, `runData` clean (Phase A). ThermalFoundation's was cut from `1.20.4` on 2026-10-11 (1723 recipes); its worktrees live in `../wt-1.21.1/` |
 
 All repos build with **ModDevGradle 2.0.147**. Shape oracles differ by branch:
 `build/moddev/artifacts/minecraft-patched-26.1.2.109-sources.jar` on `26.1.2`,
